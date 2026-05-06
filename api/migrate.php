@@ -52,6 +52,25 @@ $migrations = [
         FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (followed_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    // ── Final image refresh: photos verified via TheMealDB API. Each image
+    // has been confirmed to actually depict the dish. Replaces previous
+    // duplicate or mismatched Unsplash IDs.
+    'img.boeuf'        => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/vtqxtu1511784197.jpg' WHERE slug = 'boeuf-bourguignon'",
+    'img.soupe'        => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/xvrrux1511783685.jpg' WHERE slug = 'soupe-oignon'",
+    'img.ratatouille'  => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/wrpwuu1511786491.jpg' WHERE slug = 'ratatouille'",
+    'img.poulet'       => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/nlxald1764112200.jpg' WHERE slug = 'poulet-roti-herbes'",
+    'img.brulee'       => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/uryqru1511798039.jpg' WHERE slug = 'creme-brulee'",
+    'img.padthai'      => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/rg9ze01763479093.jpg' WHERE slug = 'pad-thai'",
+    'img.hummus'       => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/gpon5u1763801180.jpg' WHERE slug = 'hummus-libanais'",
+    'img.cassoulet'    => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/wxuvuv1511299147.jpg' WHERE slug = 'cassoulet'",
+    'img.tartiflette'  => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/qwrtut1468418027.jpg' WHERE slug = 'tartiflette-savoyarde'",
+    'img.coqauvin'     => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/qstyvs1505931190.jpg' WHERE slug = 'coq-au-vin-rouge'",
+    'img.carbonara'    => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/llcbn01574260722.jpg' WHERE slug = 'spaghetti-carbonara'",
+    'img.saumon'       => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/xxyupu1468262513.jpg' WHERE slug = 'salmon-teriyaki'",
+    'img.crumble'      => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/xvsurr1511719182.jpg' WHERE slug = 'crumble-pomme-noisette'",
+    'img.brioche'      => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/qqpwsy1511796276.jpg' WHERE slug = 'brioche-maison'",
+    'img.shakshuka'    => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/g373701551450225.jpg' WHERE slug = 'shakshuka-israelien'",
 ];
 
 foreach ($migrations as $name => $sql) {

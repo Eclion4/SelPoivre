@@ -112,7 +112,17 @@
 
     function applyMenu(user) {
         document.querySelectorAll('a[href$="connexion.html"], a[href$="connexion.html#"]').forEach(btn => {
-            // Mobile menu version uses class "block"
+            const text = btn.textContent.trim();
+
+            // Icon-only "Connexion" links (heart, etc) → re-route to favorites
+            if (!text || text.length < 3) {
+                btn.setAttribute('href', pagePath('profil.html') + '#favoris');
+                btn.removeAttribute('title');
+                btn.title = 'Mes favoris';
+                return;
+            }
+
+            // Text-bearing "Connexion" buttons → replace with user menu
             const isMobile = btn.classList.contains('block');
             const wrapper = document.createElement('template');
             wrapper.innerHTML = isMobile ? buildMobileMenu(user) : buildDesktopMenu(user);

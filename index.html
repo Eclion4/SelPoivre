@@ -275,135 +275,8 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Recipe Card 1 -->
-                <a href="recette-detail.html?slug=risotto-champignons" class="recipe-card group" data-aos="fade-up" data-aos-delay="0">
-                    <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-500">
-                        <div class="relative aspect-[4/3] overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=600&q=80" alt="Risotto aux champignons" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                            <div class="absolute top-4 left-4 flex gap-2">
-                                <span class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-or-700">Végétarien</span>
-                            </div>
-                            <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.location.href='connexion.html';" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300 group/heart">
-                                <i data-lucide="heart" class="w-5 h-5"></i>
-                            </button>
-                            <div class="absolute bottom-4 left-4 right-4 flex gap-2">
-                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
-                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> 35 min
-                                </span>
-                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
-                                    <i data-lucide="chef-hat" class="w-3.5 h-3.5"></i> Facile
-                                </span>
-                            </div>
-                        </div>
-                        <div class="p-5">
-                            <h3 class="text-xl font-display font-bold group-hover:text-sp-600 transition-colors">Risotto crémeux aux champignons</h3>
-                            <p class="text-gray-500 text-sm mt-2 line-clamp-2">Un risotto onctueux aux champignons de saison, parmesan et une touche de truffe.</p>
-                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                                <div class="flex items-center gap-2">
-                                    <img src="https://i.pravatar.cc/32?img=1" alt="Chef" class="w-8 h-8 rounded-full ring-2 ring-sp-200">
-                                    <span class="text-sm font-medium">Marie L.</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <div class="flex">
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                    </div>
-                                    <span class="text-sm text-gray-500 ml-1">(234)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Recipe Card 2 -->
-                <a href="recette-detail.html?slug=pizza-napolitaine" class="recipe-card group" data-aos="fade-up" data-aos-delay="100">
-                    <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-500">
-                        <div class="relative aspect-[4/3] overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80" alt="Pizza maison" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                            <div class="absolute top-4 left-4 flex gap-2">
-                                <span class="px-3 py-1 bg-sp-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Best-seller</span>
-                            </div>
-                            <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.location.href='connexion.html';" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300">
-                                <i data-lucide="heart" class="w-5 h-5"></i>
-                            </button>
-                            <div class="absolute bottom-4 left-4 right-4 flex gap-2">
-                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
-                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> 1h30
-                                </span>
-                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
-                                    <i data-lucide="chef-hat" class="w-3.5 h-3.5"></i> Moyen
-                                </span>
-                            </div>
-                        </div>
-                        <div class="p-5">
-                            <h3 class="text-xl font-display font-bold group-hover:text-sp-600 transition-colors">Pizza napolitaine maison</h3>
-                            <p class="text-gray-500 text-sm mt-2 line-clamp-2">Pâte fermentée 48h, sauce tomate San Marzano et mozzarella di bufala.</p>
-                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                                <div class="flex items-center gap-2">
-                                    <img src="https://i.pravatar.cc/32?img=3" alt="Chef" class="w-8 h-8 rounded-full ring-2 ring-sp-200">
-                                    <span class="text-sm font-medium">Lucas P.</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <div class="flex">
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                    </div>
-                                    <span class="text-sm text-gray-500 ml-1">(512)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Recipe Card 3 -->
-                <a href="recette-detail.html?slug=tiramisu-classique" class="recipe-card group" data-aos="fade-up" data-aos-delay="200">
-                    <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-500">
-                        <div class="relative aspect-[4/3] overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&q=80" alt="Tiramisu" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                            <div class="absolute top-4 left-4 flex gap-2">
-                                <span class="px-3 py-1 bg-amber-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Coup de coeur</span>
-                            </div>
-                            <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.location.href='connexion.html';" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300">
-                                <i data-lucide="heart" class="w-5 h-5"></i>
-                            </button>
-                            <div class="absolute bottom-4 left-4 right-4 flex gap-2">
-                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
-                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> 25 min
-                                </span>
-                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
-                                    <i data-lucide="chef-hat" class="w-3.5 h-3.5"></i> Facile
-                                </span>
-                            </div>
-                        </div>
-                        <div class="p-5">
-                            <h3 class="text-xl font-display font-bold group-hover:text-sp-600 transition-colors">Tiramisu classique italien</h3>
-                            <p class="text-gray-500 text-sm mt-2 line-clamp-2">Le vrai tiramisu à l'italienne : mascarpone, café espresso et cacao amer.</p>
-                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                                <div class="flex items-center gap-2">
-                                    <img src="https://i.pravatar.cc/32?img=5" alt="Chef" class="w-8 h-8 rounded-full ring-2 ring-sp-200">
-                                    <span class="text-sm font-medium">Sofia R.</span>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <div class="flex">
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
-                                        <i data-lucide="star" class="w-4 h-4 text-gray-200"></i>
-                                    </div>
-                                    <span class="text-sm text-gray-500 ml-1">(189)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
+            <div id="trendingGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Filled by JS -->
             </div>
 
             <div class="mt-10 text-center sm:hidden">
@@ -791,9 +664,91 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="js/recipes-data.js"></script>
     <script src="js/config.js"></script>
     <script src="js/app.js"></script>
+    <script>
+    (function () {
+        const PALETTE = ['#E85D26','#16A34A','#7C3AED','#DB2777','#0284C7','#CA8A04'];
+        function colorFor(name) {
+            let h = 0;
+            for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+            return PALETTE[Math.abs(h) % PALETTE.length];
+        }
+        function fmtTime(min) {
+            if (!min) return '—';
+            if (min < 60) return min + ' min';
+            const h = Math.floor(min / 60), m = min % 60;
+            return m > 0 ? h + 'h' + String(m).padStart(2, '0') : h + 'h';
+        }
+        function stars(rating) {
+            let s = '';
+            for (let i = 1; i <= 5; i++) {
+                const f = i <= Math.round(rating);
+                s += `<svg class="w-4 h-4 ${f ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+            }
+            return s;
+        }
+        function buildCard(r, idx) {
+            const img    = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600';
+            const rating = parseFloat(r.rating) || 4.5;
+            const count  = (parseInt(r.rating_count) || 0).toLocaleString('fr-FR');
+            const author = r.author_name || 'Équipe S&P';
+            const inits  = author.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            const color  = colorFor(author);
+            const authorHTML = r.author_type === 'mijote'
+                ? `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-sp-500 to-sp-600 flex items-center justify-center flex-shrink-0"><span class="text-white font-bold text-xs">SP</span></div><span class="text-sm font-medium">Équipe S&amp;P</span>`
+                : `<div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-xs" style="background:${color}">${inits}</div><span class="text-sm font-medium">${author}</span>`;
+            return `
+<a href="recette-detail.html?slug=${r.slug}" class="recipe-card group" data-aos="fade-up" data-aos-delay="${idx * 100}">
+    <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-500">
+        <div class="relative aspect-[4/3] overflow-hidden">
+            <img src="${img}" alt="${r.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
+            <button type="button" onclick="event.stopPropagation();event.preventDefault();window.location.href='connexion.html';"
+                class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+            <div class="absolute bottom-4 left-4 right-4 flex gap-2">
+                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    ${fmtTime(+r.total_time)}
+                </span>
+                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs">${r.difficulty || 'Facile'}</span>
+            </div>
+        </div>
+        <div class="p-5">
+            <h3 class="text-xl font-display font-bold group-hover:text-sp-600 transition-colors">${r.title}</h3>
+            <p class="text-gray-500 text-sm mt-2 line-clamp-2">${r.description || ''}</p>
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                <div class="flex items-center gap-2">${authorHTML}</div>
+                <div class="flex items-center gap-1">
+                    <div class="flex">${stars(rating)}</div>
+                    <span class="text-sm text-gray-500 ml-1">(${count})</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</a>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            const grid = document.getElementById('trendingGrid');
+            try {
+                const res  = await fetch('api/recipes.php?action=list&sort=recentes');
+                const data = await res.json();
+                const recipes = (data.recipes || []).slice(0, 3);
+                if (recipes.length === 0) {
+                    grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10">Aucune recette disponible.</p>';
+                    return;
+                }
+                grid.innerHTML = recipes.map((r, i) => buildCard(r, i)).join('');
+                if (window.AOS) AOS.refreshHard();
+                if (typeof updateAllStats === 'function') updateAllStats(data.recipes);
+            } catch (e) {
+                grid.innerHTML = '';
+            }
+        });
+    })();
+    </script>
 
 </body>
 </html>

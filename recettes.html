@@ -142,7 +142,6 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="js/recipes-data.js"></script>
     <script src="js/config.js"></script>
     <script src="js/app.js"></script>
     <script>
@@ -164,9 +163,7 @@
             return m > 0 ? h + 'h' + String(m).padStart(2, '0') : h + 'h';
         }
         function starSVG(filled) {
-            const cls = filled
-                ? 'w-3 h-3 text-amber-400 fill-amber-400'
-                : 'w-3 h-3 text-gray-300 fill-gray-200';
+            const cls = filled ? 'w-3 h-3 text-amber-400 fill-amber-400' : 'w-3 h-3 text-gray-300 fill-gray-200';
             return `<svg class="${cls}" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
         }
         function starsHTML(rating) {
@@ -175,44 +172,49 @@
             return s;
         }
 
+        // ── Normalize API response ────────────────────────────────────────────
+        function normalize(r) {
+            return {
+                ...r,
+                image:       r.image_url  || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600',
+                authorType:  r.author_type || 'user',
+                totalTime:   +r.total_time  || 0,
+                author:      r.author_name  || 'Anonyme',
+                ratingCount: +r.rating_count || 0,
+                rating:      +r.rating       || 0,
+                createdAt:   r.created_at   || '',
+                tags:        r.tags         || [],
+            };
+        }
+
         // ── Badge ─────────────────────────────────────────────────────────────
         function getBadge(r) {
-            if (r.authorType === 'mijote') {
+            if (r.authorType === 'mijote')
                 return `<span class="px-2.5 py-1 bg-sp-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Sel &amp; Poivre</span>`;
-            }
-            if (r.featured) {
-                return `<span class="px-2.5 py-1 bg-amber-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Coup de ♥</span>`;
-            }
-            if (r.tags && r.tags.some(t => t.toLowerCase().includes('végétarien'))) {
+            if (r.tags.some(t => t.toLowerCase().includes('végétarien')))
                 return `<span class="px-2.5 py-1 bg-or-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Végétarien</span>`;
-            }
             return '';
         }
 
         // ── Author avatar ─────────────────────────────────────────────────────
         function authorHTML(r) {
-            if (r.authorType === 'mijote') {
+            if (r.authorType === 'mijote')
                 return `<div class="w-6 h-6 rounded-full bg-gradient-to-br from-sp-500 to-sp-600 flex items-center justify-center flex-shrink-0"><span class="text-white font-bold" style="font-size:8px">SP</span></div><span class="text-xs text-gray-500">Équipe Sel &amp; Poivre</span>`;
-            }
             const name = r.author || 'U';
-            const color = colorFor(name);
-            const inits = initials(name);
-            return `<div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold" style="background:${color};font-size:8px">${inits}</div><span class="text-xs text-gray-500">${name}</span>`;
+            return `<div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold" style="background:${colorFor(name)};font-size:8px">${initials(name)}</div><span class="text-xs text-gray-500">${name}</span>`;
         }
 
         // ── Card HTML ─────────────────────────────────────────────────────────
         function buildCard(r, idx) {
             const badge = getBadge(r);
-            const delay = (idx % 4) * 50;
-            const count = (r.ratingCount || 0).toLocaleString('fr-FR');
+            const count = r.ratingCount.toLocaleString('fr-FR');
             return `
-<a href="recette-detail.html?slug=${r.slug}" class="recipe-grid-card group" data-aos="fade-up" data-aos-delay="${delay}">
+<a href="recette-detail.html?slug=${r.slug}" class="recipe-grid-card group" data-aos="fade-up" data-aos-delay="${(idx % 4) * 50}">
     <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 h-full flex flex-col">
         <div class="relative aspect-[4/3] overflow-hidden flex-shrink-0">
             <img src="${r.image}" alt="${r.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
             ${badge ? `<div class="absolute top-3 left-3">${badge}</div>` : ''}
-            <button type="button"
-                onclick="event.stopPropagation();event.preventDefault();window.location.href='connexion.html';"
+            <button type="button" onclick="event.stopPropagation();event.preventDefault();window.location.href='connexion.html';"
                 class="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
@@ -221,15 +223,13 @@
                     <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     ${fmtTime(r.totalTime)}
                 </span>
-                <span class="px-2.5 py-1 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs capitalize">${r.difficulty || 'facile'}</span>
+                <span class="px-2.5 py-1 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs capitalize">${r.difficulty || 'Facile'}</span>
             </div>
         </div>
         <div class="p-4 flex flex-col flex-1">
             <h3 class="font-display font-bold group-hover:text-sp-600 transition-colors flex-1 leading-snug">${r.title}</h3>
             <div class="flex items-center justify-between mt-3">
-                <div class="flex items-center gap-1.5 min-w-0">
-                    ${authorHTML(r)}
-                </div>
+                <div class="flex items-center gap-1.5 min-w-0">${authorHTML(r)}</div>
                 <div class="flex items-center gap-0.5 flex-shrink-0 ml-2">
                     ${starsHTML(r.rating)}
                     <span class="font-semibold text-sm ml-1">${r.rating.toFixed(1)}</span>
@@ -242,54 +242,50 @@
         }
 
         // ── State ─────────────────────────────────────────────────────────────
+        let allRecipes   = [];
         let activeFilter = 'tout';
         let searchQuery  = '';
         let sortKey      = 'populaires';
 
-        // ── Filter logic ──────────────────────────────────────────────────────
         const FILTER_FN = {
             'tout':        () => true,
             'entrées':     r => r.category === 'entrees',
             'plats':       r => r.category === 'plats',
             'desserts':    r => r.category === 'desserts',
             'apéro':       r => r.category === 'apero',
-            'végétarien':  r => (r.tags || []).some(t => t.toLowerCase().includes('végétarien')),
-            'rapide':      r => (r.totalTime || 9999) <= 30,
-            'sans gluten': r => (r.tags || []).some(t => t.toLowerCase().includes('sans gluten'))
+            'végétarien':  r => r.tags.some(t => t.toLowerCase().includes('végétarien')),
+            'rapide':      r => r.totalTime <= 30,
+            'sans gluten': r => r.tags.some(t => t.toLowerCase().includes('sans gluten')),
         };
 
         const SORT_FN = {
-            'populaires': (a, b) => (b.ratingCount || 0) - (a.ratingCount || 0),
+            'populaires': (a, b) => b.ratingCount - a.ratingCount,
             'recentes':   (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
             'notees':     (a, b) => b.rating - a.rating,
-            'rapides':    (a, b) => (a.totalTime || 9999) - (b.totalTime || 9999)
+            'rapides':    (a, b) => (a.totalTime || 9999) - (b.totalTime || 9999),
         };
 
-        function getRecipes() {
-            let list = [...(window.PUBLISHED_RECIPES || [])];
-            const fn = FILTER_FN[activeFilter] || FILTER_FN['tout'];
-            list = list.filter(fn);
+        function getFiltered() {
+            let list = allRecipes.filter(FILTER_FN[activeFilter] || FILTER_FN['tout']);
             if (searchQuery.trim()) {
                 const q = searchQuery.toLowerCase();
                 list = list.filter(r =>
                     r.title.toLowerCase().includes(q) ||
-                    (r.author || '').toLowerCase().includes(q) ||
-                    (r.category || '').toLowerCase().includes(q) ||
+                    r.author.toLowerCase().includes(q) ||
+                    r.category.toLowerCase().includes(q) ||
                     (r.description || '').toLowerCase().includes(q) ||
-                    (r.tags || []).some(t => t.toLowerCase().includes(q))
+                    r.tags.some(t => t.toLowerCase().includes(q))
                 );
             }
-            list.sort(SORT_FN[sortKey] || SORT_FN['populaires']);
-            return list;
+            return list.sort(SORT_FN[sortKey] || SORT_FN['populaires']);
         }
 
         // ── Render ────────────────────────────────────────────────────────────
         function render() {
-            const recipes = getRecipes();
-            const grid    = document.getElementById('recipesGrid');
-            const empty   = document.getElementById('emptyState');
-            const cnt     = document.getElementById('resultCount');
-            cnt.textContent = recipes.length;
+            const recipes = getFiltered();
+            const grid  = document.getElementById('recipesGrid');
+            const empty = document.getElementById('emptyState');
+            document.getElementById('resultCount').textContent = recipes.length;
             if (recipes.length === 0) {
                 grid.innerHTML = '';
                 empty.classList.remove('hidden');
@@ -297,13 +293,31 @@
                 empty.classList.add('hidden');
                 grid.innerHTML = recipes.map((r, i) => buildCard(r, i)).join('');
                 if (window.AOS) AOS.refreshHard();
-                if (window.lucide) lucide.createIcons();
             }
         }
 
         // ── Init ──────────────────────────────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', function () {
-            // Filter chips
+        document.addEventListener('DOMContentLoaded', async function () {
+            const grid = document.getElementById('recipesGrid');
+            grid.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400">
+                <svg class="animate-spin mx-auto mb-4 w-8 h-8 text-sp-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.291l3-2z"></path>
+                </svg>
+                <p>Chargement des recettes…</p>
+            </div>`;
+
+            try {
+                const res  = await fetch('api/recipes.php?action=list');
+                const data = await res.json();
+                allRecipes = (data.recipes || []).map(normalize);
+            } catch (e) {
+                grid.innerHTML = `<div class="col-span-full py-20 text-center text-gray-400"><p>Impossible de charger les recettes.</p></div>`;
+                return;
+            }
+
+            if (typeof updateAllStats === 'function') updateAllStats(allRecipes);
+
             document.querySelectorAll('.filter-chip[data-group="cat"]').forEach(btn => {
                 btn.addEventListener('click', function () {
                     document.querySelectorAll('.filter-chip[data-group="cat"]').forEach(b => b.classList.remove('active'));
@@ -313,14 +327,12 @@
                 });
             });
 
-            // Search (debounced)
             let timer;
             document.getElementById('recipeSearchInput').addEventListener('input', function () {
                 clearTimeout(timer);
                 timer = setTimeout(() => { searchQuery = this.value; render(); }, 300);
             });
 
-            // Sort
             document.getElementById('sortRecipes').addEventListener('change', function () {
                 sortKey = this.value;
                 render();

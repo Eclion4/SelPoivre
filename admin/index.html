@@ -37,9 +37,11 @@ tailwind.config = {
 
 <!-- Auth guard -->
 <script>
-  if (sessionStorage.getItem('adminAuth') !== 'true') {
-    window.location.href = 'login.html';
-  }
+  (function () {
+    const stored = localStorage.getItem('sp_user');
+    const user = stored ? JSON.parse(stored) : null;
+    if (!user || user.role !== 'admin') window.location.href = 'login.html';
+  })();
 </script>
 
 <div class="flex h-screen overflow-hidden">

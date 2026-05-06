@@ -170,23 +170,38 @@ if (counterSection) {
 }
 
 /* ========== SWIPER INIT ========== */
-if (document.querySelector('.quickRecipesSwiper')) {
-    new Swiper('.quickRecipesSwiper', {
+function initQuickRecipesSwiper() {
+    const el = document.querySelector('.quickRecipesSwiper');
+    if (!el || el.swiper) return;
+    new Swiper(el, {
         slidesPerView: 1.2,
         spaceBetween: 16,
         grabCursor: true,
+        observer: true,
+        observeParents: true,
+        observeSlideChildren: true,
+        watchOverflow: true,
         navigation: {
             nextEl: '.swiper-next',
             prevEl: '.swiper-prev',
         },
         breakpoints: {
-            480: { slidesPerView: 1.5, spaceBetween: 20 },
-            640: { slidesPerView: 2.2, spaceBetween: 24 },
+            480:  { slidesPerView: 1.5, spaceBetween: 20 },
+            640:  { slidesPerView: 2.2, spaceBetween: 24 },
             1024: { slidesPerView: 3.2, spaceBetween: 24 },
-            1280: { slidesPerView: 4, spaceBetween: 24 },
+            1280: { slidesPerView: 4,   spaceBetween: 24 },
         }
     });
 }
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initQuickRecipesSwiper);
+} else {
+    initQuickRecipesSwiper();
+}
+// Re-init after AOS animation completes (handles zero-width container case)
+window.addEventListener('load', () => {
+    setTimeout(initQuickRecipesSwiper, 100);
+});
 
 /* ========== BACK TO TOP ========== */
 const backToTop = document.getElementById('backToTop');

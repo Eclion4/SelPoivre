@@ -6,25 +6,25 @@
     <title id="pageTitle">Profil — Sel & Poivre</title>
     <meta id="pageDesc" name="description" content="Profil membre sur Sel &amp; Poivre.">
     <meta name="robots" content="index, follow">
+    <link rel="canonical" id="pageCanonical" href="https://www.sel-poivre.com/utilisateur">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C4311B'/><text y='22' x='16' text-anchor='middle' font-size='18' fill='white'>🍴</text></svg>">
+    <!-- Open Graph (mis à jour dynamiquement par JS après chargement du profil) -->
+    <meta property="og:type"         content="profile">
+    <meta property="og:site_name"    content="Sel & Poivre">
+    <meta property="og:locale"       content="fr_FR">
+    <meta id="ogTitle"       property="og:title"       content="Profil — Sel & Poivre">
+    <meta id="ogDescription" property="og:description" content="Profil membre sur Sel & Poivre.">
+    <meta id="ogImage"       property="og:image"       content="https://www.sel-poivre.com/assets/recipes/_default.jpg">
+    <meta id="ogUrl"         property="og:url"         content="https://www.sel-poivre.com/utilisateur">
+    <!-- Twitter Card -->
+    <meta name="twitter:card"                           content="summary">
+    <meta id="twTitle"       name="twitter:title"       content="Profil — Sel & Poivre">
+    <meta id="twDescription" name="twitter:description" content="Profil membre sur Sel & Poivre.">
+    <meta id="twImage"       name="twitter:image"       content="https://www.sel-poivre.com/assets/recipes/_default.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    'sp':    { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12' },
-                    'or':    { 50:'#FDF9EF',100:'#FDF3DC',300:'#F2C860',500:'#C4892A',600:'#A36E20' },
-                    'ivoire':'#F8F5EF', 'encre':'#18130F',
-                },
-                fontFamily: { 'display':['Playfair Display','serif'],'body':['Inter','sans-serif'],'handwrite':['Caveat','cursive'] }
-            }
-        }
-    }
-    </script>
+    <link rel="stylesheet" href="css/tailwind.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -172,6 +172,17 @@
     function renderProfile(p) {
         currentProfile = p;
         document.title = p.username + ' — Sel & Poivre';
+        const profileUrl = 'https://www.sel-poivre.com/utilisateur?id=' + p.id;
+        const profileImg = p.avatar || 'https://www.sel-poivre.com/assets/recipes/_default.jpg';
+        const profileDesc = p.bio ? p.bio.slice(0, 160) : ('Profil de ' + p.username + ' sur Sel & Poivre.');
+        document.getElementById('ogTitle').content       = p.username + ' — Sel & Poivre';
+        document.getElementById('ogDescription').content = profileDesc;
+        document.getElementById('ogImage').content       = profileImg;
+        document.getElementById('ogUrl').content         = profileUrl;
+        document.getElementById('twTitle').content       = p.username + ' — Sel & Poivre';
+        document.getElementById('twDescription').content = profileDesc;
+        document.getElementById('twImage').content       = profileImg;
+        document.getElementById('pageCanonical').href    = profileUrl;
         const a = document.getElementById('avatarBox');
         if (p.avatar) {
             a.style.background = 'transparent';

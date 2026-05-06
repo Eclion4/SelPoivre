@@ -28,6 +28,7 @@ function handlePublicStats() {
 }
 
 function handleRegister() {
+    rateLimit('register', 3, 3600);
     $d = getBody();
     $username = trim($d['username'] ?? '');
     $email    = trim($d['email']    ?? '');
@@ -62,6 +63,7 @@ function handleRegister() {
 }
 
 function handleLogin() {
+    rateLimit('login', 5, 300);
     $d = getBody();
     $email    = trim($d['email']    ?? '');
     $password =      $d['password'] ?? '';

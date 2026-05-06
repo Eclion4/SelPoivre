@@ -10,21 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'sp': { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12',800:'#57130C',900:'#360C07' },
-                        'or': { 50:'#FDF9EF',100:'#FDF3DC',200:'#F9E0A0',300:'#F2C860',400:'#E5A930',500:'#C4892A',600:'#A36E20',700:'#7D5118',800:'#5A3A12',900:'#3B260C' },
-                        'ivoire': '#F8F5EF', 'encre': '#18130F',
-                    },
-                    fontFamily: { 'display':['Playfair Display','serif'], 'body':['Inter','sans-serif'], 'handwrite':['Caveat','cursive'] }
-                }
-            }
-        }
-    </script>
+    <link rel="stylesheet" href="css/tailwind.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -218,7 +204,7 @@
 
         <!-- LEFT PANEL — Visual -->
         <div class="hidden lg:flex flex-col relative overflow-hidden bg-gradient-to-br from-encre via-gray-900 to-encre">
-            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80" alt="Cuisine" class="absolute inset-0 w-full h-full object-cover opacity-30">
+            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80" alt="Cuisine" class="absolute inset-0 w-full h-full object-cover opacity-30" loading="lazy">
             <div class="relative z-10 flex flex-col justify-between h-full p-12">
                 <div>
                     <span class="font-handwrite text-2xl text-sp-400">Bienvenue chez</span>

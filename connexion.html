@@ -12,25 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    sp: { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12',800:'#57130C',900:'#360C07' },
-                    or: { 50:'#FDF9EF',100:'#FDF3DC',200:'#F9E0A0',300:'#F2C860',400:'#E5A930',500:'#C4892A',600:'#A36E20',700:'#7D5118',800:'#5A3A12',900:'#3B260C' },
-                    ivoire: '#F8F5EF',
-                    encre: '#18130F',
-                },
-                fontFamily: {
-                    display: ['Playfair Display','serif'],
-                    body: ['Inter','sans-serif'],
-                }
-            }
-        }
-    }
-    </script>
+    <link rel="stylesheet" href="css/tailwind.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .input-field {
@@ -72,7 +54,7 @@
 
         <!-- Left panel — image (hidden on mobile) -->
         <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-            <img src="/assets/recipes/_default.jpg" alt="Cuisine" class="w-full h-full object-cover">
+            <img src="/assets/recipes/_default.jpg" alt="Cuisine" class="w-full h-full object-cover" loading="lazy">
             <div class="absolute inset-0 bg-gradient-to-br from-encre/70 via-encre/40 to-transparent"></div>
             <div class="absolute inset-0 flex flex-col justify-between p-12">
                 <a href="index.html" class="flex items-center gap-3">

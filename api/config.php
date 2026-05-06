@@ -44,6 +44,25 @@ function requireAdmin() {
     }
 }
 
+function rateLimit(string $action, int $max = 5, int $window = 300): void {
+    $ip   = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    $file = sys_get_temp_dir() . '/sp_rl_' . md5($action . $ip) . '.json';
+    $now  = time();
+    $data = ['count' => 0, 'start' => $now];
+    if (file_exists($file)) {
+        $stored = json_decode(file_get_contents($file), true);
+        if ($stored && ($now - $stored['start']) < $window) {
+            $data = $stored;
+        }
+    }
+    $data['count']++;
+    file_put_contents($file, json_encode($data), LOCK_EX);
+    if ($data['count'] > $max) {
+        $wait = $window - ($now - $data['start']);
+        jsonResponse(['error' => "Trop de tentatives. Réessayez dans {$wait}s."], 429);
+    }
+}
+
 header('Content-Type: application/json; charset=utf-8');
 
 $allowedOrigins = ['https://www.sel-poivre.com', 'http://localhost', 'http://localhost:8080', 'http://127.0.0.1', 'http://127.0.0.1:8080'];

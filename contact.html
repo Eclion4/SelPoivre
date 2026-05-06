@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact — Sel & Poivre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'sp':    { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12' },
+                    'or':    { 50:'#FDF9EF',100:'#FDF3DC',300:'#F2C860',500:'#C4892A',600:'#A36E20' },
+                    'ivoire':'#F8F5EF', 'encre':'#18130F',
+                },
+                fontFamily: { 'display':['Playfair Display','serif'],'body':['Inter','sans-serif'],'handwrite':['Caveat','cursive'] }
+            }
+        }
+    }
+    </script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background:#F8F5EF; font-family:'Inter',sans-serif; color:#18130F; }
+        .field-input { width:100%; padding:12px 14px; background:#fff; border:1.5px solid #E5E7EB; border-radius:10px; font-size:0.9375rem; color:#18130F; outline:none; transition:all 0.2s; }
+        .field-input:focus { border-color:#C4311B; box-shadow:0 0 0 3px rgba(196,49,27,0.1); }
+        .field-label { display:block; font-size:0.875rem; font-weight:600; color:#374151; margin-bottom:6px; }
+    </style>
+</head>
+<body>
+
+<nav id="navbar" class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl shadow-sm border-b border-sp-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300">
+                    <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="text-2xl font-display font-bold"><span class="text-sp-500">Sel</span><span class="text-encre"> &amp; Poivre</span></span>
+            </a>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="index.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Accueil</a>
+                <a href="recettes.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Recettes</a>
+                <a href="communaute.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Communauté</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <header class="text-center mb-10">
+        <span class="font-handwrite text-2xl text-sp-500">On vous écoute</span>
+        <h1 class="text-4xl sm:text-5xl font-display font-bold mt-2">Une question, une suggestion ?</h1>
+        <p class="text-gray-500 mt-3 max-w-lg mx-auto">Réponse en moins de 48 heures. Bug, idée, partenariat, signalement — tout passe par ce formulaire.</p>
+    </header>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+        <!-- Form -->
+        <div class="lg:col-span-2 bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div id="contactSuccess" class="hidden text-center py-8">
+                <div class="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <i data-lucide="check" class="w-8 h-8 text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-display font-bold mb-2">Message envoyé !</h2>
+                <p class="text-gray-500 mb-6">Nous vous répondrons par email à l'adresse fournie.</p>
+                <button id="resetForm" class="px-6 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Envoyer un autre message</button>
+            </div>
+
+            <form id="contactForm" class="space-y-4">
+                <div id="contactError" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm"></div>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="field-label">Votre nom <span class="text-red-500">*</span></label>
+                        <input id="name" type="text" maxlength="120" required class="field-input" placeholder="Jean Dupont">
+                    </div>
+                    <div>
+                        <label class="field-label">Email <span class="text-red-500">*</span></label>
+                        <input id="email" type="email" required class="field-input" placeholder="vous@exemple.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="field-label">Sujet <span class="text-red-500">*</span></label>
+                    <select id="subject" required class="field-input">
+                        <option value="">— Choisir un sujet —</option>
+                        <option value="Question générale">Question générale</option>
+                        <option value="Bug / problème technique">Bug / problème technique</option>
+                        <option value="Suggestion d'amélioration">Suggestion d'amélioration</option>
+                        <option value="Partenariat / professionnel">Partenariat / professionnel</option>
+                        <option value="Signaler un contenu">Signaler un contenu</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="field-label">Message <span class="text-red-500">*</span></label>
+                    <textarea id="message" rows="6" maxlength="5000" required class="field-input" placeholder="Décrivez votre demande..."></textarea>
+                    <p class="text-xs text-gray-400 mt-1"><span id="charCount">0</span> / 5000</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-2">
+                    <p class="text-xs text-gray-400">En envoyant ce message, vous acceptez que nous traitions vos données pour vous répondre.</p>
+                    <button type="submit" id="submitBtn" class="px-8 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span id="submitLabel">Envoyer</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info -->
+        <aside class="space-y-4">
+            <div class="bg-white border border-gray-100 rounded-2xl p-5">
+                <div class="w-10 h-10 bg-sp-50 rounded-xl flex items-center justify-center mb-3">
+                    <i data-lucide="mail" class="w-5 h-5 text-sp-600"></i>
+                </div>
+                <h3 class="font-display font-bold text-base mb-1">Email direct</h3>
+                <p class="text-sm text-gray-500">Pour les demandes urgentes :<br>
+                    <a href="mailto:contact@sel-poivre.com" class="text-sp-600 hover:underline font-medium">contact@sel-poivre.com</a>
+                </p>
+            </div>
+
+            <div class="bg-white border border-gray-100 rounded-2xl p-5">
+                <div class="w-10 h-10 bg-or-50 rounded-xl flex items-center justify-center mb-3">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-or-600"></i>
+                </div>
+                <h3 class="font-display font-bold text-base mb-1">Vie privée</h3>
+                <p class="text-sm text-gray-500">Vos données restent confidentielles. <a href="confidentialite.html" class="text-sp-600 hover:underline">En savoir plus</a></p>
+            </div>
+
+            <div class="bg-white border border-gray-100 rounded-2xl p-5">
+                <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
+                    <i data-lucide="help-circle" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <h3 class="font-display font-bold text-base mb-1">Une recette à signaler ?</h3>
+                <p class="text-sm text-gray-500">Choisissez "Signaler un contenu" et indiquez le titre dans votre message.</p>
+            </div>
+        </aside>
+    </div>
+
+</main>
+
+<script src="js/auth-ui.js"></script>
+<script>
+(function () {
+    const u = window.SP && window.SP.user;
+    if (u) {
+        document.getElementById('name').value = u.username || '';
+        document.getElementById('email').value = u.email || '';
+    }
+
+    const msgEl = document.getElementById('message');
+    const cnt = document.getElementById('charCount');
+    msgEl.addEventListener('input', () => cnt.textContent = msgEl.value.length);
+
+    function showError(msg) {
+        const box = document.getElementById('contactError');
+        box.textContent = msg;
+        box.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        document.getElementById('contactError').classList.add('hidden');
+        const data = {
+            name:    document.getElementById('name').value.trim(),
+            email:   document.getElementById('email').value.trim(),
+            subject: document.getElementById('subject').value,
+            message: document.getElementById('message').value.trim(),
+        };
+        if (!data.name || !data.email || !data.subject || !data.message) {
+            showError('Tous les champs sont requis.');
+            return;
+        }
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        document.getElementById('submitLabel').textContent = 'Envoi…';
+        try {
+            const res = await fetch('api/contact.php?action=send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(data),
+            });
+            const r = await res.json();
+            if (!res.ok || !r.success) throw new Error(r.error || 'Erreur');
+            document.getElementById('contactForm').classList.add('hidden');
+            document.getElementById('contactSuccess').classList.remove('hidden');
+        } catch (err) {
+            btn.disabled = false;
+            document.getElementById('submitLabel').textContent = 'Envoyer';
+            showError(err.message || 'Erreur lors de l\'envoi.');
+        }
+    });
+
+    document.getElementById('resetForm').addEventListener('click', () => {
+        const form = document.getElementById('contactForm');
+        form.reset();
+        cnt.textContent = '0';
+        if (u) {
+            document.getElementById('name').value = u.username || '';
+            document.getElementById('email').value = u.email || '';
+        }
+        document.getElementById('contactSuccess').classList.add('hidden');
+        form.classList.remove('hidden');
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = false;
+        document.getElementById('submitLabel').textContent = 'Envoyer';
+    });
+
+    if (window.lucide) lucide.createIcons();
+})();
+</script>
+</body>
+</html>

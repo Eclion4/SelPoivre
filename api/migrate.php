@@ -53,6 +53,19 @@ $migrations = [
         FOREIGN KEY (followed_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
+    'contact_messages.create' => "CREATE TABLE IF NOT EXISTS contact_messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NULL,
+        name VARCHAR(120) NOT NULL,
+        email VARCHAR(160) NOT NULL,
+        subject VARCHAR(160) NOT NULL,
+        message TEXT NOT NULL,
+        status ENUM('new','read','replied','archived') DEFAULT 'new',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_status (status),
+        INDEX idx_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
     // ── Final image refresh: photos verified via TheMealDB API. Each image
     // has been confirmed to actually depict the dish. Replaces previous
     // duplicate or mismatched Unsplash IDs.

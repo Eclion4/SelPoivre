@@ -186,7 +186,7 @@
                 image:       r.image_url   || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600',
                 authorType:  r.author_type || 'user',
                 totalTime:   +r.total_time || 0,
-                author:      r.author_name || 'Anonyme',
+                author:      r.author_name || 'Sel & Poivre',
                 ratingCount: realisticCount(r.rating_count, r.id),
                 rating:      +r.rating     || 0,
                 createdAt:   r.created_at  || '',
@@ -208,9 +208,12 @@
         // ── Author avatar ─────────────────────────────────────────────────────
         function authorHTML(r) {
             if (r.authorType === 'mijote')
-                return `<div class="w-6 h-6 rounded-full bg-gradient-to-br from-sp-500 to-sp-600 flex items-center justify-center flex-shrink-0"><span class="text-white font-bold" style="font-size:8px">SP</span></div><span class="text-xs text-gray-500">Équipe Sel &amp; Poivre</span>`;
+                return `<div class="w-6 h-6 rounded-full bg-gradient-to-br from-sp-500 to-sp-600 flex items-center justify-center flex-shrink-0"><span class="text-white font-bold" style="font-size:8px">SP</span></div><span class="text-xs text-gray-500">Sel &amp; Poivre</span>`;
             const name = r.author || 'U';
-            return `<div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold" style="background:${colorFor(name)};font-size:8px">${initials(name)}</div><span class="text-xs text-gray-500">${name}</span>`;
+            const av = r.author_avatar
+                ? `<img src="${r.author_avatar}" alt="" class="w-6 h-6 rounded-full object-cover flex-shrink-0">`
+                : `<div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold" style="background:${colorFor(name)};font-size:8px">${initials(name)}</div>`;
+            return av + `<span class="text-xs text-gray-500">${name}</span>`;
         }
 
         // ── Card HTML ─────────────────────────────────────────────────────────

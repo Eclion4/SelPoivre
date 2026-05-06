@@ -44,9 +44,9 @@ function listPosts() {
     $sql = "SELECT r.id, r.slug, r.title, r.description, r.image_url, r.created_at,
                    r.author_id, r.category, r.total_time, r.difficulty, r.rating,
                    $favSelect
-                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'mijote' ELSE 'user' END AS author_type,
-                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
-                        ELSE COALESCE(u.username, 'Communauté')
+                   CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS author_type,
+                   CASE WHEN r.author_id IS NULL THEN 'Sel & Poivre'
+                        ELSE COALESCE(u.username, 'Sel & Poivre')
                    END AS author_name,
                    u.avatar AS author_avatar,
                    (SELECT COUNT(*) FROM favorites WHERE recipe_id = r.id) AS like_count,

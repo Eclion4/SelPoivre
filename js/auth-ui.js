@@ -139,10 +139,12 @@
     }
 
     function applyMenu(user) {
-        // Idempotence guard — bail if we've already injected a user menu on this page
-        if (document.querySelector('.js-sp-userwrap')) return;
+        // Aggressive cleanup: nuke ALL existing injected menus first.
+        // This makes applyMenu fully idempotent — even if it ran 5 times on
+        // bfcache restore + verify, we always end up with exactly one of each.
+        document.querySelectorAll('.js-sp-userwrap, .js-sp-mobile, .js-sp-desktop').forEach(el => el.remove());
 
-        // 1. Mobile menu: the connexion link inside #mobileMenu (only one)
+        // 1. Mobile menu: replace the connexion link inside #mobileMenu (if any)
         const mobileLink = document.querySelector('#mobileMenu a[href$="connexion.html"]');
         if (mobileLink) {
             const newEl = injectHTML(buildMobileMenu(user));
@@ -151,16 +153,20 @@
             wireDropdown(newEl);
         }
 
-        // 2. Desktop button: connexion link in nav with text "Connexion"
-        const desktopLink = [...document.querySelectorAll('nav a[href$="connexion.html"]')].find(a =>
-            !a.closest('#mobileMenu') && /connexion/i.test(a.textContent)
-        );
-        if (desktopLink) {
-            const newEl = injectHTML(buildDesktopMenu(user));
-            newEl.classList.add('js-sp-desktop');
-            desktopLink.parentNode.replaceChild(newEl, desktopLink);
-            wireDropdown(newEl);
-        }
+        // 2. Desktop button: text-bearing "Connexion" link in nav (outside mobile menu)
+        const desktopLinks = [...document.querySelectorAll('nav a[href$="connexion.html"]')]
+            .filter(a => !a.closest('#mobileMenu') && /connexion/i.test(a.textContent));
+        // Replace only the first occurrence; nuke others to prevent any duplicate visible
+        desktopLinks.forEach((a, i) => {
+            if (i === 0) {
+                const newEl = injectHTML(buildDesktopMenu(user));
+                newEl.classList.add('js-sp-desktop', 'js-sp-userwrap');
+                a.parentNode.replaceChild(newEl, a);
+                wireDropdown(newEl);
+            } else {
+                a.remove();
+            }
+        });
 
         // 3. Any remaining icon-only connexion link (e.g. heart) → re-route to favorites
         document.querySelectorAll('a[href$="connexion.html"], a[href$="connexion.html#"]').forEach(a => {
@@ -245,10 +251,63 @@
         setUser: setStoredUser,
     };
 
+    // ─── Mobile bottom navigation ──────────────────────────────
+    function injectBottomNav() {
+        // Skip on auth pages and admin
+        const path = window.location.pathname.toLowerCase();
+        if (/connexion\.html|inscription\.html|\/admin\//.test(path)) return;
+        if (document.querySelector('.js-sp-bottomnav')) return;
+
+        const here = path.split('/').pop() || 'index.html';
+        const isActive = (slug) => here === slug || (here === '' && slug === 'index.html');
+        const u = getStoredUser();
+
+        const item = (href, icon, label, active) => `
+            <a href="${pagePath(href)}" class="flex flex-col items-center justify-center gap-0.5 flex-1 ${active ? 'text-sp-600' : 'text-gray-500'} hover:text-sp-600 transition-colors">
+                ${icon}
+                <span class="text-[10px] font-medium leading-none">${label}</span>
+            </a>`;
+
+        const homeIcon  = `<svg class="w-5 h-5" fill="${isActive('index.html')?'currentColor':'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>`;
+        const recIcon   = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>`;
+        const commIcon  = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`;
+        const pubIcon   = `<svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>`;
+        const userIcon  = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/></svg>`;
+        const loginIcon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>`;
+
+        // Center "publier" button (logged in only)
+        const middleBtn = u
+            ? `<a href="${pagePath('publier.html')}" class="flex items-center justify-center -mt-6 w-14 h-14 bg-gradient-to-br from-sp-500 to-sp-600 text-white rounded-full shadow-lg shadow-sp-500/30 flex-shrink-0">${pubIcon}</a>`
+            : item('inscription.html', loginIcon, 'Inscription', isActive('inscription.html'));
+
+        const profileItem = u
+            ? item('profil.html', userIcon, 'Profil', isActive('profil.html'))
+            : item('connexion.html', loginIcon, 'Connexion', isActive('connexion.html'));
+
+        const html = `
+        <nav class="js-sp-bottomnav md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-gray-200 pb-safe">
+            <div class="flex items-stretch h-16 px-1">
+                ${item('index.html', homeIcon, 'Accueil', isActive('index.html'))}
+                ${item('recettes.html', recIcon, 'Recettes', isActive('recettes.html'))}
+                <div class="flex items-center justify-center flex-1">${middleBtn}</div>
+                ${item('communaute.html', commIcon, 'Communauté', isActive('communaute.html'))}
+                ${profileItem}
+            </div>
+        </nav>
+        <style>
+            @supports (padding: env(safe-area-inset-bottom)) {
+                .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+            }
+            @media (max-width: 767.98px) { body { padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0)); } }
+        </style>`;
+        document.body.insertAdjacentHTML('beforeend', html);
+    }
+
     // Init: show menu immediately if user in localStorage, then verify async
     function init() {
         const local = getStoredUser();
         if (local) applyMenu(local);
+        injectBottomNav();
         // Background verification — clears stale localStorage if session expired
         verifySession().then(serverUser => {
             if (!serverUser && local) {
@@ -257,6 +316,9 @@
             } else if (serverUser && !local) {
                 // Found server session but no local copy — apply menu now
                 applyMenu(serverUser);
+                // Re-inject bottom nav with new auth state
+                document.querySelector('.js-sp-bottomnav')?.remove();
+                injectBottomNav();
             }
         });
     }

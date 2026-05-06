@@ -35,9 +35,11 @@ function getAllAdmin() {
     $s = $db->prepare("SELECT r.id, r.slug, r.title, r.description, r.category, r.status,
                               r.total_time, r.difficulty, r.rating, r.rating_count,
                               r.image_url, r.created_at, r.author_id,
-                              CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
-                                   ELSE COALESCE(u.username, 'Communauté')
-                              END AS author_name
+                              CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS author_type,
+                              CASE WHEN r.author_id IS NULL THEN 'Sel & Poivre'
+                                   ELSE COALESCE(u.username, 'Sel & Poivre')
+                              END AS author_name,
+                              u.avatar AS author_avatar
                        FROM recipes r
                        LEFT JOIN users u ON r.author_id = u.id
                        $whereSql
@@ -82,12 +84,13 @@ function getList() {
     $sql = "SELECT r.id, r.slug, r.title, r.description, r.category,
                    r.prep_time, r.cook_time, r.total_time, r.servings,
                    r.difficulty, r.rating, r.rating_count, r.image_url,
-                   r.created_at,
+                   r.created_at, r.author_id,
                    $favSelect
-                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'mijote' ELSE 'user' END AS author_type,
-                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
-                        ELSE COALESCE(u.username, 'Communauté')
-                   END AS author_name
+                   CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS author_type,
+                   CASE WHEN r.author_id IS NULL THEN 'Sel & Poivre'
+                        ELSE COALESCE(u.username, 'Sel & Poivre')
+                   END AS author_name,
+                   u.avatar AS author_avatar
             FROM recipes r
             LEFT JOIN users u ON r.author_id = u.id
             WHERE " . implode(' AND ', $where) . "
@@ -118,9 +121,9 @@ function getSingle($slug) {
 
     $sql = "SELECT r.*,
                    $favSelect
-                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'mijote' ELSE 'user' END AS norm_author_type,
-                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
-                        ELSE COALESCE(u.username, 'Communauté')
+                   CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS norm_author_type,
+                   CASE WHEN r.author_id IS NULL THEN 'Sel & Poivre'
+                        ELSE COALESCE(u.username, 'Sel & Poivre')
                    END AS author_name,
                    u.avatar AS author_avatar
             FROM recipes r

@@ -1,0 +1,75 @@
+<?php
+require_once 'config.php';
+
+$method = $_SERVER['REQUEST_METHOD'];
+$action = $_GET['action'] ?? '';
+
+switch ("$method:$action") {
+    case 'POST:send':     sendMessage();    break;
+    case 'GET:list':      listMessages();   break;
+    case 'POST:status':   updateStatus();   break;
+    case 'DELETE:delete': deleteMessage();  break;
+    default: jsonResponse(['error' => 'Route inconnue'], 404);
+}
+
+function sendMessage() {
+    $d = getBody();
+    $name    = trim($d['name']    ?? '');
+    $email   = trim($d['email']   ?? '');
+    $subject = trim($d['subject'] ?? '');
+    $message = trim($d['message'] ?? '');
+
+    if (!$name || mb_strlen($name) < 2)        jsonResponse(['error' => 'Nom requis (2 caractères min)'], 400);
+    if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) jsonResponse(['error' => 'Email invalide'], 400);
+    if (!$subject || mb_strlen($subject) < 3)  jsonResponse(['error' => 'Sujet requis'], 400);
+    if (!$message || mb_strlen($message) < 10) jsonResponse(['error' => 'Message trop court (10 caractères min)'], 400);
+    if (mb_strlen($name) > 120)    jsonResponse(['error' => 'Nom trop long'], 400);
+    if (mb_strlen($subject) > 160) jsonResponse(['error' => 'Sujet trop long'], 400);
+    if (mb_strlen($message) > 5000) jsonResponse(['error' => 'Message trop long (5000 caractères max)'], 400);
+
+    $userId = $_SESSION['user_id'] ?? null;
+    $db = getDB();
+    $s = $db->prepare('INSERT INTO contact_messages (user_id, name, email, subject, message) VALUES (?, ?, ?, ?, ?)');
+    $s->execute([$userId, $name, $email, $subject, $message]);
+    jsonResponse(['success' => true]);
+}
+
+function listMessages() {
+    requireAdmin();
+    $db = getDB();
+    $status = $_GET['status'] ?? '';
+    $where  = [];
+    $params = [];
+    if (in_array($status, ['new','read','replied','archived'])) {
+        $where[] = 'm.status = ?'; $params[] = $status;
+    }
+    $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+    $s = $db->prepare("SELECT m.*, u.username AS user_username
+                       FROM contact_messages m
+                       LEFT JOIN users u ON m.user_id = u.id
+                       $whereSql
+                       ORDER BY m.created_at DESC");
+    $s->execute($params);
+    jsonResponse(['messages' => $s->fetchAll(), 'total' => $s->rowCount()]);
+}
+
+function updateStatus() {
+    requireAdmin();
+    $id = (int)($_GET['id'] ?? 0);
+    $d  = getBody();
+    $status = $d['status'] ?? '';
+    if (!$id) jsonResponse(['error' => 'ID requis'], 400);
+    if (!in_array($status, ['new','read','replied','archived'])) jsonResponse(['error' => 'Statut invalide'], 400);
+    $db = getDB();
+    $db->prepare('UPDATE contact_messages SET status = ? WHERE id = ?')->execute([$status, $id]);
+    jsonResponse(['success' => true]);
+}
+
+function deleteMessage() {
+    requireAdmin();
+    $id = (int)($_GET['id'] ?? 0);
+    if (!$id) jsonResponse(['error' => 'ID requis'], 400);
+    $db = getDB();
+    $db->prepare('DELETE FROM contact_messages WHERE id = ?')->execute([$id]);
+    jsonResponse(['success' => true]);
+}

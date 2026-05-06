@@ -76,10 +76,11 @@ function listFav() {
     $s  = $db->prepare("SELECT r.id, r.slug, r.title, r.description, r.category,
                                r.total_time, r.difficulty, r.rating, r.rating_count,
                                r.image_url, r.created_at, f.created_at AS favorited_at,
-                               CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'mijote' ELSE 'user' END AS author_type,
-                               CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
-                                    ELSE COALESCE(u.username, 'Communauté')
+                               CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS author_type,
+                               CASE WHEN r.author_id IS NULL THEN 'Sel & Poivre'
+                                    ELSE COALESCE(u.username, 'Sel & Poivre')
                                END AS author_name,
+                               u.avatar AS author_avatar,
                                1 AS is_favorited
                         FROM favorites f
                         JOIN recipes r ON f.recipe_id = r.id

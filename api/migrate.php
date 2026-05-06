@@ -34,6 +34,14 @@ $migrations = [
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+    // Fix duplicate / wrong images
+    'images.tartiflette'     => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80' WHERE slug = 'tartiflette-savoyarde'",
+    'images.coq_au_vin'      => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=600&q=80' WHERE slug = 'coq-au-vin-rouge'",
+    'images.fondant_choco'   => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80' WHERE slug = 'fondant-chocolat'",
+    'images.gateau_yaourt'   => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=600&q=80' WHERE slug = 'gateau-yaourt'",
+    'images.crumble_pommes'  => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=600&q=80' WHERE slug = 'crumble-pomme-noisette'",
+    // Fix Pizza napolitaine total_time: 2918min (48h fermentation + actif) → 38min actif. Description mentionne déjà la fermentation 48h.
+    'pizza.totaltime'        => "UPDATE recipes SET total_time = 38 WHERE slug = 'pizza-napolitaine' AND total_time > 1000",
 ];
 
 foreach ($migrations as $name => $sql) {

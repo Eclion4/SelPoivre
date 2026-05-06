@@ -199,15 +199,25 @@
     </button>
 
     <!-- FOOTER -->
-    <footer class="bg-encre text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <a href="index.html" class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-gradient-to-br from-sp-500 to-sp-600 rounded-lg flex items-center justify-center">
-                    <i data-lucide="utensils" class="w-4 h-4 text-white"></i>
-                </div>
-                <span class="text-lg font-display font-bold">Sel &amp; Poivre</span>
-            </a>
-            <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre. Tous droits réservés.</p>
+    <footer class="bg-encre text-white py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <a href="index.html" class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-sp-500 to-sp-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="utensils" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="text-lg font-display font-bold">Sel &amp; Poivre</span>
+                </a>
+                <nav class="flex flex-wrap gap-6 justify-center text-sm text-gray-400">
+                    <a href="recettes.html"       class="hover:text-white transition-colors text-white">Recettes</a>
+                    <a href="communaute.html"      class="hover:text-white transition-colors">Communauté</a>
+                    <a href="a-propos.html"        class="hover:text-white transition-colors">À propos</a>
+                    <a href="contact.html"         class="hover:text-white transition-colors">Contact</a>
+                    <a href="cgu.html"             class="hover:text-white transition-colors">CGU</a>
+                    <a href="confidentialite.html" class="hover:text-white transition-colors">Confidentialité</a>
+                </nav>
+                <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre.</p>
+            </div>
         </div>
     </footer>
 
@@ -274,10 +284,8 @@
         }
 
         // ── Normalize API response ────────────────────────────────────────────
-        function realisticCount(raw, id) {
-            let n = parseInt(raw) || 0;
-            if (n > 30) n = 2 + (Math.abs(parseInt(id) || 0) % 7); // 2..8
-            return n;
+        function realisticCount(raw) {
+            return parseInt(raw) || 0;
         }
         function normalize(r) {
             return {
@@ -286,7 +294,7 @@
                 authorType:  r.author_type || 'user',
                 totalTime:   +r.total_time || 0,
                 author:      r.author_name || 'Sel & Poivre',
-                ratingCount: realisticCount(r.rating_count, r.id),
+                ratingCount: realisticCount(r.rating_count),
                 rating:      +r.rating     || 0,
                 createdAt:   r.created_at  || '',
                 tags:        r.tags        || [],

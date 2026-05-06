@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>À propos — Sel & Poivre</title>
+    <meta name="description" content="Sel & Poivre, c'est la cuisine du quotidien partagée avec passion. Découvrez l'histoire derrière la plateforme, nos valeurs et notre vision.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://www.sel-poivre.com/a-propos">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C4311B'/><text y='22' x='16' text-anchor='middle' font-size='18' fill='white'>🍴</text></svg>">
+
+    <!-- Open Graph -->
+    <meta property="og:type"        content="website">
+    <meta property="og:site_name"   content="Sel & Poivre">
+    <meta property="og:locale"      content="fr_FR">
+    <meta property="og:title"       content="À propos — Sel & Poivre">
+    <meta property="og:description" content="Sel & Poivre, c'est la cuisine du quotidien partagée avec passion. Notre histoire, nos valeurs, notre vision.">
+    <meta property="og:url"         content="https://www.sel-poivre.com/a-propos">
+    <meta property="og:image"       content="https://www.sel-poivre.com/assets/recipes/boeuf-bourguignon.jpg">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="À propos — Sel & Poivre">
+    <meta name="twitter:description" content="Sel & Poivre, c'est la cuisine du quotidien partagée avec passion.">
+    <meta name="twitter:image"       content="https://www.sel-poivre.com/assets/recipes/boeuf-bourguignon.jpg">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "name": "À propos de Sel & Poivre",
+      "url": "https://www.sel-poivre.com/a-propos",
+      "description": "Sel & Poivre, la plateforme communautaire de cuisine du quotidien.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Sel & Poivre",
+        "url": "https://www.sel-poivre.com"
+      }
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sp': { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12',800:'#57130C',900:'#360C07' },
+                        'or': { 50:'#FDF9EF',100:'#FDF3DC',200:'#F9E0A0',300:'#F2C860',400:'#E5A930',500:'#C4892A',600:'#A36E20',700:'#7D5118',800:'#5A3A12',900:'#3B260C' },
+                        'ivoire': '#F8F5EF', 'encre': '#18130F',
+                    },
+                    fontFamily: { 'display':['Playfair Display','serif'], 'body':['Inter','sans-serif'], 'handwrite':['Caveat','cursive'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-ivoire font-body text-encre overflow-x-hidden">
+
+    <!-- NAVBAR -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 scrolled">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="index.html" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300">
+                        <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="text-2xl font-display font-bold"><span class="text-sp-500">Sel</span><span class="text-encre"> &amp; Poivre</span></span>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="nav-link font-medium text-sm tracking-wide uppercase">Accueil</a>
+                    <a href="recettes.html" class="nav-link font-medium text-sm tracking-wide uppercase">Recettes</a>
+                    <a href="communaute.html" class="nav-link font-medium text-sm tracking-wide uppercase">Communauté</a>
+                    <a href="a-propos.html" class="nav-link active font-medium text-sm tracking-wide uppercase">À propos</a>
+                </div>
+                <div class="hidden md:flex items-center gap-4">
+                    <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all duration-300">Connexion</a>
+                </div>
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobileMenu" class="hidden md:hidden bg-white/95 backdrop-blur-xl shadow-2xl border-t border-sp-100">
+            <div class="px-4 py-6 space-y-4">
+                <a href="index.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Accueil</a>
+                <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
+                <a href="communaute.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Communauté</a>
+                <a href="a-propos.html" class="block py-3 px-4 rounded-xl bg-sp-50 text-sp-700 font-medium">À propos</a>
+                <a href="connexion.html" class="block py-3 px-4 rounded-xl bg-gradient-to-r from-sp-500 to-sp-600 text-white font-semibold text-center">Connexion</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="pt-32 pb-16 bg-gradient-to-b from-sp-50 to-ivoire">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-aos="fade-up">
+            <span class="font-handwrite text-2xl text-sp-500">Notre histoire</span>
+            <h1 class="mt-2 text-5xl sm:text-6xl font-display font-bold leading-tight">
+                La cuisine comme<br class="hidden sm:block"> <em class="text-sp-500">à la maison</em>
+            </h1>
+            <p class="mt-6 text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+                Sel &amp; Poivre est né d'une conviction simple : les meilleures recettes ne viennent pas des restaurants étoilés,
+                elles viennent des cuisines de famille, des carnets de mamies et des expériences ratées qui finissent par fonctionner.
+            </p>
+        </div>
+
+        <!-- Decorative image strip -->
+        <div class="mt-12 overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-3 sm:grid-cols-5 gap-3 rounded-3xl overflow-hidden">
+                    <div class="aspect-square overflow-hidden rounded-2xl"><img src="assets/recipes/boeuf-bourguignon.jpg"   alt="" class="w-full h-full object-cover" loading="lazy"></div>
+                    <div class="aspect-square overflow-hidden rounded-2xl hidden sm:block"><img src="assets/recipes/tarte-tatin.jpg"  alt="" class="w-full h-full object-cover" loading="lazy"></div>
+                    <div class="aspect-square overflow-hidden rounded-2xl"><img src="assets/recipes/tiramisu-classique.jpg"  alt="" class="w-full h-full object-cover" loading="lazy"></div>
+                    <div class="aspect-square overflow-hidden rounded-2xl hidden sm:block"><img src="assets/recipes/coq-au-vin-rouge.jpg" alt="" class="w-full h-full object-cover" loading="lazy"></div>
+                    <div class="aspect-square overflow-hidden rounded-2xl"><img src="assets/recipes/creme-brulee.jpg"         alt="" class="w-full h-full object-cover" loading="lazy"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- POURQUOI SEL & POIVRE -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14" data-aos="fade-up">
+                <span class="font-handwrite text-xl text-or-500">Ce qui nous différencie</span>
+                <h2 class="mt-2 text-4xl font-display font-bold">Pourquoi Sel &amp; Poivre ?</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Accessible -->
+                <div class="group p-8 rounded-3xl bg-sp-50 hover:bg-sp-100 transition-all duration-300" data-aos="fade-up" data-aos-delay="0">
+                    <div class="w-14 h-14 bg-sp-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="smile" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold mb-3">Accessible à tous</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Pas besoin de formation de chef. Chaque recette indique clairement le niveau, le temps et les ingrédients.
+                        Du débutant qui veut réussir ses œufs mimosa au passionné qui attaque le cassoulet.
+                    </p>
+                </div>
+
+                <!-- Authentique -->
+                <div class="group p-8 rounded-3xl bg-or-50 hover:bg-or-100 transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-14 h-14 bg-or-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="heart" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold mb-3">Authentiquement humain</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Ici, les recettes viennent de vraies personnes — pas d'un algorithme ou d'un studio photo.
+                        Les photos sont honnêtes, les avis aussi. Si quelque chose ne marche pas, quelqu'un le dit.
+                    </p>
+                </div>
+
+                <!-- Communautaire -->
+                <div class="group p-8 rounded-3xl bg-green-50 hover:bg-green-100 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-14 h-14 bg-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="users" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-display font-bold mb-3">Communauté avant tout</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Les meilleures recettes se transmettent, pas seulement en famille. Ici, chaque membre peut partager,
+                        commenter, noter et créer ses propres collections. La cuisine, ça se partage.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NOTRE HISTOIRE -->
+    <section class="py-20 bg-ivoire">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+                <div data-aos="fade-right">
+                    <span class="font-handwrite text-xl text-sp-500">Les origines</span>
+                    <h2 class="mt-2 text-4xl font-display font-bold mb-6">Une idée née autour d'une table</h2>
+
+                    <!-- ✏️ À PERSONNALISER — remplace ce texte par ta vraie histoire -->
+                    <div class="space-y-4 text-gray-600 leading-relaxed">
+                        <p>
+                            Sel &amp; Poivre est né d'un constat simple : internet regorge de recettes,
+                            mais il manque un endroit <strong class="text-encre">sincère et bienveillant</strong>
+                            où les gens partagent ce qu'ils cuisinent vraiment.
+                        </p>
+                        <p>
+                            Les grandes plateformes sont saturées de recettes sponsorisées, de photos retouchées
+                            et de vidéos accélérées à l'extrême. Ici, on préfère la réalité : une recette qui prend
+                            2 heures ne sera pas présentée en 30 secondes.
+                        </p>
+                        <p>
+                            Notre ambition est de construire un espace où cuisiner est un plaisir partagé —
+                            un endroit où une tartifle savoyarde d'un habitant de Savoie a autant de valeur
+                            qu'un tiramisu inspiré d'un voyage en Italie.
+                        </p>
+                    </div>
+                    <!-- fin section à personnaliser -->
+
+                    <div class="mt-8 flex items-center gap-4">
+                        <a href="recettes.html" class="px-6 py-3 bg-sp-500 text-white rounded-full font-semibold text-sm hover:bg-sp-600 transition-colors">
+                            Voir les recettes
+                        </a>
+                        <a href="inscription.html" class="px-6 py-3 border-2 border-encre text-encre rounded-full font-semibold text-sm hover:bg-encre hover:text-white transition-all">
+                            Rejoindre la communauté
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Stats panel -->
+                <div class="grid grid-cols-2 gap-4" data-aos="fade-left">
+                    <div class="bg-white rounded-3xl p-8 shadow-sm text-center">
+                        <div class="text-5xl font-display font-bold text-sp-500" id="aboutRecipeCount">—</div>
+                        <p class="mt-2 text-sm font-medium text-gray-500 uppercase tracking-wider">Recettes publiées</p>
+                    </div>
+                    <div class="bg-sp-500 rounded-3xl p-8 shadow-sm text-center">
+                        <div class="text-5xl font-display font-bold text-white" id="aboutMemberCount">—</div>
+                        <p class="mt-2 text-sm font-medium text-sp-100 uppercase tracking-wider">Membres actifs</p>
+                    </div>
+                    <div class="bg-or-500 rounded-3xl p-8 shadow-sm text-center">
+                        <div class="text-5xl font-display font-bold text-white" id="aboutRating">4.7</div>
+                        <p class="mt-2 text-sm font-medium text-or-100 uppercase tracking-wider">Note moyenne</p>
+                    </div>
+                    <div class="bg-white rounded-3xl p-8 shadow-sm text-center">
+                        <div class="text-5xl font-display font-bold text-or-500">🆓</div>
+                        <p class="mt-2 text-sm font-medium text-gray-500 uppercase tracking-wider">Entièrement gratuit</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NOS VALEURS -->
+    <section class="py-20 bg-encre text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14" data-aos="fade-up">
+                <span class="font-handwrite text-xl text-or-400">Ce en quoi on croit</span>
+                <h2 class="mt-2 text-4xl font-display font-bold">Nos valeurs</h2>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all" data-aos="fade-up" data-aos-delay="0">
+                    <div class="text-3xl mb-4">🍳</div>
+                    <h3 class="font-display font-semibold text-lg mb-2">Honnêteté</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Les vrais temps de préparation, les vraies difficultés, les vraies photos. Pas de marketing culinaire.</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all" data-aos="fade-up" data-aos-delay="80">
+                    <div class="text-3xl mb-4">🌍</div>
+                    <h3 class="font-display font-semibold text-lg mb-2">Diversité</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Cuisine française, italienne, libanaise, asiatique... Toutes les traditions culinaires méritent d'être partagées.</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all" data-aos="fade-up" data-aos-delay="160">
+                    <div class="text-3xl mb-4">♻️</div>
+                    <h3 class="font-display font-semibold text-lg mb-2">Respect</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Du respect pour les produits, les saisons, et les producteurs. On valorise les recettes anti-gaspi et locales.</p>
+                </div>
+                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all" data-aos="fade-up" data-aos-delay="240">
+                    <div class="text-3xl mb-4">🔓</div>
+                    <h3 class="font-display font-semibold text-lg mb-2">Liberté</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Pas d'abonnement, pas de paywall. Sel &amp; Poivre est et restera gratuit pour tout le monde, pour toujours.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ÉQUIPE / CRÉATEUR -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14" data-aos="fade-up">
+                <span class="font-handwrite text-xl text-sp-500">Derrière le projet</span>
+                <h2 class="mt-2 text-4xl font-display font-bold">L'équipe</h2>
+                <p class="mt-4 text-gray-500 max-w-lg mx-auto">
+                    Sel &amp; Poivre est un projet indépendant, construit avec passion et sans gros budget.
+                    Si tu veux contribuer, on est toujours ouverts.
+                </p>
+            </div>
+
+            <!-- ✏️ À PERSONNALISER — ajoute ta photo / ton nom -->
+            <div class="flex justify-center gap-8 flex-wrap">
+                <div class="text-center" data-aos="fade-up">
+                    <div class="w-28 h-28 rounded-full bg-gradient-to-br from-sp-400 to-sp-600 mx-auto flex items-center justify-center shadow-lg shadow-sp-200">
+                        <i data-lucide="chef-hat" class="w-12 h-12 text-white"></i>
+                    </div>
+                    <h3 class="mt-4 font-display font-bold text-lg">Le fondateur</h3>
+                    <p class="text-sp-500 text-sm font-medium">Fondateur &amp; développeur</p>
+                    <p class="mt-2 text-gray-500 text-sm max-w-xs mx-auto">
+                        Passionné de cuisine et de technologie. A créé Sel &amp; Poivre pour partager des recettes sans fioriture.
+                    </p>
+                </div>
+
+                <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-28 h-28 rounded-full bg-gradient-to-br from-or-400 to-or-600 mx-auto flex items-center justify-center shadow-lg shadow-or-200">
+                        <i data-lucide="users" class="w-12 h-12 text-white"></i>
+                    </div>
+                    <h3 class="mt-4 font-display font-bold text-lg">La communauté</h3>
+                    <p class="text-or-600 text-sm font-medium">Membres contributeurs</p>
+                    <p class="mt-2 text-gray-500 text-sm max-w-xs mx-auto">
+                        Les vrais héros du site. Ce sont leurs recettes, leurs photos et leurs avis qui font vivre Sel &amp; Poivre.
+                    </p>
+                </div>
+            </div>
+            <!-- fin section à personnaliser -->
+        </div>
+    </section>
+
+    <!-- CONTACT / CTA -->
+    <section class="py-20 bg-gradient-to-br from-sp-50 to-or-50">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-aos="fade-up">
+            <span class="font-handwrite text-xl text-sp-500">Une question ? Une idée ?</span>
+            <h2 class="mt-2 text-4xl font-display font-bold">On est à l'écoute</h2>
+            <p class="mt-4 text-gray-600 leading-relaxed">
+                Tu veux nous signaler un bug, proposer une recette, suggérer une fonctionnalité ou juste dire bonjour ?
+                Notre page contact est ouverte.
+            </p>
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="contact.html" class="px-8 py-4 bg-sp-500 text-white rounded-full font-semibold hover:bg-sp-600 transition-all transform hover:-translate-y-0.5 shadow-lg shadow-sp-200">
+                    <i data-lucide="mail" class="w-4 h-4 inline mr-2"></i>
+                    Nous contacter
+                </a>
+                <a href="inscription.html" class="px-8 py-4 bg-white border-2 border-encre text-encre rounded-full font-semibold hover:bg-encre hover:text-white transition-all transform hover:-translate-y-0.5">
+                    Rejoindre Sel &amp; Poivre
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-encre text-white py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <a href="index.html" class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-sp-500 to-sp-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="utensils" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="text-lg font-display font-bold">Sel &amp; Poivre</span>
+                </a>
+                <nav class="flex flex-wrap gap-6 justify-center text-sm text-gray-400">
+                    <a href="recettes.html"   class="hover:text-white transition-colors">Recettes</a>
+                    <a href="communaute.html" class="hover:text-white transition-colors">Communauté</a>
+                    <a href="a-propos.html"   class="hover:text-white transition-colors text-white">À propos</a>
+                    <a href="contact.html"    class="hover:text-white transition-colors">Contact</a>
+                    <a href="cgu.html"        class="hover:text-white transition-colors">CGU</a>
+                    <a href="confidentialite.html" class="hover:text-white transition-colors">Confidentialité</a>
+                </nav>
+                <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/auth-ui.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+    (function() {
+        AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
+        lucide.createIcons();
+
+        // Mobile menu
+        const mb = document.getElementById('mobileMenuBtn');
+        const mm = document.getElementById('mobileMenu');
+        if (mb && mm) mb.addEventListener('click', () => mm.classList.toggle('hidden'));
+
+        // Load live stats
+        fetch('api/stats.php').then(r => r.json()).then(d => {
+            const fmt = n => n > 999 ? (n/1000).toFixed(1)+'k' : n;
+            if (d.recipe_count)  document.getElementById('aboutRecipeCount').textContent = d.recipe_count;
+            if (d.member_count)  document.getElementById('aboutMemberCount').textContent = fmt(d.member_count);
+            if (d.avg_rating)    document.getElementById('aboutRating').textContent = parseFloat(d.avg_rating).toFixed(1);
+        }).catch(() => {});
+    })();
+    </script>
+</body>
+</html>

@@ -487,6 +487,7 @@
                 <div>
                     <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Informations</h4>
                     <ul class="space-y-3">
+                        <li><a href="a-propos.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">À propos</a></li>
                         <li><a href="contact.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Contact</a></li>
                         <li><a href="cgu.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">CGU</a></li>
                         <li><a href="confidentialite.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Confidentialité</a></li>
@@ -546,16 +547,14 @@
             return '';
         }
 
-        function realisticCount(raw, id) {
-            let n = parseInt(raw) || 0;
-            if (n > 30) n = 2 + (Math.abs(parseInt(id) || 0) % 7); // 2..8
-            return n;
+        function realisticCount(raw) {
+            return parseInt(raw) || 0;
         }
 
         function buildCard(r, idx) {
             const img    = r.image_url || '/assets/recipes/_default.jpg';
             const rating = parseFloat(r.rating) || 4.5;
-            const count  = realisticCount(r.rating_count, r.id).toLocaleString('fr-FR');
+            const count  = realisticCount(r.rating_count).toLocaleString('fr-FR');
             const author = r.author_name || 'Sel & Poivre';
             const inits  = author.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
             const color  = colorFor(author);
@@ -662,6 +661,16 @@
                 // Total count
                 const total = data.total || allRecipes.length;
                 document.querySelectorAll('[data-stat="recipeCount"]').forEach(el => { el.textContent = total; });
+
+                // Fetch platform stats (members + avg rating)
+                try {
+                    const sr   = await fetch('api/stats.php');
+                    const stat = await sr.json();
+                    const members = stat.member_count || 0;
+                    const rating  = parseFloat(stat.avg_rating) || 4.5;
+                    document.querySelectorAll('[data-stat="memberCount"]').forEach(el => { el.textContent = members > 999 ? (members/1000).toFixed(1)+'k' : members; });
+                    document.querySelectorAll('[data-stat="rating"]').forEach(el     => { el.textContent = rating.toFixed(1); });
+                } catch {}
             } catch (e) {
                 grid.innerHTML = '';
             }

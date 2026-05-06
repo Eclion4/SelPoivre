@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Pages privées / fonctionnelles — pas d'indexation
+Disallow: /admin/
+Disallow: /api/
+Disallow: /connexion
+Disallow: /inscription
+Disallow: /profil
+Disallow: /publier
+Disallow: /mes-recettes
+Disallow: /seed
+Disallow: /migrate
+
+# Sitemap principal
+Sitemap: https://www.sel-poivre.com/sitemap.xml

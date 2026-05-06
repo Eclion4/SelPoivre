@@ -20,6 +20,17 @@ switch ("$method:$action") {
     default: jsonResponse(['error' => 'Route inconnue'], 404);
 }
 
+/**
+ * Garantit que image_url pointe vers un asset local.
+ * Si l'URL est externe (http...) ou vide, on dérive le chemin depuis le slug.
+ */
+function fixImgUrl(array &$r): void {
+    $img = $r['image_url'] ?? '';
+    if ($img === '' || stripos($img, 'http') === 0) {
+        $r['image_url'] = '/assets/recipes/' . ($r['slug'] ?? '_default') . '.jpg';
+    }
+}
+
 /* ── Toutes les recettes (admin) ─────────────────────────────── */
 function getAllAdmin() {
     requireAdmin();
@@ -46,6 +57,7 @@ function getAllAdmin() {
                        ORDER BY r.created_at DESC");
     $s->execute($params);
     $recipes = $s->fetchAll();
+    foreach ($recipes as &$r) { fixImgUrl($r); }
     jsonResponse(['recipes' => $recipes, 'total' => count($recipes)]);
 }
 
@@ -101,6 +113,7 @@ function getList() {
     $recipes = $s->fetchAll();
 
     foreach ($recipes as &$r) {
+        fixImgUrl($r);
         $r['tags'] = getTags($db, $r['id']);
         $r['is_favorited'] = (bool)($r['is_favorited'] ?? false);
     }
@@ -134,6 +147,7 @@ function getSingle($slug) {
     $s->execute([$slug]);
     $recipe = $s->fetch();
     if (!$recipe) jsonResponse(['error' => 'Recette introuvable'], 404);
+    fixImgUrl($recipe);
 
     // Visibility: published is public; pending/rejected only for admin or owner
     if ($recipe['status'] !== 'published') {
@@ -165,6 +179,7 @@ function getMine() {
     $s->execute([$_SESSION['user_id']]);
     $recipes = $s->fetchAll();
     foreach ($recipes as &$r) {
+        fixImgUrl($r);
         $r['tags'] = getTags($db, $r['id']);
     }
     jsonResponse(['recipes' => $recipes, 'total' => count($recipes)]);

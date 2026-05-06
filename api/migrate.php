@@ -92,6 +92,10 @@ $migrations = [
     'imglocal.crumble'       => "UPDATE recipes SET image_url = '/assets/recipes/crumble-pomme-noisette.jpg' WHERE slug = 'crumble-pomme-noisette'",
     'imglocal.brioche'       => "UPDATE recipes SET image_url = '/assets/recipes/brioche-maison.jpg' WHERE slug = 'brioche-maison'",
     'imglocal.shakshuka'     => "UPDATE recipes SET image_url = '/assets/recipes/shakshuka-israelien.jpg' WHERE slug = 'shakshuka-israelien'",
+
+    // Rattrapage global : toute recette dont l'URL est encore externe ou vide
+    // reçoit automatiquement le chemin local dérivé du slug.
+    'imglocal.fallback'      => "UPDATE recipes SET image_url = CONCAT('/assets/recipes/', slug, '.jpg') WHERE image_url IS NULL OR image_url = '' OR image_url LIKE 'http%'",
 ];
 
 foreach ($migrations as $name => $sql) {

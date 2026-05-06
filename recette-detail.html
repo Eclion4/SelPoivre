@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">Recette — Sel & Poivre</title>
     <meta name="description" id="pageDesc" content="Recette Sel &amp; Poivre">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" id="pageCanonical" href="https://www.sel-poivre.com/recette-detail">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C4311B'/><text y='22' x='16' text-anchor='middle' font-size='18' fill='white'>🍴</text></svg>">
+
+    <!-- Open Graph (mis à jour dynamiquement par JS après chargement de la recette) -->
+    <meta property="og:type"        content="article">
+    <meta property="og:site_name"   content="Sel & Poivre">
+    <meta property="og:locale"      content="fr_FR">
+    <meta id="ogTitle"       property="og:title"       content="Recette — Sel & Poivre">
+    <meta id="ogDescription" property="og:description" content="Recette Sel & Poivre">
+    <meta id="ogImage"       property="og:image"       content="https://www.sel-poivre.com/assets/recipes/_default.jpg">
+    <meta id="ogUrl"         property="og:url"         content="https://www.sel-poivre.com/recette-detail">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"                          content="summary_large_image">
+    <meta id="twTitle"       name="twitter:title"      content="Recette — Sel & Poivre">
+    <meta id="twDescription" name="twitter:description" content="Recette Sel & Poivre">
+    <meta id="twImage"       name="twitter:image"      content="https://www.sel-poivre.com/assets/recipes/_default.jpg">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -288,10 +307,94 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    /* ── SEO helpers ─────────────────────────────────────────── */
+    function absImg(url) {
+        if (!url) return window.location.origin + '/assets/recipes/_default.jpg';
+        return url.startsWith('http') ? url : window.location.origin + url;
+    }
+    function pt(min) { return min ? 'PT' + min + 'M' : undefined; }
+
+    function injectSEO(r) {
+        const base = window.location.origin;
+        const imgUrl = absImg(r.image_url);
+        const pageUrl = base + '/recette-detail?slug=' + encodeURIComponent(r.slug);
+        const title   = r.title + ' — Sel & Poivre';
+        const desc    = r.description || 'Recette Sel & Poivre';
+
+        // <title> + description
+        document.title = title;
+        document.getElementById('pageDesc').setAttribute('content', desc);
+
+        // Canonical
+        const can = document.getElementById('pageCanonical');
+        if (can) can.href = pageUrl;
+
+        // Open Graph
+        document.getElementById('ogTitle').content       = title;
+        document.getElementById('ogDescription').content = desc;
+        document.getElementById('ogImage').content       = imgUrl;
+        document.getElementById('ogUrl').content         = pageUrl;
+
+        // Twitter
+        document.getElementById('twTitle').content       = title;
+        document.getElementById('twDescription').content = desc;
+        document.getElementById('twImage').content       = imgUrl;
+
+        // JSON-LD Recipe (Schema.org)
+        const old = document.getElementById('jsonld-recipe');
+        if (old) old.remove();
+
+        const ingredients = (r.ingredients || []).map(i =>
+            [i.amount, i.unit, i.name].filter(Boolean).join(' ')
+        );
+        const steps = (r.steps || []).map((s, idx) => ({
+            '@type': 'HowToStep',
+            position: idx + 1,
+            text: typeof s === 'string' ? s : (s.description || '')
+        }));
+
+        const schema = {
+            '@context': 'https://schema.org',
+            '@type':    'Recipe',
+            name:        r.title,
+            description: r.description || '',
+            image:       [imgUrl],
+            author: {
+                '@type': r.author_id ? 'Person' : 'Organization',
+                name:    r.author_name || 'Sel & Poivre'
+            },
+            datePublished:     r.created_at ? r.created_at.slice(0, 10) : undefined,
+            recipeCategory:    r.category   || '',
+            recipeCuisine:     'Française',
+            recipeYield:       (r.servings || 4) + ' personnes',
+            recipeIngredient:  ingredients,
+            recipeInstructions: steps,
+        };
+        if (r.prep_time)  schema.prepTime  = pt(r.prep_time);
+        if (r.cook_time)  schema.cookTime  = pt(r.cook_time);
+        if (r.total_time) schema.totalTime = pt(r.total_time);
+        if (r.rating && parseFloat(r.rating) > 0) {
+            schema.aggregateRating = {
+                '@type':      'AggregateRating',
+                ratingValue:  parseFloat(r.rating).toFixed(1),
+                ratingCount:  Math.max(1, parseInt(r.rating_count) || 1),
+                bestRating:   '5',
+                worstRating:  '1'
+            };
+        }
+        // Strip undefined
+        Object.keys(schema).forEach(k => { if (schema[k] === undefined) delete schema[k]; });
+
+        const tag = document.createElement('script');
+        tag.id = 'jsonld-recipe';
+        tag.type = 'application/ld+json';
+        tag.textContent = JSON.stringify(schema);
+        document.head.appendChild(tag);
+    }
+
     function renderRecipe(r) {
         currentRecipe = r;
-        document.title = r.title + ' — Sel & Poivre';
-        document.getElementById('pageDesc').setAttribute('content', r.description || 'Recette Sel & Poivre');
+        injectSEO(r);
 
         // Status banner (only if not published)
         const banner = document.getElementById('statusBanner');

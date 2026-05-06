@@ -141,11 +141,26 @@
                         </div>
                     </div>
                     <div>
-                        <label class="field-label">URL de l'image</label>
-                        <input id="image_url" type="url" class="field-input" placeholder="https://images.unsplash.com/...">
-                        <p class="text-xs text-gray-400 mt-1">Conseil : Unsplash, Pexels ou votre propre hébergement.</p>
-                        <div id="imagePreview" class="hidden mt-3 rounded-xl overflow-hidden border border-gray-200 max-w-sm">
+                        <label class="field-label">Photo du plat</label>
+                        <input type="hidden" id="image_url">
+                        <div id="imageDropzone" class="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-sp-400 hover:bg-sp-50/30 transition-colors">
+                            <input type="file" id="imageFile" accept="image/jpeg,image/png,image/webp,image/gif" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <i data-lucide="image-plus" class="w-10 h-10 text-gray-400 mx-auto mb-2"></i>
+                            <p class="text-sm text-gray-600 font-medium">Cliquez pour choisir une photo</p>
+                            <p class="text-xs text-gray-400 mt-1">JPG, PNG, WebP ou GIF · 5 Mo max</p>
+                        </div>
+                        <div id="imageUploadProgress" class="hidden mt-3 text-sm text-gray-500">
+                            <span class="inline-flex items-center gap-2">
+                                <svg class="animate-spin w-4 h-4 text-sp-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                                Envoi en cours…
+                            </span>
+                        </div>
+                        <div id="imageUploadError" class="hidden mt-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm"></div>
+                        <div id="imagePreview" class="hidden mt-3 relative rounded-xl overflow-hidden border border-gray-200 max-w-sm">
                             <img id="imagePreviewImg" src="" alt="Aperçu" class="w-full h-48 object-cover">
+                            <button type="button" id="removeImageBtn" class="absolute top-2 right-2 w-8 h-8 bg-white/95 rounded-full flex items-center justify-center text-gray-700 hover:bg-red-500 hover:text-white transition-colors shadow" aria-label="Retirer">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -278,17 +293,74 @@
             if (e.key === 'Enter') { e.preventDefault(); addTagFromInput(); }
         });
 
-        // ── Image preview ──────────────────────────────────────────────
-        document.getElementById('image_url').addEventListener('input', function () {
-            const v = this.value.trim();
-            const wrap = document.getElementById('imagePreview');
-            const img  = document.getElementById('imagePreviewImg');
-            if (v && /^https?:\/\//i.test(v)) {
-                img.src = v;
-                wrap.classList.remove('hidden');
-            } else {
-                wrap.classList.add('hidden');
+        // ── Image upload ───────────────────────────────────────────────
+        const imageInput   = document.getElementById('imageFile');
+        const imageHidden  = document.getElementById('image_url');
+        const dropzone     = document.getElementById('imageDropzone');
+        const previewWrap  = document.getElementById('imagePreview');
+        const previewImg   = document.getElementById('imagePreviewImg');
+        const progressBox  = document.getElementById('imageUploadProgress');
+        const errorBox     = document.getElementById('imageUploadError');
+        const removeBtn    = document.getElementById('removeImageBtn');
+
+        function showUploadError(msg) {
+            errorBox.textContent = msg;
+            errorBox.classList.remove('hidden');
+        }
+
+        async function uploadImage(file) {
+            errorBox.classList.add('hidden');
+            if (!file.type.startsWith('image/')) { showUploadError('Le fichier doit être une image.'); return; }
+            if (file.size > 5 * 1024 * 1024)    { showUploadError('Image trop lourde (5 Mo max).'); return; }
+
+            // Local preview while uploading
+            const localUrl = URL.createObjectURL(file);
+            previewImg.src = localUrl;
+            previewWrap.classList.remove('hidden');
+            dropzone.classList.add('hidden');
+            progressBox.classList.remove('hidden');
+
+            try {
+                const fd = new FormData();
+                fd.append('image', file);
+                const res = await fetch(window.SP.apiPath('upload.php'), {
+                    method: 'POST', credentials: 'include', body: fd,
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || 'Échec de l\'upload');
+                imageHidden.value = data.url;
+                progressBox.classList.add('hidden');
+            } catch (e) {
+                progressBox.classList.add('hidden');
+                clearImage();
+                showUploadError(e.message);
             }
+        }
+
+        function clearImage() {
+            imageInput.value = '';
+            imageHidden.value = '';
+            previewImg.src = '';
+            previewWrap.classList.add('hidden');
+            dropzone.classList.remove('hidden');
+        }
+
+        imageInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) uploadImage(this.files[0]);
+        });
+
+        removeBtn.addEventListener('click', clearImage);
+
+        // Drag & drop
+        ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e => {
+            e.preventDefault(); dropzone.classList.add('border-sp-500','bg-sp-50/50');
+        }));
+        ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => {
+            e.preventDefault(); dropzone.classList.remove('border-sp-500','bg-sp-50/50');
+        }));
+        dropzone.addEventListener('drop', e => {
+            const f = e.dataTransfer.files && e.dataTransfer.files[0];
+            if (f) uploadImage(f);
         });
 
         // ── Auto total_time ────────────────────────────────────────────
@@ -405,8 +477,12 @@
                     document.getElementById('total_time').value  = data.total_time ?? 0;
                     document.getElementById('total_time').dataset.userEdited = '1';
                     document.getElementById('servings').value    = data.servings   ?? 4;
-                    document.getElementById('image_url').value   = data.image_url  || '';
-                    if (data.image_url) document.getElementById('image_url').dispatchEvent(new Event('input'));
+                    if (data.image_url) {
+                        imageHidden.value = data.image_url;
+                        previewImg.src    = data.image_url;
+                        previewWrap.classList.remove('hidden');
+                        dropzone.classList.add('hidden');
+                    }
                     (data.ingredients || []).forEach(i => addIngredient(i.name, i.amount, i.unit));
                     (data.steps || []).forEach(s => addStep(typeof s === 'string' ? s : (s.description || '')));
                     (data.tags || []).forEach(t => tags.add(t));

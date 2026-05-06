@@ -80,7 +80,6 @@
                 <div class="hidden md:flex items-center gap-8">
                     <a href="index.html" class="nav-link active font-medium text-sm tracking-wide uppercase">Accueil</a>
                     <a href="recettes.html" class="nav-link font-medium text-sm tracking-wide uppercase">Recettes</a>
-                    <a href="recette-detail.html" class="nav-link font-medium text-sm tracking-wide uppercase">Découvrir</a>
                     <a href="#communaute" class="nav-link font-medium text-sm tracking-wide uppercase">Communauté</a>
                 </div>
 
@@ -129,7 +128,6 @@
             <div class="px-4 py-6 space-y-4">
                 <a href="index.html" class="block py-3 px-4 rounded-xl bg-sp-50 text-sp-700 font-medium">Accueil</a>
                 <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
-                <a href="recette-detail.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Découvrir</a>
                 <a href="#communaute" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Communauté</a>
                 <div class="pt-4 border-t border-gray-100">
                     <a href="connexion.html" class="block w-full text-center px-5 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Connexion</a>
@@ -153,13 +151,6 @@
 
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
             <div class="max-w-2xl">
-                <div data-aos="fade-up" data-aos-delay="100">
-                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white/90 text-sm border border-white/20 mb-6">
-                        <span class="w-2 h-2 bg-or-400 rounded-full animate-pulse"></span>
-                        <span data-stat="recipeCount">—</span> recettes disponibles · Accès gratuit
-                    </span>
-                </div>
-
                 <h1 data-aos="fade-up" data-aos-delay="200" class="text-5xl sm:text-6xl lg:text-7xl font-display font-bold text-white leading-tight">
                     Cuisinez,
                     <span class="block text-transparent bg-clip-text bg-gradient-to-r from-sp-300 to-sp-500">Partagez,</span>
@@ -208,80 +199,6 @@
         </div>
     </section>
 
-    <!-- ========== CATEGORIES ========== -->
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-14" data-aos="fade-up">
-                <span class="font-handwrite text-2xl text-sp-500">Explorez</span>
-                <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2">Par catégorie</h2>
-                <p class="mt-2 text-sm text-gray-400"><span data-stat="recipeCount">—</span> recettes disponibles</p>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                <a href="recettes.html?category=entrees" class="category-card group" data-aos="fade-up" data-aos-delay="0">
-                    <div class="relative overflow-hidden rounded-2xl aspect-square">
-                        <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80" alt="Entrées" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-4">
-                            <span class="text-white font-semibold text-lg">Entrées</span>
-                            <span class="block text-white/70 text-sm" data-cat="entrees">—</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="recettes.html?category=plats" class="category-card group" data-aos="fade-up" data-aos-delay="50">
-                    <div class="relative overflow-hidden rounded-2xl aspect-square">
-                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80" alt="Plats" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-4">
-                            <span class="text-white font-semibold text-lg">Plats</span>
-                            <span class="block text-white/70 text-sm" data-cat="plats">—</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="recettes.html?category=desserts" class="category-card group" data-aos="fade-up" data-aos-delay="100">
-                    <div class="relative overflow-hidden rounded-2xl aspect-square">
-                        <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&q=80" alt="Desserts" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-4">
-                            <span class="text-white font-semibold text-lg">Desserts</span>
-                            <span class="block text-white/70 text-sm" data-cat="desserts">—</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="recettes.html?category=apero" class="category-card group" data-aos="fade-up" data-aos-delay="150">
-                    <div class="relative overflow-hidden rounded-2xl aspect-square">
-                        <img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&q=80" alt="Apéro" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-4">
-                            <span class="text-white font-semibold text-lg">Apéro</span>
-                            <span class="block text-white/70 text-sm" data-cat="apero">—</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="recettes.html?category=boissons" class="category-card group" data-aos="fade-up" data-aos-delay="200">
-                    <div class="relative overflow-hidden rounded-2xl aspect-square">
-                        <img src="https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=400&q=80" alt="Boissons" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-4">
-                            <span class="text-white font-semibold text-lg">Boissons</span>
-                            <span class="block text-white/70 text-sm" data-cat="boissons">—</span>
-                        </div>
-                    </div>
-                </a>
-                <a href="recettes.html?category=boulangerie" class="category-card group" data-aos="fade-up" data-aos-delay="250">
-                    <div class="relative overflow-hidden rounded-2xl aspect-square">
-                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80" alt="Boulangerie" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-4">
-                            <span class="text-white font-semibold text-lg">Boulangerie</span>
-                            <span class="block text-white/70 text-sm" data-cat="boulangerie">—</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </section>
-
     <!-- ========== TRENDING RECIPES ========== -->
     <section class="py-20 bg-ivoire">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -327,7 +244,7 @@
                     </div>
                     <div class="font-handwrite text-5xl text-white/30 mb-2">01</div>
                     <h3 class="text-xl font-bold text-white mb-3">Trouvez l'inspiration</h3>
-                    <p class="text-white/70">Parcourez des milliers de recettes par catégorie, ingrédient ou envie du moment.</p>
+                    <p class="text-white/70">Parcourez nos recettes par catégorie, ingrédient ou envie du moment.</p>
                 </div>
                 <div class="text-center" data-aos="fade-up" data-aos-delay="150">
                     <div class="w-20 h-20 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 transform hover:rotate-6 transition-transform">
@@ -354,20 +271,20 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <div data-aos="fade-right">
-                    <span class="font-handwrite text-2xl text-or-600">Sélection de saison</span>
-                    <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2">Les saveurs du printemps</h2>
+                    <span class="font-handwrite text-2xl text-or-600">Saveurs &amp; saison</span>
+                    <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2">Cuisinez avec ce qu'il y a de mieux</h2>
                     <p class="mt-6 text-gray-600 text-lg leading-relaxed">
-                        Asperges croquantes, fraises parfumées, petits pois fondants... Le printemps regorge de trésors. Découvrez notre sélection de recettes qui célèbrent la saison.
+                        Tomates juteuses, herbes fraîches, légumes croquants... Les meilleures recettes commencent par les meilleurs produits. Inspirez-vous de notre sélection.
                     </p>
                     <div class="mt-8 flex flex-wrap gap-3">
-                        <span class="px-4 py-2 bg-or-50 text-or-700 rounded-full text-sm font-medium border border-or-200">Asperges</span>
-                        <span class="px-4 py-2 bg-red-50 text-red-700 rounded-full text-sm font-medium border border-red-200">Fraises</span>
-                        <span class="px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-200">Petits pois</span>
-                        <span class="px-4 py-2 bg-purple-50 text-purple-700 rounded-full text-sm font-medium border border-purple-200">Artichaut</span>
-                        <span class="px-4 py-2 bg-yellow-50 text-yellow-700 rounded-full text-sm font-medium border border-yellow-200">Radis</span>
+                        <a href="recettes.html?search=légumes" class="px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-200 hover:bg-green-100 transition-colors">Légumes</a>
+                        <a href="recettes.html?search=poisson" class="px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200 hover:bg-blue-100 transition-colors">Poisson</a>
+                        <a href="recettes.html?search=fromage" class="px-4 py-2 bg-yellow-50 text-yellow-700 rounded-full text-sm font-medium border border-yellow-200 hover:bg-yellow-100 transition-colors">Fromage</a>
+                        <a href="recettes.html?search=chocolat" class="px-4 py-2 bg-amber-50 text-amber-800 rounded-full text-sm font-medium border border-amber-200 hover:bg-amber-100 transition-colors">Chocolat</a>
+                        <a href="recettes.html?search=pâtes" class="px-4 py-2 bg-or-50 text-or-700 rounded-full text-sm font-medium border border-or-200 hover:bg-or-100 transition-colors">Pâtes</a>
                     </div>
                     <a href="recettes.html" class="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-or-600 text-white rounded-full font-semibold hover:bg-or-700 transform hover:-translate-y-0.5 transition-all duration-300">
-                        Voir la sélection
+                        Toutes les recettes
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </a>
                 </div>
@@ -416,102 +333,8 @@
             </div>
 
             <div class="swiper quickRecipesSwiper">
-                <div class="swiper-wrapper pb-4">
-                    <!-- Slide 1 -->
-                    <div class="swiper-slide">
-                        <a href="recette-detail.html" class="block group">
-                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
-                                <div class="relative aspect-video overflow-hidden">
-                                    <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80" alt="Salade Caesar" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">15 min</span>
-                                </div>
-                                <div class="p-4">
-                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Salade César express</h3>
-                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 320 kcal
-                                        <span class="mx-1">·</span>
-                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 2 pers.
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <!-- Slide 2 -->
-                    <div class="swiper-slide">
-                        <a href="recette-detail.html" class="block group">
-                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
-                                <div class="relative aspect-video overflow-hidden">
-                                    <img src="https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=500&q=80" alt="Pâtes carbonara" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">20 min</span>
-                                </div>
-                                <div class="p-4">
-                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Carbonara authentique</h3>
-                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 580 kcal
-                                        <span class="mx-1">·</span>
-                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 4 pers.
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <!-- Slide 3 -->
-                    <div class="swiper-slide">
-                        <a href="recette-detail.html" class="block group">
-                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
-                                <div class="relative aspect-video overflow-hidden">
-                                    <img src="https://images.unsplash.com/photo-1432139509613-5c4255a1d197?w=500&q=80" alt="Tartine avocat" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">10 min</span>
-                                </div>
-                                <div class="p-4">
-                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Tartines avocat & oeuf</h3>
-                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 280 kcal
-                                        <span class="mx-1">·</span>
-                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 1 pers.
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <!-- Slide 4 -->
-                    <div class="swiper-slide">
-                        <a href="recette-detail.html" class="block group">
-                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
-                                <div class="relative aspect-video overflow-hidden">
-                                    <img src="https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=500&q=80" alt="Wrap poulet" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">15 min</span>
-                                </div>
-                                <div class="p-4">
-                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Wrap poulet grillé</h3>
-                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 420 kcal
-                                        <span class="mx-1">·</span>
-                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 2 pers.
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <!-- Slide 5 -->
-                    <div class="swiper-slide">
-                        <a href="recette-detail.html" class="block group">
-                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
-                                <div class="relative aspect-video overflow-hidden">
-                                    <img src="https://images.unsplash.com/photo-1525351484163-7529414344d8?w=500&q=80" alt="Smoothie bowl" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">5 min</span>
-                                </div>
-                                <div class="p-4">
-                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Smoothie bowl tropical</h3>
-                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 210 kcal
-                                        <span class="mx-1">·</span>
-                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 1 pers.
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                <div class="swiper-wrapper pb-4" id="quickRecipesWrapper">
+                    <!-- Filled by JS — recettes ≤ 20 min depuis l'API -->
                 </div>
             </div>
         </div>
@@ -585,13 +408,13 @@
                         <h2 class="text-3xl sm:text-4xl font-display font-bold mt-2">Les recettes de la semaine dans votre boîte mail</h2>
                         <p class="mt-4 text-gray-600">Recevez chaque vendredi une sélection de recettes de saison, les coups de coeur de la communauté et des astuces de chef.</p>
                     </div>
-                    <form class="mt-8 flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-                        <input type="email" placeholder="votre@email.com" class="flex-1 px-6 py-4 rounded-full bg-white border border-sp-200 focus:outline-none focus:ring-2 focus:ring-sp-500 text-sm">
+                    <form id="newsletterForm" class="mt-8 flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                        <input id="newsletterEmail" type="email" required placeholder="votre@email.com" class="flex-1 px-6 py-4 rounded-full bg-white border border-sp-200 focus:outline-none focus:ring-2 focus:ring-sp-500 text-sm">
                         <button type="submit" class="px-8 py-4 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all duration-300 whitespace-nowrap">
                             S'abonner
                         </button>
                     </form>
-                    <p class="mt-4 text-center text-xs text-gray-400">Pas de spam. Désabonnement en un clic.</p>
+                    <p id="newsletterMsg" class="mt-4 text-center text-xs text-gray-400">Pas de spam. Désabonnement en un clic.</p>
                 </div>
             </div>
         </div>
@@ -614,10 +437,10 @@
                     <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Explorer</h4>
                     <ul class="space-y-3">
                         <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Toutes les recettes</a></li>
-                        <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Recettes rapides</a></li>
-                        <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Recettes végétariennes</a></li>
-                        <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Recettes du monde</a></li>
-                        <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Nouveautés</a></li>
+                        <li><a href="recettes.html?category=plats" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Plats principaux</a></li>
+                        <li><a href="recettes.html?category=desserts" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Desserts</a></li>
+                        <li><a href="recettes.html?search=végétarien" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Végétariennes</a></li>
+                        <li><a href="recettes.html?category=apero" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Apéro</a></li>
                     </ul>
                 </div>
                 <div>
@@ -738,31 +561,92 @@
 </a>`;
         }
 
+        function quickCard(r) {
+            const img  = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=500';
+            const time = r.total_time ? (r.total_time < 60 ? r.total_time + ' min' : Math.floor(r.total_time/60) + 'h' + (r.total_time%60 ? String(r.total_time%60).padStart(2,'0') : '')) : '—';
+            return `
+            <div class="swiper-slide">
+                <a href="recette-detail.html?slug=${r.slug}" class="block group">
+                    <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                        <div class="relative aspect-video overflow-hidden">
+                            <img src="${img}" alt="${r.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
+                            <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">${time}</span>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors line-clamp-1">${r.title}</h3>
+                            <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                                <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> ${r.servings || 4} pers.
+                                <span class="mx-1">·</span>
+                                <span class="capitalize">${r.difficulty || 'Facile'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>`;
+        }
+
         document.addEventListener('DOMContentLoaded', async function () {
             const grid = document.getElementById('trendingGrid');
             try {
                 const res  = await fetch('api/recipes.php?action=list&sort=recentes');
                 const data = await res.json();
-                const recipes = (data.recipes || []).slice(0, 6);
-                if (recipes.length === 0) {
+                const allRecipes = data.recipes || [];
+
+                // Trending: first 6
+                const trending = allRecipes.slice(0, 6);
+                if (trending.length === 0) {
                     grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10">Aucune recette disponible.</p>';
-                    return;
+                } else {
+                    grid.innerHTML = trending.map((r, i) => buildCard(r, i)).join('');
+                    if (window.AOS) AOS.refreshHard();
                 }
-                grid.innerHTML = recipes.map((r, i) => buildCard(r, i)).join('');
-                if (window.AOS) AOS.refreshHard();
-                // Update total count directly from API (bypasses DOM card count)
-                const total = data.total || (data.recipes || []).length;
+
+                // Quick recipes (≤ 20 min): up to 8
+                const quick = allRecipes.filter(r => r.total_time > 0 && r.total_time <= 20).slice(0, 8);
+                const wrapper = document.getElementById('quickRecipesWrapper');
+                if (wrapper) {
+                    if (quick.length === 0) {
+                        // Pas de recette rapide → on cache la section pour pas afficher du vide
+                        wrapper.closest('section')?.classList.add('hidden');
+                    } else {
+                        wrapper.innerHTML = quick.map(quickCard).join('');
+                        if (window.lucide) lucide.createIcons();
+                        // Re-init Swiper to pick up new slides
+                        setTimeout(() => {
+                            const sw = document.querySelector('.quickRecipesSwiper');
+                            if (sw && sw.swiper) sw.swiper.update();
+                            else if (typeof initQuickRecipesSwiper === 'function') initQuickRecipesSwiper();
+                        }, 50);
+                    }
+                }
+
+                // Total count
+                const total = data.total || allRecipes.length;
                 document.querySelectorAll('[data-stat="recipeCount"]').forEach(el => { el.textContent = total; });
-                // Update category subcounts
-                const catCounts = {};
-                (data.recipes || []).forEach(r => { catCounts[r.category] = (catCounts[r.category] || 0) + 1; });
-                document.querySelectorAll('[data-cat]').forEach(el => {
-                    const n = catCounts[el.dataset.cat] || 0;
-                    el.textContent = n + ' recette' + (n !== 1 ? 's' : '');
-                });
             } catch (e) {
                 grid.innerHTML = '';
             }
+        });
+
+        // ── Newsletter form ────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('newsletterForm');
+            const msg  = document.getElementById('newsletterMsg');
+            if (!form) return;
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const email = document.getElementById('newsletterEmail').value.trim();
+                if (!email) return;
+                // Stockage local — implémentation backend à venir
+                try {
+                    const list = JSON.parse(localStorage.getItem('sp_newsletter') || '[]');
+                    if (!list.includes(email)) list.push(email);
+                    localStorage.setItem('sp_newsletter', JSON.stringify(list));
+                } catch {}
+                form.reset();
+                msg.textContent = 'Merci ! Vous recevrez notre prochaine sélection.';
+                msg.className = 'mt-4 text-center text-sm text-green-600 font-medium';
+            });
         });
     })();
     </script>

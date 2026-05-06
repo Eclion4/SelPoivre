@@ -110,39 +110,55 @@
 </div>`.trim();
     }
 
-    function applyMenu(user) {
-        document.querySelectorAll('a[href$="connexion.html"], a[href$="connexion.html#"]').forEach(btn => {
-            const text = btn.textContent.trim();
-
-            // Icon-only "Connexion" links (heart, etc) → re-route to favorites
-            if (!text || text.length < 3) {
-                btn.setAttribute('href', pagePath('profil.html') + '#favoris');
-                btn.removeAttribute('title');
-                btn.title = 'Mes favoris';
-                return;
-            }
-
-            // Text-bearing "Connexion" buttons → replace with user menu
-            const isMobile = btn.classList.contains('block');
-            const wrapper = document.createElement('template');
-            wrapper.innerHTML = isMobile ? buildMobileMenu(user) : buildDesktopMenu(user);
-            const newEl = wrapper.content.firstElementChild;
-            btn.parentNode.replaceChild(newEl, btn);
-
-            if (!isMobile) {
-                const trigger  = newEl.querySelector('.js-sp-trigger');
-                const dropdown = newEl.querySelector('.js-sp-dropdown');
-                trigger.addEventListener('click', e => {
-                    e.stopPropagation();
-                    dropdown.classList.toggle('hidden');
-                });
-                document.addEventListener('click', e => {
-                    if (!newEl.contains(e.target)) dropdown.classList.add('hidden');
-                });
-            }
-            newEl.querySelectorAll('.js-sp-logout').forEach(b => {
-                b.addEventListener('click', () => window.SP.logout());
+    function wireDropdown(newEl) {
+        const trigger  = newEl.querySelector('.js-sp-trigger');
+        const dropdown = newEl.querySelector('.js-sp-dropdown');
+        if (trigger && dropdown) {
+            trigger.addEventListener('click', e => {
+                e.stopPropagation();
+                dropdown.classList.toggle('hidden');
             });
+            document.addEventListener('click', e => {
+                if (!newEl.contains(e.target)) dropdown.classList.add('hidden');
+            });
+        }
+        newEl.querySelectorAll('.js-sp-logout').forEach(b => {
+            b.addEventListener('click', () => window.SP.logout());
+        });
+    }
+
+    function injectHTML(html) {
+        const wrapper = document.createElement('template');
+        wrapper.innerHTML = html;
+        return wrapper.content.firstElementChild;
+    }
+
+    function applyMenu(user) {
+        // 1. Mobile menu: the connexion link inside #mobileMenu (only one)
+        const mobileLink = document.querySelector('#mobileMenu a[href$="connexion.html"]');
+        if (mobileLink) {
+            const newEl = injectHTML(buildMobileMenu(user));
+            mobileLink.parentNode.replaceChild(newEl, mobileLink);
+            wireDropdown(newEl);
+        }
+
+        // 2. Desktop button: connexion link in nav with text "Connexion" and gradient style
+        const desktopLink = [...document.querySelectorAll('nav a[href$="connexion.html"]')].find(a =>
+            !a.closest('#mobileMenu') && /connexion/i.test(a.textContent)
+        );
+        if (desktopLink) {
+            const newEl = injectHTML(buildDesktopMenu(user));
+            desktopLink.parentNode.replaceChild(newEl, desktopLink);
+            wireDropdown(newEl);
+        }
+
+        // 3. Any remaining icon-only connexion link (e.g. heart) → re-route to favorites
+        document.querySelectorAll('a[href$="connexion.html"], a[href$="connexion.html#"]').forEach(a => {
+            // Skip if it's clearly textual "Connexion" (already handled above; would be a non-nav case)
+            if (/connexion/i.test(a.textContent)) return;
+            a.setAttribute('href', pagePath('profil.html') + '#favoris');
+            a.removeAttribute('title');
+            a.title = 'Mes favoris';
         });
     }
 

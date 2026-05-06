@@ -102,6 +102,13 @@
 <!-- ===== CONTENT ===== -->
 <main id="recipeContent" class="hidden">
 
+    <!-- Status banner (only when status !== 'published') -->
+    <div id="statusBanner" class="hidden pt-24">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="statusBannerInner" class="flex items-center gap-3 px-5 py-3 rounded-xl border"></div>
+        </div>
+    </div>
+
     <!-- HERO -->
     <section class="pt-24 pb-12 bg-gradient-to-b from-sp-50 to-ivoire">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -286,6 +293,22 @@
         document.title = r.title + ' — Sel & Poivre';
         document.getElementById('pageDesc').setAttribute('content', r.description || 'Recette Sel & Poivre');
 
+        // Status banner (only if not published)
+        const banner = document.getElementById('statusBanner');
+        const bannerInner = document.getElementById('statusBannerInner');
+        const heroSection = document.querySelector('main section.pt-24');
+        if (r.status === 'pending') {
+            banner.classList.remove('hidden');
+            bannerInner.className = 'flex items-center gap-3 px-5 py-3 rounded-xl border bg-amber-50 border-amber-200 text-amber-800';
+            bannerInner.innerHTML = '<i data-lucide="clock" class="w-5 h-5 flex-shrink-0"></i><div class="text-sm"><strong>Recette en attente de validation.</strong> Elle n\'est pas visible publiquement tant qu\'un administrateur ne l\'a pas approuvée.</div>';
+            if (heroSection) { heroSection.classList.remove('pt-24'); heroSection.classList.add('pt-6'); }
+        } else if (r.status === 'rejected') {
+            banner.classList.remove('hidden');
+            bannerInner.className = 'flex items-center gap-3 px-5 py-3 rounded-xl border bg-red-50 border-red-200 text-red-800';
+            bannerInner.innerHTML = '<i data-lucide="x-circle" class="w-5 h-5 flex-shrink-0"></i><div class="text-sm"><strong>Recette refusée.</strong> Elle n\'est pas publiée. Vous pouvez la modifier puis la resoumettre.</div>';
+            if (heroSection) { heroSection.classList.remove('pt-24'); heroSection.classList.add('pt-6'); }
+        }
+
         // Hero
         document.getElementById('heroTitle').textContent = r.title;
         document.getElementById('heroDesc').textContent  = r.description || '';
@@ -319,7 +342,9 @@
         const u = window.SP && window.SP.user;
         if (u && (u.role === 'admin' || u.id == r.author_id)) {
             const link = document.getElementById('editLink');
-            link.href = 'publier.html?slug=' + encodeURIComponent(r.slug);
+            // Preserve admin context if coming from admin panel
+            const fromAdmin = /\/admin\//.test(document.referrer || '');
+            link.href = 'publier.html?slug=' + encodeURIComponent(r.slug) + (fromAdmin ? '&from=admin' : '');
             link.classList.remove('hidden');
         }
 
@@ -350,6 +375,93 @@
         if (window.lucide) lucide.createIcons();
     }
 
+    /* ── Ingredient emoji DB + countable detection ───────────── */
+    // Each entry: regex (matched against ingredient name) → { e: emoji, c: countable? }
+    const INGREDIENT_DB = [
+        // Œufs / volaille / viandes
+        { r: /\b(oeuf|œuf|jaune|blanc d['’]oeuf)/i, e: '🥚', c: true },
+        { r: /\bpoulet\b|\bcuisse\b|\bblanc de volaille|coq\b/i, e: '🍗' },
+        { r: /\bbœuf|\bboeuf|\bsteak|\bbavette|\bfaux-filet/i, e: '🥩' },
+        { r: /\bporc|saucisse|chorizo|jambon|lardon|guanciale|pancetta|bacon/i, e: '🥓' },
+        { r: /\bagneau|\bmouton|gigot/i, e: '🥩' },
+        { r: /\bcanard|magret/i, e: '🦆' },
+        // Poissons / fruits de mer
+        { r: /saumon|truite|cabillaud|colin|merlu|bar\b|dorade|maquereau|sardine|thon|poisson/i, e: '🐟' },
+        { r: /crevette|gambas|langoustine/i, e: '🦐' },
+        { r: /moule|huître|coquille saint|coquillage/i, e: '🦪' },
+        { r: /calamar|poulpe|seiche|encornet/i, e: '🦑' },
+        // Légumes
+        { r: /tomate cerise/i, e: '🍅' },
+        { r: /\btomate\b/i, e: '🍅', c: true },
+        { r: /carotte/i, e: '🥕', c: true },
+        { r: /pomme de terre|patate/i, e: '🥔', c: true },
+        { r: /\boignon\b|\béchalote/i, e: '🧅', c: true },
+        { r: /gousse|ail\b/i, e: '🧄', c: true },
+        { r: /poivron/i, e: '🫑', c: true },
+        { r: /aubergine/i, e: '🍆', c: true },
+        { r: /courgette/i, e: '🥒', c: true },
+        { r: /concombre/i, e: '🥒', c: true },
+        { r: /maïs|mais\b/i, e: '🌽' },
+        { r: /piment/i, e: '🌶️' },
+        { r: /champignon|cèpe|girolle|pleurote/i, e: '🍄' },
+        { r: /épinard|epinard|salade|laitue|roquette|mâche|mache|cresson/i, e: '🥬' },
+        { r: /chou\b|broccoli|brocoli/i, e: '🥦' },
+        { r: /asperge/i, e: '🌱' },
+        { r: /haricot|petit pois|pois chiche|lentille/i, e: '🫘' },
+        { r: /artichaut|fenouil|poireau|céleri|celeri|navet/i, e: '🥗' },
+        // Fruits
+        { r: /pomme\b/i, e: '🍎', c: true },
+        { r: /poire/i, e: '🍐', c: true },
+        { r: /banane/i, e: '🍌', c: true },
+        { r: /orange/i, e: '🍊', c: true },
+        { r: /citron/i, e: '🍋', c: true },
+        { r: /fraise/i, e: '🍓' },
+        { r: /framboise|myrtille|cassis|groseille|mûre|mure/i, e: '🫐' },
+        { r: /raisin/i, e: '🍇' },
+        { r: /pêche|peche\b|nectarine|abricot/i, e: '🍑' },
+        { r: /cerise/i, e: '🍒' },
+        { r: /ananas/i, e: '🍍' },
+        { r: /mangue/i, e: '🥭' },
+        { r: /avocat/i, e: '🥑', c: true },
+        { r: /pastèque|pasteque|melon/i, e: '🍉' },
+        { r: /noix de coco|coco/i, e: '🥥' },
+        // Féculents / boulange
+        { r: /baguette|pain\b|brioche|bagel/i, e: '🥖', c: true },
+        { r: /pâte\b|pates\b|spaghetti|tagliatelle|penne|fusilli|nouille/i, e: '🍝' },
+        { r: /\briz\b|\briso/i, e: '🍚' },
+        { r: /farine|semoule|polenta|boulgour|quinoa/i, e: '🌾' },
+        // Crémerie
+        { r: /lait\b/i, e: '🥛' },
+        { r: /yaourt|fromage blanc|skyr/i, e: '🥛' },
+        { r: /crème|creme/i, e: '🥛' },
+        { r: /beurre/i, e: '🧈' },
+        { r: /mozzarell|parmesan|gruyère|gruyere|comté|comte|cheddar|reblochon|chèvre|chevre|fromage/i, e: '🧀' },
+        // Sucré / pâtisserie
+        { r: /chocolat|cacao/i, e: '🍫' },
+        { r: /miel/i, e: '🍯' },
+        { r: /sucre/i, e: '🍬' },
+        { r: /vanille/i, e: '🍦' },
+        // Sec / épices / huile
+        { r: /\bsel\b|fleur de sel/i, e: '🧂' },
+        { r: /poivre/i, e: '⚫' },
+        { r: /huile/i, e: '🫒' },
+        { r: /olive/i, e: '🫒' },
+        { r: /amande|noisette|noix\b|pistache|pignon|cajou/i, e: '🌰' },
+        { r: /basilic|thym|romarin|persil|coriandre|menthe|estragon|laurier|herbe|sauge/i, e: '🌿' },
+        // Boissons
+        { r: /\bvin\b/i, e: '🍷' },
+        { r: /bière|biere/i, e: '🍺' },
+        { r: /café|cafe\b|expresso|espresso/i, e: '☕' },
+        { r: /\bthé\b|\bthe\b/i, e: '🍵' },
+        { r: /eau\b/i, e: '💧' },
+    ];
+    function ingredientMeta(name) {
+        for (const e of INGREDIENT_DB) {
+            if (e.r.test(name)) return { emoji: e.e, countable: !!e.c };
+        }
+        return { emoji: '🍴', countable: false };
+    }
+
     function renderIngredients() {
         const r = currentRecipe;
         const list = document.getElementById('ingredientsList');
@@ -358,18 +470,30 @@
         const factor = currentPortions / (basePortions || 1);
         list.innerHTML = ings.map((ing, i) => {
             const name = ing.name || '';
-            let amount = ing.amount || '';
-            const numMatch = String(amount).match(/^(\d+(?:[.,]\d+)?)/);
+            const unit = (ing.unit || '').trim();
+            const meta = ingredientMeta(name);
+            // An ingredient is "discrete" if it's countable per name OR has no unit (and amount is a small int)
+            const noUnit = !unit;
+            const amountStr = String(ing.amount || '');
+            const numMatch = amountStr.match(/^(\d+(?:[.,]\d+)?)/);
+            let amount = amountStr;
             if (numMatch) {
-                const n = parseFloat(numMatch[1].replace(',', '.')) * factor;
-                const formatted = n % 1 === 0 ? n.toString() : n.toFixed(1).replace('.0','');
-                amount = formatted + amount.slice(numMatch[1].length);
+                const base = parseFloat(numMatch[1].replace(',', '.'));
+                let scaled = base * factor;
+                const isDiscrete = meta.countable || (noUnit && Number.isInteger(base) && base <= 30);
+                if (isDiscrete) {
+                    scaled = Math.max(1, Math.ceil(scaled));
+                }
+                let formatted;
+                if (Number.isInteger(scaled)) formatted = scaled.toString();
+                else formatted = scaled.toFixed(1).replace('.0', '');
+                amount = formatted + amountStr.slice(numMatch[1].length);
             }
-            const unit = ing.unit || '';
             const display = [amount, unit, name].filter(Boolean).join(' ');
             return `
             <li class="ingredient-item" data-i="${i}">
                 <div class="checkbox"></div>
+                <span class="ing-emoji text-xl flex-shrink-0 leading-none" aria-hidden="true">${meta.emoji}</span>
                 <span class="ing-text">${escape(display)}</span>
             </li>`;
         }).join('');

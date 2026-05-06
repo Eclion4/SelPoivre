@@ -109,7 +109,8 @@ function getList() {
 function getSingle($slug) {
     if (!$slug) jsonResponse(['error' => 'Slug manquant'], 400);
     $db = getDB();
-    $userId = $_SESSION['user_id'] ?? 0;
+    $userId   = $_SESSION['user_id'] ?? 0;
+    $userRole = $_SESSION['user_role'] ?? '';
 
     $favSelect = $userId
         ? "(SELECT 1 FROM favorites f WHERE f.recipe_id = r.id AND f.user_id = " . (int)$userId . ") AS is_favorited,"
@@ -124,12 +125,19 @@ function getSingle($slug) {
                    u.avatar AS author_avatar
             FROM recipes r
             LEFT JOIN users u ON r.author_id = u.id
-            WHERE r.slug = ? AND r.status = 'published'";
+            WHERE r.slug = ?";
 
     $s = $db->prepare($sql);
     $s->execute([$slug]);
     $recipe = $s->fetch();
     if (!$recipe) jsonResponse(['error' => 'Recette introuvable'], 404);
+
+    // Visibility: published is public; pending/rejected only for admin or owner
+    if ($recipe['status'] !== 'published') {
+        $isAdmin = $userRole === 'admin';
+        $isOwner = $userId && (int)$recipe['author_id'] === (int)$userId;
+        if (!$isAdmin && !$isOwner) jsonResponse(['error' => 'Recette introuvable'], 404);
+    }
 
     $recipe['author_type']   = $recipe['norm_author_type'];
     $recipe['is_favorited']  = (bool)($recipe['is_favorited'] ?? false);

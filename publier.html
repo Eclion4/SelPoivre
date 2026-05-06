@@ -67,8 +67,9 @@
 
         <!-- Header -->
         <div class="mb-8">
-            <a href="profil.html" class="text-sm text-gray-500 hover:text-sp-600 transition-colors inline-flex items-center gap-1">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour au profil
+            <a id="backLink" href="profil.html" class="text-sm text-gray-500 hover:text-sp-600 transition-colors inline-flex items-center gap-1">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span id="backLinkLabel">Retour au profil</span>
             </a>
             <h1 id="pageTitle" class="text-4xl sm:text-5xl font-display font-bold mt-3">Publier une recette</h1>
             <p class="text-gray-500 mt-2">Votre recette sera soumise à la modération avant publication.</p>
@@ -197,7 +198,7 @@
 
             <!-- Submit -->
             <div class="flex flex-col sm:flex-row gap-3 sm:justify-end pt-2">
-                <a href="profil.html" class="px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-full font-semibold hover:bg-gray-50 text-center transition-colors">Annuler</a>
+                <a id="cancelLink" href="profil.html" class="px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-full font-semibold hover:bg-gray-50 text-center transition-colors">Annuler</a>
                 <button type="submit" id="submitBtn" class="px-8 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
                     <i data-lucide="send" class="w-4 h-4"></i>
                     <span id="submitLabel">Soumettre pour modération</span>
@@ -213,7 +214,7 @@
             <h2 class="text-3xl font-display font-bold">Recette envoyée !</h2>
             <p id="successMsg" class="text-gray-500 mt-3 max-w-md mx-auto">Votre recette a été soumise à la modération. Vous serez notifié dès qu'elle sera approuvée.</p>
             <div class="mt-8 flex gap-3 justify-center">
-                <a href="profil.html#mes-recettes" class="px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Mes recettes</a>
+                <a id="successBackLink" href="profil.html#mes-recettes" class="px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Retour</a>
                 <a href="publier.html" class="px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-full font-semibold hover:bg-gray-50">Publier une autre</a>
             </div>
         </div>
@@ -227,8 +228,35 @@
         const user = window.SP && window.SP.user;
         if (!user) { window.location.href = 'connexion.html'; return; }
 
-        const params  = new URLSearchParams(window.location.search);
+        const params   = new URLSearchParams(window.location.search);
         const editSlug = params.get('slug');
+        const fromParam = params.get('from'); // 'admin' | 'profil' | null
+
+        // Compute back URL based on where the user came from
+        function computeBackUrl() {
+            // 1) Explicit ?from=admin URL param wins
+            if (fromParam === 'admin') return 'admin/recettes.html';
+            // 2) Otherwise check referrer
+            try {
+                const ref = document.referrer || '';
+                if (/\/admin\//.test(ref)) return 'admin/recettes.html';
+            } catch {}
+            // 3) Default for users editing their own
+            return 'profil.html#mes-recettes';
+        }
+        const backUrl = computeBackUrl();
+        const isFromAdmin = backUrl.startsWith('admin/');
+        const backLabel = isFromAdmin ? 'Retour au panneau admin' : 'Retour au profil';
+
+        // Wire all back/cancel links
+        document.addEventListener('DOMContentLoaded', function () {
+            const backEl    = document.getElementById('backLink');
+            const cancelEl  = document.getElementById('cancelLink');
+            const successEl = document.getElementById('successBackLink');
+            if (backEl)    { backEl.href = backUrl; document.getElementById('backLinkLabel').textContent = backLabel; }
+            if (cancelEl)   cancelEl.href = backUrl;
+            if (successEl)  successEl.href = backUrl;
+        });
 
         function el(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
 

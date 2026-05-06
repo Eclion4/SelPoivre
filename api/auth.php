@@ -11,7 +11,20 @@ switch ($action) {
     case 'update_profile':   handleUpdateProfile();   break;
     case 'change_password':  handleChangePassword();  break;
     case 'delete_account':   handleDeleteAccount();   break;
+    case 'public_stats':     handlePublicStats();     break;
     default: jsonResponse(['error' => 'Action inconnue'], 400);
+}
+
+function handlePublicStats() {
+    $db = getDB();
+    $u = (int)$db->query("SELECT COUNT(*) FROM users WHERE is_active = 1")->fetchColumn();
+    $r = (int)$db->query("SELECT COUNT(*) FROM recipes WHERE status = 'published'")->fetchColumn();
+    $avg = $db->query("SELECT AVG(rating) FROM recipes WHERE status = 'published' AND rating > 0")->fetchColumn();
+    jsonResponse([
+        'members' => $u,
+        'recipes' => $r,
+        'rating'  => $avg ? round((float)$avg, 1) : 0,
+    ]);
 }
 
 function handleRegister() {

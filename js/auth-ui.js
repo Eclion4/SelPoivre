@@ -139,27 +139,31 @@
     }
 
     function applyMenu(user) {
+        // Idempotence guard — bail if we've already injected a user menu on this page
+        if (document.querySelector('.js-sp-userwrap')) return;
+
         // 1. Mobile menu: the connexion link inside #mobileMenu (only one)
         const mobileLink = document.querySelector('#mobileMenu a[href$="connexion.html"]');
         if (mobileLink) {
             const newEl = injectHTML(buildMobileMenu(user));
+            newEl.classList.add('js-sp-mobile');
             mobileLink.parentNode.replaceChild(newEl, mobileLink);
             wireDropdown(newEl);
         }
 
-        // 2. Desktop button: connexion link in nav with text "Connexion" and gradient style
+        // 2. Desktop button: connexion link in nav with text "Connexion"
         const desktopLink = [...document.querySelectorAll('nav a[href$="connexion.html"]')].find(a =>
             !a.closest('#mobileMenu') && /connexion/i.test(a.textContent)
         );
         if (desktopLink) {
             const newEl = injectHTML(buildDesktopMenu(user));
+            newEl.classList.add('js-sp-desktop');
             desktopLink.parentNode.replaceChild(newEl, desktopLink);
             wireDropdown(newEl);
         }
 
         // 3. Any remaining icon-only connexion link (e.g. heart) → re-route to favorites
         document.querySelectorAll('a[href$="connexion.html"], a[href$="connexion.html#"]').forEach(a => {
-            // Skip if it's clearly textual "Connexion" (already handled above; would be a non-nav case)
             if (/connexion/i.test(a.textContent)) return;
             a.setAttribute('href', pagePath('profil.html') + '#favoris');
             a.removeAttribute('title');

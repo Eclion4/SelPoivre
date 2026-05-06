@@ -166,10 +166,11 @@
 
             <!-- Bloc Étapes -->
             <div class="section-card">
-                <h2 class="font-display font-bold text-xl mb-5">Étapes de préparation</h2>
-                <div id="stepsList"></div>
-                <button type="button" onclick="addStep()" class="mt-2 inline-flex items-center gap-2 px-4 py-2 text-sp-600 hover:bg-sp-50 rounded-lg text-sm font-medium transition-colors">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Ajouter une étape
+                <h2 class="font-display font-bold text-xl mb-1">Étapes de préparation</h2>
+                <p class="text-sm text-gray-500 mb-5">Organisez vos étapes en sections (ex: <em>Pâte</em>, <em>Garniture</em>) pour les recettes en plusieurs parties.</p>
+                <div id="sectionsList" class="space-y-5"></div>
+                <button type="button" onclick="addSection()" class="mt-3 inline-flex items-center gap-2 px-4 py-2 text-sp-600 hover:bg-sp-50 rounded-lg text-sm font-medium transition-colors">
+                    <i data-lucide="folder-plus" class="w-4 h-4"></i> Ajouter une section
                 </button>
             </div>
 
@@ -267,24 +268,53 @@
         }
         window.addIngredient = addIngredient;
 
-        // ── Steps ──────────────────────────────────────────────────────
-        function addStep(text='') {
-            const list = document.getElementById('stepsList');
-            const idx = list.children.length + 1;
+        // ── Sections + Steps ───────────────────────────────────────────
+        function addSection(name='', steps=[]) {
+            const list = document.getElementById('sectionsList');
+            const sec = el(`
+            <div class="section-block border border-gray-200 rounded-xl p-4 bg-gray-50/50">
+                <div class="flex items-center gap-2 mb-3">
+                    <i data-lucide="layers" class="w-4 h-4 text-sp-600 flex-shrink-0"></i>
+                    <input type="text" maxlength="120" placeholder="Nom de la section (optionnel — ex: Pâte, Garniture, Sauce…)" class="section-name flex-1 bg-transparent border-0 border-b border-dashed border-gray-300 focus:border-sp-500 focus:outline-none text-sm font-semibold text-encre py-1 px-0">
+                    <button type="button" class="btn-remove-section text-gray-400 hover:text-red-500 transition-colors" aria-label="Supprimer la section" title="Supprimer la section"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+                <div class="steps-list space-y-2"></div>
+                <button type="button" class="btn-add-step mt-2 inline-flex items-center gap-2 px-3 py-1.5 text-sp-600 hover:bg-sp-50 rounded-lg text-xs font-medium transition-colors">
+                    <i data-lucide="plus" class="w-3 h-3"></i> Ajouter une étape
+                </button>
+            </div>`);
+            sec.querySelector('.section-name').value = name;
+            sec.querySelector('.btn-add-step').addEventListener('click', () => addStepTo(sec));
+            sec.querySelector('.btn-remove-section').addEventListener('click', () => {
+                if (document.querySelectorAll('#sectionsList .section-block').length <= 1) return;
+                sec.remove();
+                renumberAllSteps();
+            });
+            list.appendChild(sec);
+            (steps.length ? steps : ['']).forEach(t => addStepTo(sec, t));
+            if (window.lucide) lucide.createIcons();
+            return sec;
+        }
+        window.addSection = addSection;
+
+        function addStepTo(sectionEl, text='') {
+            const list = sectionEl.querySelector('.steps-list');
             const row = el(`
             <div class="step-row">
-                <div class="w-8 h-8 rounded-full bg-sp-100 text-sp-700 flex items-center justify-center text-sm font-bold flex-shrink-0 step-num">${idx}</div>
+                <div class="w-8 h-8 rounded-full bg-sp-100 text-sp-700 flex items-center justify-center text-sm font-bold flex-shrink-0 step-num">1</div>
                 <textarea rows="2" placeholder="Décrivez l'étape..." class="field-input flex-1 step-text" maxlength="600"></textarea>
                 <button type="button" class="btn-remove" aria-label="Supprimer"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>`);
             row.querySelector('.step-text').value = text;
-            row.querySelector('.btn-remove').addEventListener('click', () => { row.remove(); renumberSteps(); });
+            row.querySelector('.btn-remove').addEventListener('click', () => { row.remove(); renumberAllSteps(); });
             list.appendChild(row);
+            renumberAllSteps();
             if (window.lucide) lucide.createIcons();
         }
-        window.addStep = addStep;
-        function renumberSteps() {
-            document.querySelectorAll('#stepsList .step-row').forEach((r, i) => r.querySelector('.step-num').textContent = i + 1);
+
+        function renumberAllSteps() {
+            let n = 1;
+            document.querySelectorAll('#sectionsList .step-row .step-num').forEach(el => el.textContent = n++);
         }
 
         // ── Tags ───────────────────────────────────────────────────────
@@ -407,8 +437,14 @@
                 }))
                 .filter(i => i.name);
 
-            const steps = [...document.querySelectorAll('#stepsList .step-text')]
-                .map(t => t.value.trim()).filter(Boolean);
+            const steps = [];
+            document.querySelectorAll('#sectionsList .section-block').forEach(sec => {
+                const sectionName = sec.querySelector('.section-name').value.trim();
+                sec.querySelectorAll('.step-row .step-text').forEach(t => {
+                    const desc = t.value.trim();
+                    if (desc) steps.push({ description: desc, section: sectionName });
+                });
+            });
 
             return {
                 title:       document.getElementById('title').value.trim(),
@@ -500,7 +536,16 @@
                         dropzone.classList.add('hidden');
                     }
                     (data.ingredients || []).forEach(i => addIngredient(i.name, i.amount, i.unit));
-                    (data.steps || []).forEach(s => addStep(typeof s === 'string' ? s : (s.description || '')));
+                    // Regrouper les étapes par section pour l'édition
+                    const grouped = [];
+                    (data.steps || []).forEach(s => {
+                        const desc = typeof s === 'string' ? s : (s.description || '');
+                        const sec  = typeof s === 'string' ? '' : (s.section || '');
+                        const last = grouped[grouped.length - 1];
+                        if (last && last.name === sec) last.steps.push(desc);
+                        else grouped.push({ name: sec, steps: [desc] });
+                    });
+                    grouped.forEach(g => addSection(g.name, g.steps));
                     (data.tags || []).forEach(t => tags.add(t));
                     refreshTags();
                 } catch (err) {
@@ -508,7 +553,7 @@
                 }
             }
             if (document.querySelectorAll('#ingredientsList .ing-row').length === 0) addIngredient();
-            if (document.querySelectorAll('#stepsList .step-row').length === 0) addStep();
+            if (document.querySelectorAll('#sectionsList .section-block').length === 0) addSection();
             if (window.lucide) lucide.createIcons();
         }
         init();

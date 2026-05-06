@@ -481,12 +481,28 @@
         document.getElementById('portionsCount').textContent = currentPortions;
         renderIngredients();
 
-        // Steps
+        // Steps (avec sections optionnelles)
         const stepsBox = document.getElementById('stepsList');
-        const steps = (r.steps || []).map(s => typeof s === 'string' ? s : (s.description || ''));
-        stepsBox.innerHTML = steps.length === 0
-            ? '<li class="text-gray-400">Aucune étape renseignée.</li>'
-            : steps.map((txt, i) => `<li class="step-card" data-step="${i+1}"><p class="text-base leading-relaxed">${escape(txt)}</p></li>`).join('');
+        const rawSteps = (r.steps || []).map(s => typeof s === 'string'
+            ? { description: s, section: '' }
+            : { description: s.description || '', section: s.section || '' });
+        if (rawSteps.length === 0) {
+            stepsBox.innerHTML = '<li class="text-gray-400">Aucune étape renseignée.</li>';
+        } else {
+            const hasSections = rawSteps.some(s => s.section);
+            let html = '';
+            let prevSection = null;
+            rawSteps.forEach((s, i) => {
+                if (hasSections && s.section !== prevSection) {
+                    if (s.section) {
+                        html += `<li class="list-none"><h3 class="font-display font-bold text-lg text-sp-700 mt-4 first:mt-0 mb-3 flex items-center gap-2"><span class="w-1 h-6 bg-gradient-to-b from-sp-500 to-sp-600 rounded-full"></span>${escape(s.section)}</h3></li>`;
+                    }
+                    prevSection = s.section;
+                }
+                html += `<li class="step-card" data-step="${i+1}"><p class="text-base leading-relaxed">${escape(s.description)}</p></li>`;
+            });
+            stepsBox.innerHTML = html;
+        }
 
         // Tags
         const tagsBox = document.getElementById('tagsList');

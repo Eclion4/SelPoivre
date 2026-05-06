@@ -10,6 +10,7 @@ $results = [];
 
 $migrations = [
     'users.preferences'      => "ALTER TABLE users ADD COLUMN IF NOT EXISTS preferences TEXT NULL AFTER bio",
+    'steps.section'          => "ALTER TABLE steps ADD COLUMN IF NOT EXISTS section VARCHAR(120) NULL AFTER description",
     'recipes.author_type'    => "UPDATE recipes SET author_type = 'mijote' WHERE author_type = 'sel-poivre'",
     'recipes.rating_count'   => "UPDATE recipes SET rating_count = FLOOR(2 + (id % 7)) WHERE status = 'published'",
     'favorites.create'       => "CREATE TABLE IF NOT EXISTS favorites (

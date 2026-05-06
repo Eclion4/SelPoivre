@@ -300,9 +300,9 @@ function getIngredients($db, $recipeId) {
     return $s->fetchAll();
 }
 function getSteps($db, $recipeId) {
-    $s = $db->prepare('SELECT description FROM steps WHERE recipe_id = ? ORDER BY sort_order');
+    $s = $db->prepare('SELECT description, section FROM steps WHERE recipe_id = ? ORDER BY sort_order');
     $s->execute([$recipeId]);
-    return array_column($s->fetchAll(), 'description');
+    return $s->fetchAll();
 }
 function getTags($db, $recipeId) {
     $s = $db->prepare('SELECT tag FROM recipe_tags WHERE recipe_id = ?');
@@ -316,9 +316,17 @@ function saveIngredients($db, $recipeId, $items) {
     }
 }
 function saveSteps($db, $recipeId, $items) {
-    $s = $db->prepare('INSERT INTO steps (recipe_id, description, sort_order) VALUES (?,?,?)');
-    foreach ($items as $i => $desc) {
-        $s->execute([$recipeId, is_array($desc) ? $desc['description'] : $desc, $i]);
+    $s = $db->prepare('INSERT INTO steps (recipe_id, description, section, sort_order) VALUES (?,?,?,?)');
+    foreach ($items as $i => $item) {
+        if (is_array($item)) {
+            $desc    = trim($item['description'] ?? '');
+            $section = trim($item['section'] ?? '');
+        } else {
+            $desc    = trim((string)$item);
+            $section = '';
+        }
+        if ($desc === '') continue;
+        $s->execute([$recipeId, $desc, $section !== '' ? $section : null, $i]);
     }
 }
 function saveTags($db, $recipeId, $tags) {

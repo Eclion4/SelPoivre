@@ -120,6 +120,47 @@ $migrations = [
         FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
         FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    // ── Newsletter subscribers ────────────────────────────────────────────
+    'newsletter_subscribers.create' => "CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(160) NOT NULL,
+        status ENUM('active','unsubscribed') DEFAULT 'active',
+        source VARCHAR(60) DEFAULT 'website',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_email (email),
+        INDEX idx_status (status)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    // ── Titres SEO optimisés (ciblage requêtes Google réelles) ───────────
+    'seo.title.boeuf'        => "UPDATE recipes SET title='Bœuf Bourguignon — Recette Traditionnelle Facile'             WHERE slug='boeuf-bourguignon'",
+    'seo.title.quiche'       => "UPDATE recipes SET title='Quiche Lorraine — Recette Traditionnelle Facile'              WHERE slug='quiche-lorraine'",
+    'seo.title.tarte_tatin'  => "UPDATE recipes SET title='Tarte Tatin Maison — Recette Facile aux Pommes Caramélisées'  WHERE slug='tarte-tatin'",
+    'seo.title.soupe'        => "UPDATE recipes SET title='Soupe à l\\'Oignon Gratinée — Recette Traditionnelle'          WHERE slug='soupe-oignon'",
+    'seo.title.crepes'       => "UPDATE recipes SET title='Crêpes Maison — Recette Simple et Inratable'                  WHERE slug='crepes-classiques'",
+    'seo.title.ratatouille'  => "UPDATE recipes SET title='Ratatouille Provençale — Recette Facile et Authentique'       WHERE slug='ratatouille'",
+    'seo.title.mousse_choc'  => "UPDATE recipes SET title='Mousse au Chocolat Maison — Recette Facile 3 Ingrédients'     WHERE slug='mousse-chocolat'",
+    'seo.title.poulet'       => "UPDATE recipes SET title='Poulet Rôti aux Herbes — Recette Facile au Four'              WHERE slug='poulet-roti-herbes'",
+    'seo.title.brulee'       => "UPDATE recipes SET title='Crème Brûlée — Recette Traditionnelle Française Facile'       WHERE slug='creme-brulee'",
+    'seo.title.blanquette'   => "UPDATE recipes SET title='Blanquette de Veau — Recette Traditionnelle Facile'           WHERE slug='blanquette-veau'",
+    'seo.title.curry'        => "UPDATE recipes SET title='Curry de Légumes — Recette Facile et Rapide'                  WHERE slug='curry-legumes'",
+    'seo.title.madeleines'   => "UPDATE recipes SET title='Madeleines Moelleuses — Recette Maison Facile et Inratable'   WHERE slug='madeleines'",
+    'seo.title.padthai'      => "UPDATE recipes SET title='Pad Thaï — Recette Authentique Facile à la Maison'            WHERE slug='pad-thai'",
+    'seo.title.hummus'       => "UPDATE recipes SET title='Houmous Libanais — Recette Authentique et Facile'             WHERE slug='hummus-libanais'",
+    'seo.title.cassoulet'    => "UPDATE recipes SET title='Cassoulet Toulousain — Recette Traditionnelle du Sud'         WHERE slug='cassoulet'",
+    'seo.title.risotto'      => "UPDATE recipes SET title='Risotto aux Champignons — Recette Crémeuse et Facile'         WHERE slug='risotto-champignons'",
+    'seo.title.pizza'        => "UPDATE recipes SET title='Pizza Napolitaine — Recette Authentique Pâte Fine'            WHERE slug='pizza-napolitaine'",
+    'seo.title.tiramisu'     => "UPDATE recipes SET title='Tiramisu Classique — Recette Italienne Traditionnelle'        WHERE slug='tiramisu-classique'",
+    'seo.title.tartiflette'  => "UPDATE recipes SET title='Tartiflette Savoyarde — Recette Authentique et Facile'        WHERE slug='tartiflette-savoyarde'",
+    'seo.title.coq_au_vin'   => "UPDATE recipes SET title='Coq au Vin Rouge — Recette Traditionnelle Française'          WHERE slug='coq-au-vin-rouge'",
+    'seo.title.fondant'      => "UPDATE recipes SET title='Gâteau au Chocolat Fondant — Recette Moelleuse Inratable'    WHERE slug='gateau-chocolat-fondant'",
+    'seo.title.carbonara'    => "UPDATE recipes SET title='Spaghetti Carbonara — Recette Authentique Italienne'          WHERE slug='spaghetti-carbonara'",
+    'seo.title.tabbouleh'    => "UPDATE recipes SET title='Taboulé Libanais — Recette Fraîche et Authentique'            WHERE slug='tabbouleh-libanais'",
+    'seo.title.saumon'       => "UPDATE recipes SET title='Saumon Teriyaki — Recette Japonaise Facile et Rapide'         WHERE slug='salmon-teriyaki'",
+    'seo.title.yaourt'       => "UPDATE recipes SET title='Gâteau au Yaourt Moelleux — Recette Facile des Enfants'      WHERE slug='gateau-yaourt'",
+    'seo.title.crumble'      => "UPDATE recipes SET title='Crumble Pommes Noisettes — Recette Gourmande et Facile'      WHERE slug='crumble-pomme-noisette'",
+    'seo.title.brioche'      => "UPDATE recipes SET title='Brioche Maison Moelleuse — Recette Facile au Beurre'         WHERE slug='brioche-maison'",
+    'seo.title.shakshuka'    => "UPDATE recipes SET title='Shakshuka — Recette d\\'Œufs Pochés en Sauce Tomate Épicée'   WHERE slug='shakshuka-israelien'",
 ];
 
 foreach ($migrations as $name => $sql) {

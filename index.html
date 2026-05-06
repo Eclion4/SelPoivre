@@ -681,18 +681,33 @@
             const form = document.getElementById('newsletterForm');
             const msg  = document.getElementById('newsletterMsg');
             if (!form) return;
-            form.addEventListener('submit', function (e) {
+            form.addEventListener('submit', async function (e) {
                 e.preventDefault();
                 const email = document.getElementById('newsletterEmail').value.trim();
                 if (!email) return;
+                const btn = form.querySelector('button[type="submit"]');
+                if (btn) { btn.disabled = true; btn.textContent = '…'; }
                 try {
-                    const list = JSON.parse(localStorage.getItem('sp_newsletter') || '[]');
-                    if (!list.includes(email)) list.push(email);
-                    localStorage.setItem('sp_newsletter', JSON.stringify(list));
-                } catch {}
-                form.reset();
-                msg.textContent = 'Merci ! Vous recevrez notre prochaine sélection.';
-                msg.className = 'mt-4 text-center text-sm text-green-600 font-medium';
+                    const res  = await fetch('api/newsletter.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, source: 'homepage' }),
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        form.reset();
+                        msg.textContent = '🎉 Merci ! Vous recevrez notre prochaine sélection.';
+                        msg.className   = 'mt-4 text-center text-sm text-green-600 font-medium';
+                    } else {
+                        msg.textContent = data.error || 'Une erreur est survenue, réessayez.';
+                        msg.className   = 'mt-4 text-center text-sm text-red-500 font-medium';
+                    }
+                } catch {
+                    msg.textContent = 'Erreur réseau, réessayez.';
+                    msg.className   = 'mt-4 text-center text-sm text-red-500 font-medium';
+                } finally {
+                    if (btn) { btn.disabled = false; btn.textContent = "S'inscrire"; }
+                }
             });
         });
 

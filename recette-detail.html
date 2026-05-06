@@ -303,7 +303,7 @@
     function initials(name){return (name||'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);}
     function fmtTime(min){if(!min)return '—';if(min<60)return min+' min';const h=Math.floor(min/60),m=min%60;return m?h+'h'+String(m).padStart(2,'0'):h+'h';}
     function fmtDate(iso){try{return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});}catch{return '';}}
-    function realisticCount(raw,id){let n=parseInt(raw)||0;if(n>30)n=2+(Math.abs(parseInt(id)||0)%7);return n;}
+    function realisticCount(raw){ return parseInt(raw) || 0; }
     function escape(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
     function starsHTML(rating){
@@ -475,7 +475,7 @@
         document.getElementById('statServings').textContent   = (r.servings || 4) + ' pers.';
         document.getElementById('statDifficulty').textContent = r.difficulty || 'Facile';
         const ratingVal = parseFloat(r.rating || 0);
-        const ratingCnt = realisticCount(r.rating_count, r.id);
+        const ratingCnt = realisticCount(r.rating_count);
         document.getElementById('statRating').innerHTML = ratingVal > 0 ? `${ratingVal.toFixed(1)} <span class="text-xs text-gray-400">(${ratingCnt})</span>` : '<span class="text-xs text-gray-400">Aucun avis</span>';
 
         // Edit link if owner or admin
@@ -858,7 +858,7 @@
                 currentRecipe.rating = data.rating;
                 currentRecipe.rating_count = data.rating_count;
                 const ratingVal = parseFloat(data.rating || 0);
-                const ratingCnt = realisticCount(data.rating_count, data.id);
+                const ratingCnt = realisticCount(data.rating_count);
                 document.getElementById('statRating').innerHTML = ratingVal > 0 ? `${ratingVal.toFixed(1)} <span class="text-xs text-gray-400">(${ratingCnt})</span>` : '<span class="text-xs text-gray-400">Aucun avis</span>';
             }
         } catch {}

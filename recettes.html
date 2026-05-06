@@ -86,6 +86,8 @@
                 <button class="filter-chip" data-group="cat">Plats</button>
                 <button class="filter-chip" data-group="cat">Desserts</button>
                 <button class="filter-chip" data-group="cat">Apéro</button>
+                <button class="filter-chip" data-group="cat">Boissons</button>
+                <button class="filter-chip" data-group="cat">Boulangerie</button>
                 <button class="filter-chip" data-group="cat">Végétarien</button>
                 <button class="filter-chip" data-group="cat">Rapide</button>
                 <button class="filter-chip" data-group="cat">Sans gluten</button>
@@ -143,6 +145,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="js/config.js"></script>
+    <script src="js/auth-ui.js"></script>
     <script src="js/app.js"></script>
     <script>
     (function () {
@@ -221,9 +224,10 @@
         <div class="relative aspect-[4/3] overflow-hidden flex-shrink-0">
             <img src="${r.image}" alt="${r.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
             ${badge ? `<div class="absolute top-3 left-3">${badge}</div>` : ''}
-            <button type="button" onclick="event.stopPropagation();event.preventDefault();window.location.href='connexion.html';"
-                class="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <button type="button" data-fav data-id="${r.id}"
+                onclick="event.stopPropagation();event.preventDefault();window.SP&&window.SP.toggleFavorite(${r.id}, this);"
+                class="absolute top-3 right-3 w-9 h-9 ${r.is_favorited ? 'bg-sp-500 text-white' : 'bg-white/90'} backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all is-favorited-${!!r.is_favorited}">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="${r.is_favorited?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
             <div class="absolute bottom-3 left-3 flex gap-1.5">
                 <span class="px-2.5 py-1 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
@@ -260,8 +264,10 @@
             'plats':       r => r.category === 'plats',
             'desserts':    r => r.category === 'desserts',
             'apéro':       r => r.category === 'apero',
+            'boissons':    r => r.category === 'boissons',
+            'boulangerie': r => r.category === 'boulangerie',
             'végétarien':  r => r.tags.some(t => t.toLowerCase().includes('végétarien')),
-            'rapide':      r => r.totalTime <= 30,
+            'rapide':      r => r.totalTime > 0 && r.totalTime <= 30,
             'sans gluten': r => r.tags.some(t => t.toLowerCase().includes('sans gluten')),
         };
 
@@ -324,6 +330,22 @@
             }
 
             if (typeof updateAllStats === 'function') updateAllStats(allRecipes);
+
+            // Apply URL params (?search=…&category=…)
+            const params = new URLSearchParams(window.location.search);
+            const urlSearch = (params.get('search') || '').trim();
+            const urlCat    = (params.get('category') || '').trim().toLowerCase();
+            if (urlSearch) {
+                searchQuery = urlSearch;
+                document.getElementById('recipeSearchInput').value = urlSearch;
+            }
+            const catMap = { entrees:'entrées', plats:'plats', desserts:'desserts', apero:'apéro', boissons:'boissons', boulangerie:'boulangerie' };
+            if (urlCat && catMap[urlCat]) {
+                activeFilter = catMap[urlCat];
+                document.querySelectorAll('.filter-chip[data-group="cat"]').forEach(b => {
+                    b.classList.toggle('active', b.textContent.trim().toLowerCase() === activeFilter);
+                });
+            }
 
             document.querySelectorAll('.filter-chip[data-group="cat"]').forEach(btn => {
                 btn.addEventListener('click', function () {

@@ -109,15 +109,17 @@
             <div class="max-w-3xl mx-auto px-4 py-8">
                 <div class="relative">
                     <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-sp-400"></i>
-                    <input type="text" placeholder="Rechercher une recette, un ingrédient..." class="w-full pl-14 pr-4 py-4 bg-sp-50 rounded-2xl text-lg focus:outline-none focus:ring-2 focus:ring-sp-500 transition-all">
+                    <input id="globalSearchInput" type="text" placeholder="Rechercher une recette, un ingrédient..." class="w-full pl-14 pr-4 py-4 bg-sp-50 rounded-2xl text-lg focus:outline-none focus:ring-2 focus:ring-sp-500 transition-all">
                 </div>
-                <div class="mt-4 flex flex-wrap gap-2">
-                    <span class="text-sm text-gray-500 mr-2">Tendances :</span>
-                    <a href="#" class="px-3 py-1 bg-sp-100 text-sp-700 rounded-full text-sm hover:bg-sp-200 transition-colors">Tiramisu</a>
-                    <a href="#" class="px-3 py-1 bg-or-100 text-or-700 rounded-full text-sm hover:bg-or-200 transition-colors">Risotto</a>
-                    <a href="#" class="px-3 py-1 bg-sp-100 text-sp-700 rounded-full text-sm hover:bg-sp-200 transition-colors">Ratatouille</a>
-                    <a href="#" class="px-3 py-1 bg-or-100 text-or-700 rounded-full text-sm hover:bg-or-200 transition-colors">Crêpes</a>
-                    <a href="#" class="px-3 py-1 bg-sp-100 text-sp-700 rounded-full text-sm hover:bg-sp-200 transition-colors">Poulet rôti</a>
+                <div id="searchResults" class="mt-4 space-y-2 max-h-96 overflow-y-auto">
+                    <div id="searchHints" class="flex flex-wrap gap-2">
+                        <span class="text-sm text-gray-500 mr-2">Tendances :</span>
+                        <button data-search="tiramisu" class="js-search-hint px-3 py-1 bg-sp-100 text-sp-700 rounded-full text-sm hover:bg-sp-200 transition-colors">Tiramisu</button>
+                        <button data-search="risotto" class="js-search-hint px-3 py-1 bg-or-100 text-or-700 rounded-full text-sm hover:bg-or-200 transition-colors">Risotto</button>
+                        <button data-search="ratatouille" class="js-search-hint px-3 py-1 bg-sp-100 text-sp-700 rounded-full text-sm hover:bg-sp-200 transition-colors">Ratatouille</button>
+                        <button data-search="crêpes" class="js-search-hint px-3 py-1 bg-or-100 text-or-700 rounded-full text-sm hover:bg-or-200 transition-colors">Crêpes</button>
+                        <button data-search="poulet" class="js-search-hint px-3 py-1 bg-sp-100 text-sp-700 rounded-full text-sm hover:bg-sp-200 transition-colors">Poulet rôti</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -216,7 +218,7 @@
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="0">
+                <a href="recettes.html?category=entrees" class="category-card group" data-aos="fade-up" data-aos-delay="0">
                     <div class="relative overflow-hidden rounded-2xl aspect-square">
                         <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80" alt="Entrées" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
@@ -226,7 +228,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="50">
+                <a href="recettes.html?category=plats" class="category-card group" data-aos="fade-up" data-aos-delay="50">
                     <div class="relative overflow-hidden rounded-2xl aspect-square">
                         <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80" alt="Plats" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
@@ -236,7 +238,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="100">
+                <a href="recettes.html?category=desserts" class="category-card group" data-aos="fade-up" data-aos-delay="100">
                     <div class="relative overflow-hidden rounded-2xl aspect-square">
                         <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&q=80" alt="Desserts" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
@@ -246,7 +248,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="150">
+                <a href="recettes.html?category=apero" class="category-card group" data-aos="fade-up" data-aos-delay="150">
                     <div class="relative overflow-hidden rounded-2xl aspect-square">
                         <img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&q=80" alt="Apéro" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
@@ -256,7 +258,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="200">
+                <a href="recettes.html?category=boissons" class="category-card group" data-aos="fade-up" data-aos-delay="200">
                     <div class="relative overflow-hidden rounded-2xl aspect-square">
                         <img src="https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=400&q=80" alt="Boissons" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
@@ -266,7 +268,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="250">
+                <a href="recettes.html?category=boulangerie" class="category-card group" data-aos="fade-up" data-aos-delay="250">
                     <div class="relative overflow-hidden rounded-2xl aspect-square">
                         <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80" alt="Boulangerie" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
@@ -650,7 +652,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="js/config.js"></script>
+    <script src="js/auth-ui.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/search.js"></script>
     <script>
     (function () {
         const PALETTE = ['#E85D26','#16A34A','#7C3AED','#DB2777','#0284C7','#CA8A04'];
@@ -706,9 +710,10 @@
         <div class="relative aspect-[4/3] overflow-hidden">
             <img src="${img}" alt="${r.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
             ${badge ? `<div class="absolute top-4 left-4">${badge}</div>` : ''}
-            <button type="button" onclick="event.stopPropagation();event.preventDefault();window.location.href='connexion.html';"
-                class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <button type="button" data-fav data-id="${r.id}"
+                onclick="event.stopPropagation();event.preventDefault();window.SP&&window.SP.toggleFavorite(${r.id}, this);"
+                class="absolute top-4 right-4 w-10 h-10 ${r.is_favorited ? 'bg-sp-500 text-white' : 'bg-white/90'} backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="${r.is_favorited?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
             <div class="absolute bottom-4 left-4 right-4 flex gap-2">
                 <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">

@@ -4,10 +4,13 @@ require_once 'config.php';
 $action = $_GET['action'] ?? '';
 
 switch ($action) {
-    case 'register': handleRegister(); break;
-    case 'login':    handleLogin();    break;
-    case 'logout':   handleLogout();   break;
-    case 'me':       handleMe();       break;
+    case 'register':         handleRegister();        break;
+    case 'login':            handleLogin();           break;
+    case 'logout':           handleLogout();          break;
+    case 'me':               handleMe();              break;
+    case 'update_profile':   handleUpdateProfile();   break;
+    case 'change_password':  handleChangePassword();  break;
+    case 'delete_account':   handleDeleteAccount();   break;
     default: jsonResponse(['error' => 'Action inconnue'], 400);
 }
 
@@ -84,11 +87,89 @@ function handleMe() {
         jsonResponse(['authenticated' => false]);
     }
     $db = getDB();
-    $s = $db->prepare('SELECT id, username, email, role, avatar, bio, created_at FROM users WHERE id = ?');
+    $s = $db->prepare('SELECT id, username, email, role, avatar, bio, preferences, created_at FROM users WHERE id = ?');
     $s->execute([$_SESSION['user_id']]);
     $user = $s->fetch();
 
     if (!$user) { session_destroy(); jsonResponse(['authenticated' => false]); }
 
+    if (!empty($user['preferences'])) {
+        $decoded = json_decode($user['preferences'], true);
+        if ($decoded) $user['preferences'] = $decoded;
+    }
+
     jsonResponse(['authenticated' => true, 'user' => $user]);
+}
+
+function handleUpdateProfile() {
+    requireAuth();
+    $d = getBody();
+    $username = trim($d['username'] ?? '');
+    $email    = trim($d['email']    ?? '');
+    $bio      = trim($d['bio']      ?? '');
+    $avatar   = trim($d['avatar']   ?? '');
+    $prefs    = $d['preferences'] ?? null;
+
+    if (!$username || strlen($username) < 3) jsonResponse(['error' => 'Pseudo trop court (3 min)'], 400);
+    if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) jsonResponse(['error' => 'Email invalide'], 400);
+    if (mb_strlen($bio) > 500) jsonResponse(['error' => 'Bio trop longue (500 max)'], 400);
+
+    $db = getDB();
+    $check = $db->prepare('SELECT id FROM users WHERE (email = ? OR username = ?) AND id <> ?');
+    $check->execute([$email, $username, $_SESSION['user_id']]);
+    if ($check->fetch()) jsonResponse(['error' => 'Email ou pseudo déjà utilisé'], 409);
+
+    $prefsJson = $prefs !== null ? json_encode($prefs, JSON_UNESCAPED_UNICODE) : null;
+    $s = $db->prepare('UPDATE users SET username=?, email=?, bio=?, avatar=?, preferences=? WHERE id=?');
+    $s->execute([$username, $email, $bio, $avatar ?: null, $prefsJson, $_SESSION['user_id']]);
+
+    $s = $db->prepare('SELECT id, username, email, role, avatar, bio, preferences, created_at FROM users WHERE id = ?');
+    $s->execute([$_SESSION['user_id']]);
+    $user = $s->fetch();
+    if (!empty($user['preferences'])) {
+        $decoded = json_decode($user['preferences'], true);
+        if ($decoded) $user['preferences'] = $decoded;
+    }
+    jsonResponse(['success' => true, 'user' => $user]);
+}
+
+function handleChangePassword() {
+    requireAuth();
+    $d = getBody();
+    $current = $d['current_password'] ?? '';
+    $newPwd  = $d['new_password']     ?? '';
+    if (!$current || !$newPwd) jsonResponse(['error' => 'Les deux mots de passe sont requis'], 400);
+    if (strlen($newPwd) < 8)   jsonResponse(['error' => 'Nouveau mot de passe trop court (8 min)'], 400);
+
+    $db = getDB();
+    $s  = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
+    $s->execute([$_SESSION['user_id']]);
+    $row = $s->fetch();
+    if (!$row || !password_verify($current, $row['password_hash']))
+        jsonResponse(['error' => 'Mot de passe actuel incorrect'], 401);
+
+    $hash = password_hash($newPwd, PASSWORD_DEFAULT);
+    $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
+       ->execute([$hash, $_SESSION['user_id']]);
+    jsonResponse(['success' => true]);
+}
+
+function handleDeleteAccount() {
+    requireAuth();
+    $d = getBody();
+    $password = $d['password'] ?? '';
+    if (!$password) jsonResponse(['error' => 'Mot de passe requis pour confirmer'], 400);
+
+    $db = getDB();
+    $s  = $db->prepare('SELECT password_hash, role FROM users WHERE id = ?');
+    $s->execute([$_SESSION['user_id']]);
+    $row = $s->fetch();
+    if (!$row || !password_verify($password, $row['password_hash']))
+        jsonResponse(['error' => 'Mot de passe incorrect'], 401);
+    if ($row['role'] === 'admin')
+        jsonResponse(['error' => 'Un admin ne peut pas supprimer son compte ici'], 403);
+
+    $db->prepare('DELETE FROM users WHERE id = ?')->execute([$_SESSION['user_id']]);
+    session_destroy();
+    jsonResponse(['success' => true]);
 }

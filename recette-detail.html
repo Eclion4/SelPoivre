@@ -5,50 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="pageTitle">Recette — Sel & Poivre</title>
     <meta name="description" id="pageDesc" content="Recette Sel &amp; Poivre">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'sp': { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12',800:'#57130C',900:'#360C07' },
-                        'or': { 50:'#FDF9EF',100:'#FDF3DC',200:'#F9E0A0',300:'#F2C860',400:'#E5A930',500:'#C4892A',600:'#A36E20',700:'#7D5118',800:'#5A3A12',900:'#3B260C' },
-                        'ivoire': '#F8F5EF', 'encre': '#18130F',
-                    },
-                    fontFamily: { 'display':['Playfair Display','serif'],'body':['Inter','sans-serif'],'handwrite':['Caveat','cursive'] }
-                }
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'sp':    { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12' },
+                    'or':    { 50:'#FDF9EF',100:'#FDF3DC',300:'#F2C860',500:'#C4892A',600:'#A36E20' },
+                    'ivoire':'#F8F5EF', 'encre':'#18130F',
+                },
+                fontFamily: { 'display':['Playfair Display','serif'],'body':['Inter','sans-serif'],'handwrite':['Caveat','cursive'] }
             }
         }
+    }
     </script>
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <style>
+        body { background: #F8F5EF; font-family: 'Inter', sans-serif; color: #18130F; }
         .ingredient-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #F3F4F6; cursor:pointer; user-select:none; }
         .ingredient-item:last-child { border-bottom:none; }
         .ingredient-item .checkbox { width:20px; height:20px; border:2px solid #E5E7EB; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .2s; }
-        .ingredient-item.checked .checkbox { background:#EA580C; border-color:#EA580C; }
+        .ingredient-item.checked .checkbox { background:#C4311B; border-color:#C4311B; }
         .ingredient-item.checked .checkbox::after { content:''; display:block; width:5px; height:9px; border:2px solid white; border-top:none; border-left:none; transform:rotate(45deg) translateY(-2px); }
-        .ingredient-item.checked span { text-decoration:line-through; color:#9CA3AF; }
-        .step-card { position:relative; padding-left:48px; }
-        .step-card::before { content:attr(data-step); position:absolute; left:0; top:0; width:34px; height:34px; background:linear-gradient(135deg,#F97316,#EA580C); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; line-height:34px; text-align:center; }
-        .step-card:not(:last-child)::after { content:''; position:absolute; left:16px; top:34px; bottom:-24px; width:2px; background:linear-gradient(to bottom,#EA580C20,transparent); }
-        .timer-display { font-family:'Caveat',cursive; letter-spacing:2px; }
-        .nav-link { position:relative; color:#6B7280; transition:color .2s; }
-        .nav-link:hover,.nav-link.active { color:#EA580C; }
-        .nav-link.active::after,.nav-link:hover::after { content:''; position:absolute; bottom:-4px; left:0; right:0; height:2px; background:#EA580C; border-radius:2px; }
-        #navbar.scrolled { background:rgba(255,251,240,.92); backdrop-filter:blur(20px); box-shadow:0 2px 20px rgba(0,0,0,.08); }
-        .rating-stars { display:flex; gap:2px; }
+        .ingredient-item.checked .ing-text { text-decoration:line-through; color:#9CA3AF; }
+        .step-card { position:relative; padding-left:54px; }
+        .step-card::before { content:attr(data-step); position:absolute; left:0; top:0; width:38px; height:38px; background:linear-gradient(135deg,#C4311B,#A42618); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; }
+        .step-card:not(:last-child)::after { content:''; position:absolute; left:18px; top:38px; bottom:-24px; width:2px; background:linear-gradient(to bottom,#A4261820,transparent); }
+        .star-input { cursor:pointer; transition: transform .15s; }
+        .star-input:hover { transform: scale(1.15); }
+        #navbar { background: rgba(255,251,240,.92); backdrop-filter: blur(20px); box-shadow: 0 2px 20px rgba(0,0,0,.06); }
+        .heart-btn.is-fav { background:#C4311B !important; color:white !important; }
+        .heart-btn.is-fav svg { fill: currentColor; }
     </style>
 </head>
-<body class="bg-ivoire font-body text-encre overflow-x-hidden">
+<body class="overflow-x-hidden">
 
 <!-- NAVBAR -->
-<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 scrolled">
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
             <a href="index.html" class="flex items-center gap-2 group">
@@ -58,15 +56,11 @@
                 <span class="text-2xl font-display font-bold"><span class="text-sp-500">Sel</span><span class="text-encre"> &amp; Poivre</span></span>
             </a>
             <div class="hidden md:flex items-center gap-8">
-                <a href="index.html" class="nav-link font-medium text-sm tracking-wide uppercase">Accueil</a>
-                <a href="recettes.html" class="nav-link font-medium text-sm tracking-wide uppercase">Recettes</a>
-                <a href="index.html#communaute" class="nav-link font-medium text-sm tracking-wide uppercase">Communauté</a>
+                <a href="index.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Accueil</a>
+                <a href="recettes.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Recettes</a>
             </div>
             <div class="hidden md:flex items-center gap-4">
-                <a href="connexion.html" class="p-2 rounded-full hover:bg-sp-100 transition-colors" title="Mes favoris">
-                    <i data-lucide="heart" class="w-5 h-5"></i>
-                </a>
-                <a href="connexion.html" class="ml-2 px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all duration-300">Connexion</a>
+                <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
             </div>
             <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors">
                 <i data-lucide="menu" class="w-6 h-6"></i>
@@ -77,548 +71,511 @@
         <div class="px-4 py-6 space-y-4">
             <a href="index.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Accueil</a>
             <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
-            <a href="connexion.html" class="block w-full text-center px-5 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold mt-2">Connexion</a>
+            <a href="connexion.html" class="block w-full text-center px-5 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Connexion</a>
         </div>
     </div>
 </nav>
 
-<!-- HERO IMAGE -->
-<section class="pt-20" id="heroSection">
-    <div class="relative h-[50vh] sm:h-[60vh] overflow-hidden bg-gray-200">
-        <img id="heroImg" src="" alt="" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-t from-encre/60 via-encre/20 to-transparent"></div>
-
-        <!-- Breadcrumb -->
-        <div class="absolute top-6 left-0 right-0">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <nav class="flex items-center gap-2 text-white/80 text-sm">
-                    <a href="index.html" class="hover:text-white transition-colors">Accueil</a>
-                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    <a href="recettes.html" class="hover:text-white transition-colors">Recettes</a>
-                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                    <span id="breadcrumbTitle" class="text-white font-medium">…</span>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Action buttons -->
-        <div class="absolute top-6 right-0">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex gap-2">
-                <button onclick="copyLink()" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all" title="Copier le lien">
-                    <i data-lucide="link" class="w-5 h-5"></i>
-                </button>
-                <button onclick="shareOn('facebook')" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all" title="Partager sur Facebook">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                </button>
-                <button onclick="window.location.href='connexion.html'" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-all" title="Ajouter aux favoris" id="favBtn">
-                    <i data-lucide="heart" class="w-5 h-5"></i>
-                </button>
-            </div>
-        </div>
+<!-- ===== LOADING ===== -->
+<div id="loadingState" class="min-h-screen flex items-center justify-center pt-20">
+    <div class="text-center">
+        <svg class="animate-spin mx-auto mb-4 w-10 h-10 text-sp-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.291l3-2z"></path>
+        </svg>
+        <p class="text-gray-500">Chargement de la recette…</p>
     </div>
-</section>
-
-<!-- RECIPE CONTENT -->
-<section class="relative -mt-20 z-10 pb-20" id="recipeContent">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <!-- Title Card -->
-        <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-10" data-aos="fade-up">
-            <!-- Tags -->
-            <div class="flex flex-wrap gap-2 mb-4" id="tagsList"></div>
-
-            <h1 id="recipeTitle" class="text-3xl sm:text-4xl lg:text-5xl font-display font-bold leading-tight"></h1>
-            <p id="recipeDesc" class="mt-4 text-gray-500 text-lg leading-relaxed"></p>
-
-            <!-- Author & Rating -->
-            <div class="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-gray-100">
-                <div class="flex items-center gap-3">
-                    <div id="authorAvatar" class="w-12 h-12 rounded-full ring-2 ring-sp-200 flex items-center justify-center text-white text-sm font-bold flex-shrink-0"></div>
-                    <div>
-                        <p class="font-semibold" id="authorName"></p>
-                        <p class="text-sm text-gray-400" id="authorMeta"></p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div id="starsDisplay" class="rating-stars"></div>
-                    <span class="text-lg font-bold ml-1" id="ratingVal"></span>
-                    <span class="text-sm text-gray-400" id="ratingCount"></span>
-                </div>
-            </div>
-
-            <!-- Quick Info Bar -->
-            <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="bg-sp-50 rounded-2xl p-4 text-center">
-                    <i data-lucide="clock" class="w-6 h-6 text-sp-500 mx-auto mb-2"></i>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide">Préparation</p>
-                    <p class="text-lg font-bold mt-1" id="prepTimeVal"></p>
-                </div>
-                <div class="bg-or-50 rounded-2xl p-4 text-center">
-                    <i data-lucide="cooking-pot" class="w-6 h-6 text-or-600 mx-auto mb-2"></i>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide">Cuisson</p>
-                    <p class="text-lg font-bold mt-1" id="cookTimeVal"></p>
-                </div>
-                <div class="bg-amber-50 rounded-2xl p-4 text-center">
-                    <i data-lucide="gauge" class="w-6 h-6 text-amber-600 mx-auto mb-2"></i>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide">Difficulté</p>
-                    <p class="text-lg font-bold mt-1 capitalize" id="difficultyVal"></p>
-                </div>
-                <div class="bg-purple-50 rounded-2xl p-4 text-center">
-                    <i data-lucide="flame" class="w-6 h-6 text-purple-600 mx-auto mb-2"></i>
-                    <p class="text-xs text-gray-500 uppercase tracking-wide">Calories</p>
-                    <p class="text-lg font-bold mt-1" id="caloriesVal"></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Two Column Layout -->
-        <div class="mt-10 grid lg:grid-cols-3 gap-8">
-
-            <!-- LEFT: Ingredients + Timer -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-2xl shadow-sm p-6 sticky top-24" data-aos="fade-right">
-                    <h2 class="text-2xl font-display font-bold mb-2">Ingrédients</h2>
-
-                    <!-- Portions Adjuster -->
-                    <div class="flex items-center justify-between mb-6 p-3 bg-sp-50 rounded-xl">
-                        <span class="text-sm font-medium text-gray-600">Portions</span>
-                        <div class="flex items-center gap-3">
-                            <button id="portionsMinus" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:border-sp-500 hover:text-sp-500 transition-all text-lg font-bold">−</button>
-                            <span id="portionsCount" class="text-xl font-bold text-sp-600 w-6 text-center">4</span>
-                            <button id="portionsPlus" class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:border-sp-500 hover:text-sp-500 transition-all text-lg font-bold">+</button>
-                        </div>
-                    </div>
-
-                    <div id="ingredientsList" class="space-y-0"></div>
-
-                    <!-- Timer -->
-                    <div class="mt-8 p-4 bg-gradient-to-br from-encre to-gray-800 rounded-2xl text-white">
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold flex items-center gap-2">
-                                <i data-lucide="timer" class="w-5 h-5 text-sp-400"></i>
-                                Timer
-                            </h3>
-                            <button id="timerResetBtn" class="text-xs text-gray-400 hover:text-white transition-colors">Réinitialiser</button>
-                        </div>
-                        <div id="timerDisplay" class="timer-display text-4xl font-bold text-center py-3 font-mono">20:00</div>
-                        <div class="flex gap-2 mt-3">
-                            <button id="timerBtn" class="flex-1 py-2.5 bg-or-600 hover:bg-or-700 rounded-xl font-semibold text-sm transition-colors">Démarrer</button>
-                        </div>
-                        <div class="flex gap-2 mt-2">
-                            <button class="timer-preset flex-1 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-center transition-colors" data-minutes="5">5 min</button>
-                            <button class="timer-preset flex-1 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-center transition-colors" data-minutes="10">10 min</button>
-                            <button class="timer-preset flex-1 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-center transition-colors" data-minutes="15">15 min</button>
-                            <button class="timer-preset flex-1 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs text-center transition-colors" data-minutes="20">20 min</button>
-                        </div>
-                    </div>
-
-                    <button onclick="window.print()" class="mt-4 w-full py-3 border-2 border-gray-200 rounded-xl text-sm font-medium hover:border-sp-500 hover:text-sp-600 transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="printer" class="w-4 h-4"></i>
-                        Imprimer la recette
-                    </button>
-                </div>
-            </div>
-
-            <!-- RIGHT: Steps + Nutrition + Comments -->
-            <div class="lg:col-span-2 space-y-8">
-
-                <!-- Steps -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8" data-aos="fade-left">
-                    <h2 class="text-2xl font-display font-bold mb-8">Préparation</h2>
-                    <div id="stepsList" class="space-y-8"></div>
-                </div>
-
-                <!-- Nutrition -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8" data-aos="fade-up">
-                    <h2 class="text-2xl font-display font-bold mb-6">Valeurs nutritionnelles <span class="text-base font-normal text-gray-400 font-body">par portion</span></h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4" id="nutritionGrid"></div>
-                </div>
-
-                <!-- Comments -->
-                <div class="bg-white rounded-2xl shadow-sm p-6 sm:p-8" data-aos="fade-up">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl font-display font-bold">Avis <span class="text-base font-normal text-gray-400 font-body" id="reviewCount"></span></h2>
-                    </div>
-
-                    <!-- Leave a review CTA -->
-                    <div class="mb-6 p-4 bg-sp-50 rounded-2xl flex items-center gap-4">
-                        <div class="w-10 h-10 bg-sp-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <i data-lucide="message-circle" class="w-5 h-5 text-sp-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-encre">Vous avez testé cette recette ?</p>
-                            <p class="text-xs text-gray-500">Connectez-vous pour laisser un avis.</p>
-                        </div>
-                        <a href="connexion.html" class="px-4 py-2 bg-sp-600 text-white text-sm font-semibold rounded-xl hover:bg-sp-700 transition-colors flex-shrink-0">Avis</a>
-                    </div>
-
-                    <!-- Sample comments -->
-                    <div id="commentsList" class="space-y-5"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Related recipes -->
-        <div class="mt-16" data-aos="fade-up">
-            <h2 class="text-3xl font-display font-bold mb-8">Vous aimerez aussi</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="relatedRecipes"></div>
-        </div>
-    </div>
-</section>
-
-<!-- 404 state (hidden by default) -->
-<div id="notFoundState" class="hidden min-h-[60vh] flex flex-col items-center justify-center text-center px-4 pt-32">
-    <div class="text-8xl mb-6">🍽️</div>
-    <h1 class="text-4xl font-display font-bold text-encre mb-4">Recette introuvable</h1>
-    <p class="text-gray-500 text-lg mb-8">Cette recette n'existe pas ou a été supprimée.</p>
-    <a href="recettes.html" class="px-8 py-4 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-lg hover:shadow-lg transition-all">
-        Voir toutes les recettes
-    </a>
 </div>
 
-<!-- Toast -->
-<div id="toastWrap" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-<!-- Back to top -->
-<button id="backToTop" class="fixed bottom-6 left-6 z-40 w-12 h-12 bg-sp-600 text-white rounded-full shadow-lg flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 hover:bg-sp-700">
-    <i data-lucide="arrow-up" class="w-5 h-5"></i>
-</button>
-
-<!-- FOOTER -->
-<footer class="bg-encre text-white pt-16 pb-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-8 mb-12">
-            <div class="col-span-2 md:col-span-1">
-                <a href="index.html" class="flex items-center gap-2 mb-4">
-                    <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center">
-                        <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
-                    </div>
-                    <span class="text-lg font-display font-bold">Sel &amp; Poivre</span>
-                </a>
-                <p class="text-gray-400 text-sm leading-relaxed">La plateforme de recettes moderne et communautaire.</p>
-            </div>
-            <div>
-                <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Explorer</h4>
-                <ul class="space-y-3">
-                    <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Toutes les recettes</a></li>
-                    <li><a href="inscription.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Publier une recette</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Informations</h4>
-                <ul class="space-y-3">
-                    <li><a href="cgu.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">CGU</a></li>
-                    <li><a href="confidentialite.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Confidentialité</a></li>
-                </ul>
-            </div>
+<!-- ===== ERROR ===== -->
+<div id="errorState" class="hidden min-h-screen flex items-center justify-center pt-20 px-4">
+    <div class="text-center max-w-md">
+        <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <i data-lucide="search-x" class="w-10 h-10 text-gray-400"></i>
         </div>
-        <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre. Tous droits réservés.</p>
-            <div class="flex items-center gap-2 text-gray-500 text-sm">
-                <span>Fait avec</span>
-                <i data-lucide="heart" class="w-4 h-4 text-red-400 fill-red-400"></i>
-                <span>en France</span>
-            </div>
-        </div>
+        <h1 class="text-2xl font-display font-bold mb-2">Recette introuvable</h1>
+        <p id="errorMsg" class="text-gray-500 mb-6">Cette recette n'existe pas ou n'est plus disponible.</p>
+        <a href="recettes.html" class="inline-block px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Toutes les recettes</a>
     </div>
-</footer>
+</div>
 
-<!-- Scripts -->
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script src="js/recipes-data.js"></script>
+<!-- ===== CONTENT ===== -->
+<main id="recipeContent" class="hidden">
+
+    <!-- HERO -->
+    <section class="pt-24 pb-12 bg-gradient-to-b from-sp-50 to-ivoire">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <a href="recettes.html" class="text-sm text-gray-500 hover:text-sp-600 transition-colors inline-flex items-center gap-1 mb-4">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour aux recettes
+            </a>
+            <div class="grid lg:grid-cols-2 gap-10 items-start">
+                <div>
+                    <div id="heroBadges" class="flex flex-wrap gap-2 mb-4"></div>
+                    <h1 id="heroTitle" class="text-4xl sm:text-5xl lg:text-6xl font-display font-bold leading-tight"></h1>
+                    <p id="heroDesc" class="mt-4 text-lg text-gray-600 leading-relaxed"></p>
+                    <!-- Author -->
+                    <div class="mt-6 flex items-center gap-3" id="authorBlock"></div>
+                    <!-- Stats -->
+                    <div class="mt-8 grid grid-cols-4 gap-3">
+                        <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
+                            <i data-lucide="clock" class="w-5 h-5 text-sp-500 mx-auto mb-1"></i>
+                            <p class="text-xs text-gray-500">Total</p>
+                            <p id="statTotal" class="text-sm font-bold">—</p>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
+                            <i data-lucide="users" class="w-5 h-5 text-sp-500 mx-auto mb-1"></i>
+                            <p class="text-xs text-gray-500">Portions</p>
+                            <p id="statServings" class="text-sm font-bold">—</p>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
+                            <i data-lucide="chef-hat" class="w-5 h-5 text-sp-500 mx-auto mb-1"></i>
+                            <p class="text-xs text-gray-500">Difficulté</p>
+                            <p id="statDifficulty" class="text-sm font-bold">—</p>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
+                            <i data-lucide="star" class="w-5 h-5 text-or-500 mx-auto mb-1"></i>
+                            <p class="text-xs text-gray-500">Note</p>
+                            <p id="statRating" class="text-sm font-bold">—</p>
+                        </div>
+                    </div>
+                    <!-- Actions -->
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <button id="favBtn" class="heart-btn px-5 py-3 bg-white border-2 border-gray-200 rounded-full font-semibold text-sm hover:bg-sp-50 hover:border-sp-200 transition-all flex items-center gap-2">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            <span id="favLabel">Ajouter aux favoris</span>
+                        </button>
+                        <button id="printBtn" class="px-5 py-3 bg-white border-2 border-gray-200 rounded-full font-semibold text-sm hover:bg-gray-50 transition-all flex items-center gap-2">
+                            <i data-lucide="printer" class="w-4 h-4"></i> Imprimer
+                        </button>
+                        <button id="shareBtn" class="px-5 py-3 bg-white border-2 border-gray-200 rounded-full font-semibold text-sm hover:bg-gray-50 transition-all flex items-center gap-2">
+                            <i data-lucide="share-2" class="w-4 h-4"></i> Partager
+                        </button>
+                        <a id="editLink" class="hidden px-5 py-3 bg-or-50 border-2 border-or-200 text-or-700 rounded-full font-semibold text-sm hover:bg-or-100 transition-all flex items-center gap-2">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i> Modifier
+                        </a>
+                    </div>
+                </div>
+                <div class="rounded-3xl overflow-hidden shadow-xl aspect-[4/3]">
+                    <img id="heroImg" alt="" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BODY -->
+    <section class="py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-3 gap-10">
+
+                <!-- INGREDIENTS -->
+                <aside class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-28">
+                        <div class="flex items-center justify-between mb-5">
+                            <h2 class="font-display font-bold text-2xl">Ingrédients</h2>
+                            <div class="flex items-center gap-2 text-sm">
+                                <button id="portionsMinus" class="w-7 h-7 rounded-full bg-sp-50 text-sp-600 font-bold hover:bg-sp-100">-</button>
+                                <span id="portionsCount" class="font-semibold w-6 text-center">4</span>
+                                <button id="portionsPlus" class="w-7 h-7 rounded-full bg-sp-50 text-sp-600 font-bold hover:bg-sp-100">+</button>
+                                <span class="text-xs text-gray-400 ml-1">pers.</span>
+                            </div>
+                        </div>
+                        <ul id="ingredientsList"></ul>
+                        <div class="mt-5 pt-4 border-t border-gray-100">
+                            <p class="text-xs text-gray-500 mb-2">Tags</p>
+                            <div id="tagsList" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- STEPS -->
+                <div class="lg:col-span-2">
+                    <h2 class="font-display font-bold text-2xl mb-6">Préparation</h2>
+                    <ol id="stepsList" class="space-y-6"></ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMMENTS -->
+    <section id="commentsSection" class="py-16 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="font-display font-bold text-3xl mb-8">Avis &amp; commentaires <span id="commentsCount" class="text-gray-400 text-2xl"></span></h2>
+
+            <!-- Add comment (logged in) -->
+            <div id="commentFormBox" class="hidden bg-ivoire rounded-2xl p-5 mb-8 border border-gray-100">
+                <p class="font-semibold mb-3">Laisser un avis</p>
+                <div id="ratingInput" class="flex gap-1.5 mb-3"></div>
+                <textarea id="commentText" rows="3" maxlength="2000" class="w-full p-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-sp-500 transition-all" placeholder="Partagez votre expérience…"></textarea>
+                <div id="commentError" class="hidden mt-2 text-sm text-red-600"></div>
+                <div class="flex justify-end mt-3">
+                    <button id="submitComment" class="px-5 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Publier mon avis</button>
+                </div>
+            </div>
+
+            <!-- Login CTA (anonymous) -->
+            <div id="commentLoginCTA" class="hidden bg-ivoire rounded-2xl p-5 mb-8 border border-gray-100 text-center">
+                <p class="text-gray-600 mb-3">Connectez-vous pour laisser un avis.</p>
+                <a href="connexion.html" class="inline-block px-5 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Se connecter</a>
+            </div>
+
+            <!-- Comments list -->
+            <div id="commentsList" class="space-y-5">
+                <p class="text-gray-400 text-center py-8">Aucun avis pour le moment. Soyez le premier !</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-encre text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-sp-500 to-sp-600 rounded-lg flex items-center justify-center">
+                    <i data-lucide="utensils" class="w-4 h-4 text-white"></i>
+                </div>
+                <span class="text-lg font-display font-bold">Sel &amp; Poivre</span>
+            </a>
+            <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre. Tous droits réservés.</p>
+        </div>
+    </footer>
+</main>
+
+<script src="js/auth-ui.js"></script>
 <script>
-AOS.init({ duration: 600, once: true, offset: 60 });
+(function () {
+    const PALETTE = ['#E85D26','#16A34A','#7C3AED','#DB2777','#0284C7','#CA8A04'];
+    function colorFor(name){let h=0;for(const c of (name||''))h=(h*31+c.charCodeAt(0))&0xFFFF;return PALETTE[h%PALETTE.length];}
+    function initials(name){return (name||'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+    function fmtTime(min){if(!min)return '—';if(min<60)return min+' min';const h=Math.floor(min/60),m=min%60;return m?h+'h'+String(m).padStart(2,'0'):h+'h';}
+    function fmtDate(iso){try{return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});}catch{return '';}}
+    function realisticCount(raw,id){let n=parseInt(raw)||0;if(n>30)n=2+(Math.abs(parseInt(id)||0)%7);return n;}
+    function escape(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-// ── Helpers ──────────────────────────────────────────────────
-const palette = ['#E85D26','#16A34A','#7C3AED','#D97706','#0284C7','#DB2777','#059669','#DC2626'];
-function colorFor(name) {
-    let h = 0;
-    for (let i = 0; i < name.length; i++) h = (h << 5) - h + name.charCodeAt(i);
-    return palette[Math.abs(h) % palette.length];
-}
-function initials(name) {
-    return name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
-}
-function fmtTime(min) {
-    if (!min) return '—';
-    if (min < 60) return min + ' min';
-    const h = Math.floor(min / 60), m = min % 60;
-    return h + 'h' + (m ? m.toString().padStart(2, '0') : '');
-}
-function stars(rating) {
-    let s = '';
-    for (let i = 1; i <= 5; i++) {
-        const full = i <= Math.floor(rating);
-        const half = !full && i - rating < 1;
-        s += `<svg class="w-5 h-5 ${full || half ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+    function starsHTML(rating){
+        let s = '';
+        for (let i=1;i<=5;i++){
+            const f = i <= Math.round(rating || 0);
+            s += `<svg class="w-4 h-4 ${f?'text-amber-400 fill-amber-400':'text-gray-300 fill-gray-200'}" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+        }
+        return s;
     }
-    return s;
-}
-function toast(msg, ok = true) {
-    const t = document.createElement('div');
-    t.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 ${ok ? 'bg-encre' : 'bg-red-600'} text-white text-sm rounded-2xl shadow-xl translate-y-4 opacity-0 transition-all duration-300`;
-    t.textContent = msg;
-    document.getElementById('toastWrap').appendChild(t);
-    requestAnimationFrame(() => t.classList.remove('translate-y-4','opacity-0'));
-    setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.remove(), 300); }, 3000);
-}
 
-// ── Tag color mapping ────────────────────────────────────────
-const tagColors = {
-    végétarien: 'bg-or-50 text-or-700 border-or-200',
-    vegan: 'bg-or-50 text-or-700 border-or-200',
-    'sans gluten': 'bg-yellow-50 text-yellow-700 border-yellow-200',
-    français: 'bg-blue-50 text-blue-700 border-blue-200',
-    classique: 'bg-sp-50 text-sp-700 border-sp-200',
-    rapide: 'bg-green-50 text-green-700 border-green-200',
-    hiver: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    été: 'bg-orange-50 text-orange-700 border-orange-200',
-    _default: 'bg-gray-100 text-gray-600 border-gray-200',
-};
-function tagClass(tag) { return tagColors[tag] || tagColors._default; }
-
-// ── Sample comments ──────────────────────────────────────────
-const SAMPLE_COMMENTS = [
-    { name:'Marie L.', note:5, text:'Absolument délicieux ! J'ai suivi la recette à la lettre et le résultat était parfait. Ma famille a adoré.', date:'il y a 3 jours' },
-    { name:'Lucas P.', note:5, text:'La meilleure version que j'ai testée. Les proportions sont exactes et les étapes très bien expliquées.', date:'il y a 1 semaine' },
-    { name:'Nina T.', note:4, text:'Très bonne recette, j'ai ajouté un peu plus d'épices selon mes goûts. Je referai sans hésiter !', date:'il y a 2 semaines' },
-];
-
-// ── Main render ──────────────────────────────────────────────
-function render(r) {
-    document.getElementById('pageTitle').textContent = r.title + ' — Sel & Poivre';
-    document.getElementById('pageDesc').content = r.description;
-
-    // Hero
-    const heroImg = document.getElementById('heroImg');
-    heroImg.src = r.image;
-    heroImg.alt = r.title;
-    document.getElementById('breadcrumbTitle').textContent = r.title;
-
-    // Tags
-    const tagsList = document.getElementById('tagsList');
-    const catLabel = { plats:'Plat principal', entrées:'Entrée', desserts:'Dessert', soupes:'Soupe', boulangerie:'Boulangerie', apéro:'Apéritif' };
-    const allTags = [r.category, ...(r.tags||[])];
-    tagsList.innerHTML = allTags.map((t, i) => `<span class="px-3 py-1 ${tagClass(t)} rounded-full text-xs font-semibold border">${i===0?(catLabel[t]||t):t}</span>`).join('');
-
-    // Title & desc
-    document.getElementById('recipeTitle').textContent = r.title;
-    document.getElementById('recipeDesc').textContent = r.description;
-
-    // Author
-    const avatarEl = document.getElementById('authorAvatar');
-    if (r.authorType === 'mijote') {
-        avatarEl.style.background = 'linear-gradient(135deg,#F97316,#EA580C)';
-        avatarEl.textContent = 'MJ';
-    } else {
-        avatarEl.style.background = colorFor(r.author);
-        avatarEl.textContent = initials(r.author);
+    function getBadge(r) {
+        const tags = (r.tags || []);
+        if (r.author_type === 'mijote')               return '<span class="px-3 py-1 bg-sp-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Sel &amp; Poivre</span>';
+        if (tags.some(t => /végétar/i.test(t)))       return '<span class="px-3 py-1 bg-green-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Végétarien</span>';
+        if (tags.some(t => /vegan/i.test(t)))          return '<span class="px-3 py-1 bg-green-600/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Vegan</span>';
+        if (tags.some(t => /sans gluten/i.test(t)))    return '<span class="px-3 py-1 bg-blue-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Sans gluten</span>';
+        if (+r.total_time > 0 && +r.total_time <= 20)  return '<span class="px-3 py-1 bg-or-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Rapide</span>';
+        if (r.difficulty === 'Difficile')              return '<span class="px-3 py-1 bg-amber-600/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Expert</span>';
+        return '';
     }
-    document.getElementById('authorName').textContent = r.authorType === 'mijote' ? 'SEL & POIVRE — Recette officielle' : r.author;
-    document.getElementById('authorMeta').textContent = `Publiée le ${new Date(r.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})} · ${r.ratingCount.toLocaleString('fr-FR')} avis`;
 
-    // Rating
-    document.getElementById('starsDisplay').innerHTML = stars(r.rating);
-    document.getElementById('ratingVal').textContent = r.rating.toFixed(1);
-    document.getElementById('ratingCount').textContent = `(${r.ratingCount.toLocaleString('fr-FR')} avis)`;
+    let currentRecipe = null;
+    let currentPortions = 4;
+    let basePortions = 4;
 
-    // Quick info
-    document.getElementById('prepTimeVal').textContent = fmtTime(r.prepTime);
-    document.getElementById('cookTimeVal').textContent = r.cookTime ? fmtTime(r.cookTime) : '—';
-    document.getElementById('difficultyVal').textContent = r.difficulty;
-    document.getElementById('caloriesVal').textContent = r.calories + ' kcal';
+    function showError(msg) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('errorState').classList.remove('hidden');
+        document.getElementById('errorMsg').textContent = msg || "Cette recette n'existe pas ou n'est plus disponible.";
+        if (window.lucide) lucide.createIcons();
+    }
 
-    // Portions & ingredients
-    let basePortion = r.servings || 4;
-    let currentPortion = basePortion;
-    document.getElementById('portionsCount').textContent = currentPortion;
+    function renderRecipe(r) {
+        currentRecipe = r;
+        document.title = r.title + ' — Sel & Poivre';
+        document.getElementById('pageDesc').setAttribute('content', r.description || 'Recette Sel & Poivre');
+
+        // Hero
+        document.getElementById('heroTitle').textContent = r.title;
+        document.getElementById('heroDesc').textContent  = r.description || '';
+        document.getElementById('heroImg').src = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=1200';
+        document.getElementById('heroImg').alt = r.title;
+        const badge = getBadge(r);
+        document.getElementById('heroBadges').innerHTML = badge + (r.category ? `<span class="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-semibold text-gray-600 capitalize">${r.category}</span>` : '');
+
+        // Author
+        const authorName = r.author_name || 'Communauté';
+        const authorBlock = document.getElementById('authorBlock');
+        if (r.author_type === 'mijote') {
+            authorBlock.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sp-500 to-sp-600 flex items-center justify-center text-white font-bold text-xs">SP</div>
+                <div><p class="text-sm font-semibold">Équipe Sel &amp; Poivre</p><p class="text-xs text-gray-500">Recette officielle</p></div>`;
+        } else {
+            authorBlock.innerHTML = `
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs" style="background:${colorFor(authorName)}">${initials(authorName)}</div>
+                <div><p class="text-sm font-semibold">${escape(authorName)}</p><p class="text-xs text-gray-500">Membre · ${r.created_at ? fmtDate(r.created_at) : ''}</p></div>`;
+        }
+
+        // Stats
+        document.getElementById('statTotal').textContent      = fmtTime(+r.total_time);
+        document.getElementById('statServings').textContent   = (r.servings || 4) + ' pers.';
+        document.getElementById('statDifficulty').textContent = r.difficulty || 'Facile';
+        const ratingVal = parseFloat(r.rating || 0);
+        const ratingCnt = realisticCount(r.rating_count, r.id);
+        document.getElementById('statRating').innerHTML = ratingVal > 0 ? `${ratingVal.toFixed(1)} <span class="text-xs text-gray-400">(${ratingCnt})</span>` : '<span class="text-xs text-gray-400">Aucun avis</span>';
+
+        // Edit link if owner or admin
+        const u = window.SP && window.SP.user;
+        if (u && (u.role === 'admin' || u.id == r.author_id)) {
+            const link = document.getElementById('editLink');
+            link.href = 'publier.html?slug=' + encodeURIComponent(r.slug);
+            link.classList.remove('hidden');
+        }
+
+        // Ingredients
+        basePortions = parseInt(r.servings || 4);
+        currentPortions = basePortions;
+        document.getElementById('portionsCount').textContent = currentPortions;
+        renderIngredients();
+
+        // Steps
+        const stepsBox = document.getElementById('stepsList');
+        const steps = (r.steps || []).map(s => typeof s === 'string' ? s : (s.description || ''));
+        stepsBox.innerHTML = steps.length === 0
+            ? '<li class="text-gray-400">Aucune étape renseignée.</li>'
+            : steps.map((txt, i) => `<li class="step-card" data-step="${i+1}"><p class="text-base leading-relaxed">${escape(txt)}</p></li>`).join('');
+
+        // Tags
+        const tagsBox = document.getElementById('tagsList');
+        const tags = r.tags || [];
+        tagsBox.innerHTML = tags.length === 0 ? '<span class="text-xs text-gray-400">Aucun tag</span>' : tags.map(t => `<span class="px-2.5 py-1 bg-sp-50 text-sp-700 rounded-full text-xs font-medium">${escape(t)}</span>`).join('');
+
+        // Favorite button
+        updateFavBtn(r.is_favorited);
+
+        // Show
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('recipeContent').classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+    }
 
     function renderIngredients() {
-        const ratio = currentPortion / basePortion;
-        document.getElementById('ingredientsList').innerHTML = (r.ingredients || []).map((ing, i) => {
-            const qtyRaw = parseFloat(ing.qty);
-            let qtyDisplay = '';
-            if (!isNaN(qtyRaw) && ing.qty !== '') {
-                const adjusted = qtyRaw * ratio;
-                qtyDisplay = Number.isInteger(adjusted) ? adjusted : parseFloat(adjusted.toFixed(1));
+        const r = currentRecipe;
+        const list = document.getElementById('ingredientsList');
+        const ings = r.ingredients || [];
+        if (ings.length === 0) { list.innerHTML = '<li class="text-gray-400 text-sm py-2">Aucun ingrédient renseigné.</li>'; return; }
+        const factor = currentPortions / (basePortions || 1);
+        list.innerHTML = ings.map((ing, i) => {
+            const name = ing.name || '';
+            let amount = ing.amount || '';
+            const numMatch = String(amount).match(/^(\d+(?:[.,]\d+)?)/);
+            if (numMatch) {
+                const n = parseFloat(numMatch[1].replace(',', '.')) * factor;
+                const formatted = n % 1 === 0 ? n.toString() : n.toFixed(1).replace('.0','');
+                amount = formatted + amount.slice(numMatch[1].length);
             }
-            const label = qtyDisplay !== '' ? `<strong data-base-qty="${qtyRaw}">${qtyDisplay}</strong> ${ing.unit ? ing.unit + ' ' : ''}${ing.name}` : ing.name;
-            return `<div class="ingredient-item" onclick="this.classList.toggle('checked')"><div class="checkbox"></div><span>${label}</span></div>`;
+            const unit = ing.unit || '';
+            const display = [amount, unit, name].filter(Boolean).join(' ');
+            return `
+            <li class="ingredient-item" data-i="${i}">
+                <div class="checkbox"></div>
+                <span class="ing-text">${escape(display)}</span>
+            </li>`;
         }).join('');
-    }
-    renderIngredients();
-
-    document.getElementById('portionsMinus').onclick = () => { if (currentPortion > 1) { currentPortion--; document.getElementById('portionsCount').textContent = currentPortion; renderIngredients(); } };
-    document.getElementById('portionsPlus').onclick = () => { currentPortion++; document.getElementById('portionsCount').textContent = currentPortion; renderIngredients(); };
-
-    // Steps
-    document.getElementById('stepsList').innerHTML = (r.steps || []).map((s, i) => `
-        <div class="step-card" data-step="${i+1}">
-            <h3 class="text-lg font-bold text-encre mb-2">${s.title}</h3>
-            <p class="text-gray-600 leading-relaxed">${s.text}</p>
-        </div>
-    `).join('');
-
-    // Nutrition
-    const nut = r.nutrition || {};
-    const nutItems = [
-        { label:'Calories', val: r.calories + ' kcal', color:'bg-purple-50 text-purple-700' },
-        { label:'Glucides', val: (nut.glucides||0) + ' g', color:'bg-amber-50 text-amber-700' },
-        { label:'Protéines', val: (nut.proteines||0) + ' g', color:'bg-blue-50 text-blue-700' },
-        { label:'Lipides', val: (nut.lipides||0) + ' g', color:'bg-red-50 text-red-700' },
-        { label:'Fibres', val: (nut.fibres||0) + ' g', color:'bg-green-50 text-green-700' },
-    ];
-    document.getElementById('nutritionGrid').innerHTML = nutItems.map(n => `
-        <div class="${n.color} rounded-2xl p-4 text-center">
-            <p class="text-xl font-bold">${n.val}</p>
-            <p class="text-xs uppercase tracking-wide mt-1 opacity-80">${n.label}</p>
-        </div>
-    `).join('');
-
-    // Comments
-    document.getElementById('reviewCount').textContent = `(${r.ratingCount.toLocaleString('fr-FR')})`;
-    document.getElementById('commentsList').innerHTML = SAMPLE_COMMENTS.map(c => `
-        <div class="flex gap-4">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style="background:${colorFor(c.name)}">${initials(c.name)}</div>
-            <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="font-semibold text-sm">${c.name}</span>
-                    <div class="flex">${[1,2,3,4,5].map(i=>`<svg class="w-3.5 h-3.5 ${i<=c.note?'text-amber-400 fill-amber-400':'text-gray-200 fill-gray-200'}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`).join('')}</div>
-                    <span class="text-xs text-gray-400">${c.date}</span>
-                </div>
-                <p class="text-sm text-gray-600 leading-relaxed">${c.text}</p>
-            </div>
-        </div>
-    `).join('');
-
-    // Related recipes (same category, different slug)
-    const related = PUBLISHED_RECIPES.filter(rx => rx.slug !== r.slug && rx.category === r.category).slice(0, 3);
-    const fallback = PUBLISHED_RECIPES.filter(rx => rx.slug !== r.slug).slice(0, 3);
-    const toShow = related.length >= 2 ? related : fallback;
-    document.getElementById('relatedRecipes').innerHTML = toShow.map(rx => `
-        <a href="recette-detail.html?slug=${rx.slug}" class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
-            <div class="relative aspect-[4/3] overflow-hidden">
-                <img src="${rx.image}" alt="${rx.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy">
-                <div class="absolute inset-0 bg-gradient-to-t from-encre/30 to-transparent"></div>
-            </div>
-            <div class="p-4">
-                <p class="font-display font-bold group-hover:text-sp-600 transition-colors leading-snug">${rx.title}</p>
-                <div class="flex items-center justify-between mt-2 text-xs text-gray-400">
-                    <span>${fmtTime(rx.prepTime + rx.cookTime)}</span>
-                    <span class="flex items-center gap-1">
-                        <svg class="w-3.5 h-3.5 text-amber-400 fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        ${rx.rating}
-                    </span>
-                </div>
-            </div>
-        </a>
-    `).join('');
-}
-
-// ── Init ─────────────────────────────────────────────────────
-function init() {
-    const params = new URLSearchParams(window.location.search);
-    const slug = params.get('slug');
-
-    if (!slug) {
-        // No slug: redirect to first published recipe
-        if (typeof PUBLISHED_RECIPES !== 'undefined' && PUBLISHED_RECIPES.length) {
-            window.location.replace('recette-detail.html?slug=' + PUBLISHED_RECIPES[0].slug);
-        }
-        return;
-    }
-
-    const recipe = (typeof RECIPES_DB !== 'undefined' ? RECIPES_DB : []).find(r => r.slug === slug);
-
-    if (!recipe || recipe.status !== 'published') {
-        document.getElementById('heroSection').classList.add('hidden');
-        document.getElementById('recipeContent').classList.add('hidden');
-        document.getElementById('notFoundState').classList.remove('hidden');
-        document.getElementById('notFoundState').classList.add('flex');
-        lucide.createIcons();
-        return;
-    }
-
-    render(recipe);
-    lucide.createIcons();
-    initTimer(recipe);
-    initNavbar();
-}
-
-// ── Timer ────────────────────────────────────────────────────
-function initTimer(recipe) {
-    let totalSec = (recipe.cookTime || 20) * 60;
-    let remaining = totalSec;
-    let running = false;
-    let interval = null;
-
-    document.getElementById('timerDisplay').textContent = fmtTimer(remaining);
-    document.getElementById('timerResetBtn').addEventListener('click', () => {
-        clearInterval(interval); running = false;
-        document.getElementById('timerBtn').textContent = 'Démarrer';
-        document.getElementById('timerBtn').className = document.getElementById('timerBtn').className.replace('bg-red-500 hover:bg-red-600','bg-or-600 hover:bg-or-700');
-        document.getElementById('timerBtn').classList.add('bg-or-600','hover:bg-or-700');
-        remaining = totalSec;
-        document.getElementById('timerDisplay').textContent = fmtTimer(remaining);
-    });
-    document.getElementById('timerBtn').addEventListener('click', () => {
-        if (running) {
-            clearInterval(interval); running = false;
-            document.getElementById('timerBtn').textContent = 'Reprendre';
-        } else {
-            running = true;
-            document.getElementById('timerBtn').textContent = 'Pause';
-            interval = setInterval(() => {
-                remaining--;
-                document.getElementById('timerDisplay').textContent = fmtTimer(remaining);
-                if (remaining <= 0) {
-                    clearInterval(interval); running = false;
-                    document.getElementById('timerBtn').textContent = 'Terminé !';
-                    toast('⏱️ Timer terminé !');
-                }
-            }, 1000);
-        }
-    });
-    document.querySelectorAll('.timer-preset').forEach(btn => {
-        btn.addEventListener('click', () => {
-            clearInterval(interval); running = false;
-            document.getElementById('timerBtn').textContent = 'Démarrer';
-            totalSec = parseInt(btn.dataset.minutes) * 60;
-            remaining = totalSec;
-            document.getElementById('timerDisplay').textContent = fmtTimer(remaining);
+        list.querySelectorAll('.ingredient-item').forEach(it => {
+            it.addEventListener('click', () => it.classList.toggle('checked'));
         });
+    }
+
+    function updateFavBtn(favorited) {
+        const btn = document.getElementById('favBtn');
+        const lbl = document.getElementById('favLabel');
+        if (favorited) {
+            btn.classList.add('is-fav');
+            lbl.textContent = 'Retirer des favoris';
+        } else {
+            btn.classList.remove('is-fav');
+            lbl.textContent = 'Ajouter aux favoris';
+        }
+    }
+
+    document.getElementById('favBtn').addEventListener('click', async () => {
+        if (!window.SP.user) { window.location.href = 'connexion.html'; return; }
+        const r = currentRecipe; if (!r) return;
+        try {
+            const res = await fetch(window.SP.apiPath('favorites.php?action=toggle'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ recipe_id: r.id })
+            });
+            const data = await res.json();
+            if (data.success) { r.is_favorited = data.favorited; updateFavBtn(data.favorited); }
+        } catch {}
     });
-}
-function fmtTimer(s) {
-    const m = Math.floor(s / 60), sec = s % 60;
-    return m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
-}
 
-// ── Navbar scroll ────────────────────────────────────────────
-function initNavbar() {
-    const nav = document.getElementById('navbar');
-    const mobile = document.getElementById('mobileMenu');
-    document.getElementById('mobileMenuBtn').addEventListener('click', () => mobile.classList.toggle('hidden'));
-    window.addEventListener('scroll', () => {
-        nav.classList.toggle('scrolled', window.scrollY > 20);
-        const btn = document.getElementById('backToTop');
-        if (window.scrollY > 400) { btn.classList.remove('opacity-0','pointer-events-none'); }
-        else { btn.classList.add('opacity-0','pointer-events-none'); }
-    }, { passive: true });
-    document.getElementById('backToTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-}
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+        const url = window.location.href;
+        const title = currentRecipe ? currentRecipe.title : document.title;
+        if (navigator.share) {
+            try { await navigator.share({ title, url }); } catch {}
+        } else {
+            try { await navigator.clipboard.writeText(url); alert('Lien copié dans le presse-papiers'); } catch { alert(url); }
+        }
+    });
 
-// ── Share ────────────────────────────────────────────────────
-function copyLink() {
-    navigator.clipboard.writeText(window.location.href).then(() => toast('Lien copié !')).catch(() => toast('Impossible de copier', false));
-}
-function shareOn(platform) {
-    const url = encodeURIComponent(window.location.href);
-    if (platform === 'facebook') window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
-}
+    // Portions
+    document.getElementById('portionsMinus').addEventListener('click', () => {
+        if (currentPortions > 1) { currentPortions--; document.getElementById('portionsCount').textContent = currentPortions; renderIngredients(); }
+    });
+    document.getElementById('portionsPlus').addEventListener('click', () => {
+        if (currentPortions < 50) { currentPortions++; document.getElementById('portionsCount').textContent = currentPortions; renderIngredients(); }
+    });
 
-// ── Start ────────────────────────────────────────────────────
-init();
+    // Mobile menu
+    const mb = document.getElementById('mobileMenuBtn');
+    const mm = document.getElementById('mobileMenu');
+    if (mb && mm) mb.addEventListener('click', () => mm.classList.toggle('hidden'));
+
+    // ── Comments ────────────────────────────────────────────────
+    let pickedRating = 0;
+
+    function renderRatingInput() {
+        const box = document.getElementById('ratingInput');
+        let html = '<div class="flex items-center gap-2"><span class="text-sm text-gray-600 mr-1">Votre note :</span>';
+        for (let i = 1; i <= 5; i++) {
+            html += `<button type="button" data-r="${i}" class="star-input w-7 h-7 text-gray-300 hover:text-amber-400" aria-label="${i} étoile${i>1?'s':''}">
+                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>`;
+        }
+        html += '<span id="ratingPicked" class="text-sm text-gray-400 ml-2">Cliquez pour noter</span></div>';
+        box.innerHTML = html;
+        box.querySelectorAll('.star-input').forEach(b => {
+            b.addEventListener('click', () => {
+                pickedRating = +b.dataset.r;
+                box.querySelectorAll('.star-input').forEach((s, i) => {
+                    s.classList.toggle('text-amber-400', i < pickedRating);
+                    s.classList.toggle('text-gray-300', i >= pickedRating);
+                });
+                document.getElementById('ratingPicked').textContent = pickedRating + ' / 5';
+            });
+        });
+    }
+
+    function commentItem(c) {
+        const name = c.username || 'Utilisateur';
+        const u = window.SP && window.SP.user;
+        const canDelete = u && (c.user_id == u.id || u.role === 'admin');
+        const ratingHTML = c.rating ? `<div class="flex gap-0.5">${starsHTML(c.rating)}</div>` : '';
+        return `
+        <div class="bg-ivoire rounded-2xl p-5 border border-gray-100" data-id="${c.id}">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style="background:${colorFor(name)}">${initials(name)}</div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-3">
+                            <p class="font-semibold text-sm">${escape(name)}</p>
+                            ${ratingHTML}
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <p class="text-xs text-gray-400">${fmtDate(c.created_at)}</p>
+                            ${canDelete ? `<button class="js-del-comment text-xs text-red-500 hover:underline">Supprimer</button>` : ''}
+                        </div>
+                    </div>
+                    <p class="mt-2 text-gray-700 text-sm leading-relaxed whitespace-pre-line">${escape(c.content)}</p>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    async function loadComments(recipeId) {
+        const box = document.getElementById('commentsList');
+        try {
+            const res = await fetch(window.SP.apiPath('comments.php?action=list&recipe_id=') + recipeId, { credentials: 'include' });
+            const data = await res.json();
+            const list = data.comments || [];
+            document.getElementById('commentsCount').textContent = list.length ? '· ' + list.length : '';
+            if (list.length === 0) {
+                box.innerHTML = '<p class="text-gray-400 text-center py-8">Aucun avis pour le moment. Soyez le premier !</p>';
+            } else {
+                box.innerHTML = list.map(commentItem).join('');
+                box.querySelectorAll('.js-del-comment').forEach(b => {
+                    b.addEventListener('click', async () => {
+                        const id = b.closest('[data-id]').dataset.id;
+                        if (!confirm('Supprimer ce commentaire ?')) return;
+                        try {
+                            await fetch(window.SP.apiPath('comments.php?action=delete&id=') + id, { method: 'DELETE', credentials: 'include' });
+                            loadComments(recipeId);
+                            // refresh recipe rating
+                            refreshRating();
+                        } catch {}
+                    });
+                });
+            }
+        } catch {
+            box.innerHTML = '<p class="text-red-500 text-center py-8">Impossible de charger les avis.</p>';
+        }
+    }
+
+    async function refreshRating() {
+        if (!currentRecipe) return;
+        try {
+            const res = await fetch(window.SP.apiPath('recipes.php?action=single&slug=') + encodeURIComponent(currentRecipe.slug), { credentials: 'include' });
+            const data = await res.json();
+            if (data && !data.error) {
+                currentRecipe.rating = data.rating;
+                currentRecipe.rating_count = data.rating_count;
+                const ratingVal = parseFloat(data.rating || 0);
+                const ratingCnt = realisticCount(data.rating_count, data.id);
+                document.getElementById('statRating').innerHTML = ratingVal > 0 ? `${ratingVal.toFixed(1)} <span class="text-xs text-gray-400">(${ratingCnt})</span>` : '<span class="text-xs text-gray-400">Aucun avis</span>';
+            }
+        } catch {}
+    }
+
+    document.getElementById('submitComment').addEventListener('click', async () => {
+        const r = currentRecipe; if (!r) return;
+        const content = document.getElementById('commentText').value.trim();
+        const errBox  = document.getElementById('commentError');
+        errBox.classList.add('hidden');
+        if (!content) { errBox.textContent = 'Le commentaire ne peut pas être vide.'; errBox.classList.remove('hidden'); return; }
+
+        try {
+            const res = await fetch(window.SP.apiPath('comments.php?action=add'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ recipe_id: r.id, content, rating: pickedRating || null })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || 'Erreur');
+            document.getElementById('commentText').value = '';
+            pickedRating = 0;
+            renderRatingInput();
+            await loadComments(r.id);
+            await refreshRating();
+        } catch (e) {
+            errBox.textContent = e.message;
+            errBox.classList.remove('hidden');
+        }
+    });
+
+    function setupCommentBox() {
+        const u = window.SP && window.SP.user;
+        document.getElementById('commentFormBox').classList.toggle('hidden', !u);
+        document.getElementById('commentLoginCTA').classList.toggle('hidden', !!u);
+        if (u) renderRatingInput();
+    }
+
+    // ── Init ────────────────────────────────────────────────────
+    async function init() {
+        const slug = new URLSearchParams(window.location.search).get('slug');
+        if (!slug) { showError('Aucune recette demandée.'); return; }
+
+        try {
+            const res = await fetch(window.SP.apiPath('recipes.php?action=single&slug=') + encodeURIComponent(slug), { credentials: 'include' });
+            const data = await res.json();
+            if (!res.ok || data.error) throw new Error(data.error || 'Recette introuvable');
+            renderRecipe(data);
+            setupCommentBox();
+            await loadComments(data.id);
+        } catch (e) {
+            showError(e.message);
+        }
+    }
+    init();
+})();
 </script>
 </body>
 </html>

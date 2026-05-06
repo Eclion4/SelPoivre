@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon profil — Sel & Poivre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sp':     { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12' },
+                        'or':     { 50:'#FDF9EF',100:'#FDF3DC',300:'#F2C860',500:'#C4892A',600:'#A36E20' },
+                        'ivoire': '#F8F5EF',
+                        'encre':  '#18130F',
+                    },
+                    fontFamily: { 'display':['Playfair Display','serif'], 'body':['Inter','sans-serif'], 'handwrite':['Caveat','cursive'] }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background:#F8F5EF; font-family:'Inter',sans-serif; }
+        .field-input { width:100%; padding:11px 14px; background:#fff; border:1.5px solid #E5E7EB; border-radius:10px; font-size:0.9375rem; color:#18130F; outline:none; transition:all 0.2s; }
+        .field-input:focus { border-color:#C4311B; box-shadow:0 0 0 3px rgba(196,49,27,0.1); }
+        .field-input:disabled { background:#F9FAFB; color:#6B7280; }
+        .field-label { display:block; font-size:0.875rem; font-weight:600; color:#374151; margin-bottom:6px; }
+        .tab-btn { padding:14px 4px; border-bottom:2px solid transparent; color:#6B7280; font-weight:500; font-size:0.9375rem; transition:all .2s; cursor:pointer; }
+        .tab-btn:hover { color:#18130F; }
+        .tab-btn.active { color:#C4311B; border-bottom-color:#C4311B; font-weight:600; }
+        .badge-status { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:9999px; font-size:0.75rem; font-weight:600; }
+        .badge-published { background:#D1FAE5; color:#065F46; }
+        .badge-pending   { background:#FEF3C7; color:#92400E; }
+        .badge-rejected  { background:#FEE2E2; color:#991B1B; }
+        .recipe-mini-card { background:#fff; border-radius:14px; overflow:hidden; border:1px solid #E5E7EB; transition:all .2s; }
+        .recipe-mini-card:hover { box-shadow:0 8px 20px rgba(0,0,0,0.06); transform:translateY(-2px); }
+    </style>
+</head>
+<body class="text-encre">
+
+    <!-- NAVBAR -->
+    <nav id="navbar" class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl shadow-sm border-b border-sp-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="index.html" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300">
+                        <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="text-2xl font-display font-bold"><span class="text-sp-500">Sel</span><span class="text-encre"> &amp; Poivre</span></span>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Accueil</a>
+                    <a href="recettes.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Recettes</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+        <!-- ===== HEADER PROFIL ===== -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 mb-10">
+            <div id="avatarBox" class="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-md">SP</div>
+            <div class="flex-1 min-w-0">
+                <h1 id="displayName" class="text-3xl sm:text-4xl font-display font-bold">…</h1>
+                <p id="displayEmail" class="text-gray-500 text-sm mt-1">…</p>
+                <p id="memberSince" class="text-xs text-gray-400 mt-1"></p>
+            </div>
+            <a href="publier.html" class="px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Publier une recette
+            </a>
+        </div>
+
+        <!-- ===== STATS ===== -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <p class="text-2xl font-bold" id="statRecipes">—</p>
+                <p class="text-xs text-gray-500 mt-1">Recettes publiées</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <p class="text-2xl font-bold text-amber-600" id="statPending">—</p>
+                <p class="text-xs text-gray-500 mt-1">En attente</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <p class="text-2xl font-bold text-sp-600" id="statFavorites">—</p>
+                <p class="text-xs text-gray-500 mt-1">Favoris</p>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <p class="text-2xl font-bold text-or-600" id="statRating">—</p>
+                <p class="text-xs text-gray-500 mt-1">Note moyenne</p>
+            </div>
+        </div>
+
+        <!-- ===== TABS ===== -->
+        <div class="border-b border-gray-200 mb-8">
+            <div class="flex gap-8 overflow-x-auto -mb-px">
+                <button class="tab-btn active" data-tab="infos">Mon profil</button>
+                <button class="tab-btn" data-tab="mes-recettes">Mes recettes</button>
+                <button class="tab-btn" data-tab="favoris">Mes favoris</button>
+                <button class="tab-btn" data-tab="parametres">Paramètres</button>
+            </div>
+        </div>
+
+        <!-- ===== TAB: INFOS ===== -->
+        <section id="tab-infos" class="tab-pane">
+            <div class="grid lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-5">
+                        <h2 class="font-display font-bold text-xl">Informations personnelles</h2>
+                        <button id="editProfileBtn" class="text-sm text-sp-600 font-semibold hover:underline">Modifier</button>
+                    </div>
+                    <div id="profileSaveError" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm mb-4"></div>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="field-label">Pseudo</label>
+                            <input id="fldUsername" class="field-input" disabled>
+                        </div>
+                        <div>
+                            <label class="field-label">Email</label>
+                            <input id="fldEmail" type="email" class="field-input" disabled>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="field-label">Bio</label>
+                            <textarea id="fldBio" rows="3" maxlength="500" class="field-input" placeholder="Quelques mots sur vous, votre style culinaire…" disabled></textarea>
+                            <p class="text-xs text-gray-400 mt-1"><span id="bioCount">0</span>/500</p>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="field-label">URL d'avatar (facultatif)</label>
+                            <input id="fldAvatar" type="url" class="field-input" placeholder="https://…" disabled>
+                        </div>
+                    </div>
+                    <div id="profileEditActions" class="hidden mt-5 flex gap-3 justify-end">
+                        <button id="cancelEditBtn" class="px-5 py-2 border-2 border-gray-200 rounded-full font-semibold text-sm">Annuler</button>
+                        <button id="saveProfileBtn" class="px-6 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Enregistrer</button>
+                    </div>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                    <h2 class="font-display font-bold text-xl mb-5">Préférences culinaires</h2>
+                    <div id="prefsSummary" class="space-y-3 text-sm"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== TAB: MES RECETTES ===== -->
+        <section id="tab-mes-recettes" class="tab-pane hidden">
+            <div id="myRecipesList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <p class="text-gray-400 col-span-full text-center py-10">Chargement…</p>
+            </div>
+        </section>
+
+        <!-- ===== TAB: FAVORIS ===== -->
+        <section id="tab-favoris" class="tab-pane hidden">
+            <div id="favoritesList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <p class="text-gray-400 col-span-full text-center py-10">Chargement…</p>
+            </div>
+        </section>
+
+        <!-- ===== TAB: PARAMETRES ===== -->
+        <section id="tab-parametres" class="tab-pane hidden">
+            <div class="grid lg:grid-cols-2 gap-6">
+                <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                    <h2 class="font-display font-bold text-xl mb-5">Mot de passe</h2>
+                    <div id="pwdError" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm mb-4"></div>
+                    <div id="pwdSuccess" class="hidden p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm mb-4">Mot de passe mis à jour.</div>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="field-label">Mot de passe actuel</label>
+                            <input id="curPwd" type="password" class="field-input" autocomplete="current-password">
+                        </div>
+                        <div>
+                            <label class="field-label">Nouveau mot de passe</label>
+                            <input id="newPwd" type="password" minlength="8" class="field-input" autocomplete="new-password">
+                            <p class="text-xs text-gray-400 mt-1">8 caractères minimum.</p>
+                        </div>
+                        <div>
+                            <label class="field-label">Confirmation</label>
+                            <input id="confirmPwd" type="password" class="field-input" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <button id="changePwdBtn" class="mt-5 px-6 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Changer le mot de passe</button>
+                </div>
+                <div class="bg-white border border-red-200 rounded-2xl p-6">
+                    <h2 class="font-display font-bold text-xl text-red-700 mb-2">Zone dangereuse</h2>
+                    <p class="text-sm text-gray-600 mb-4">La suppression de votre compte est définitive. Vos recettes publiées resteront visibles mais ne vous seront plus attribuées.</p>
+                    <button id="openDeleteBtn" class="px-5 py-2 bg-red-50 border border-red-200 text-red-700 rounded-full font-semibold text-sm hover:bg-red-100 transition-colors">Supprimer mon compte</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== DELETE ACCOUNT MODAL ===== -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <h3 class="font-display font-bold text-xl mb-2 text-red-700">Confirmer la suppression</h3>
+            <p class="text-sm text-gray-600 mb-4">Cette action est irréversible. Saisissez votre mot de passe pour confirmer.</p>
+            <div id="deleteError" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm mb-3"></div>
+            <input id="deletePwd" type="password" class="field-input mb-4" placeholder="Mot de passe">
+            <div class="flex gap-3 justify-end">
+                <button id="cancelDeleteBtn" class="px-5 py-2 border-2 border-gray-200 rounded-full font-semibold text-sm">Annuler</button>
+                <button id="confirmDeleteBtn" class="px-5 py-2 bg-red-600 text-white rounded-full font-semibold text-sm hover:bg-red-700 transition-colors">Supprimer définitivement</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth-ui.js"></script>
+    <script>
+    (function () {
+        const user = window.SP && window.SP.user;
+        if (!user) { window.location.href = 'connexion.html'; return; }
+
+        const PALETTE = ['#E85D26','#16A34A','#7C3AED','#DB2777','#0284C7','#CA8A04'];
+        function colorFor(name) { let h=0; for(const c of (name||'')) h=(h*31+c.charCodeAt(0))&0xFFFF; return PALETTE[h%PALETTE.length]; }
+        function initials(name) { return (name||'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+        function fmtTime(min) { if(!min) return '—'; if(min<60) return min+' min'; const h=Math.floor(min/60), m=min%60; return m? h+'h'+String(m).padStart(2,'0') : h+'h'; }
+        function fmtDate(iso) { try { return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}); } catch { return ''; } }
+
+        function renderHeader(u) {
+            const a = document.getElementById('avatarBox');
+            a.style.background = colorFor(u.username);
+            a.textContent = initials(u.username);
+            document.getElementById('displayName').textContent  = u.username;
+            document.getElementById('displayEmail').textContent = u.email;
+            if (u.created_at) document.getElementById('memberSince').textContent = 'Membre depuis ' + fmtDate(u.created_at);
+        }
+        function fillForm(u) {
+            document.getElementById('fldUsername').value = u.username || '';
+            document.getElementById('fldEmail').value    = u.email || '';
+            document.getElementById('fldBio').value      = u.bio || '';
+            document.getElementById('fldAvatar').value   = u.avatar || '';
+            document.getElementById('bioCount').textContent = (u.bio || '').length;
+        }
+        function renderPrefs(u) {
+            const box = document.getElementById('prefsSummary');
+            const p   = u.preferences || {};
+            const dietary  = (p.dietary  || []).filter(Boolean);
+            const cuisines = (p.cuisines || []).filter(Boolean);
+            const level    = p.level || '';
+            const empty = !dietary.length && !cuisines.length && !level;
+            if (empty) { box.innerHTML = '<p class="text-gray-400 text-sm">Aucune préférence renseignée.</p>'; return; }
+            box.innerHTML = `
+                ${level ? `<div><p class="text-xs text-gray-500 mb-1">Niveau</p><span class="inline-block px-3 py-1 bg-or-50 text-or-700 rounded-full text-sm font-medium">${level}</span></div>` : ''}
+                ${dietary.length ? `<div><p class="text-xs text-gray-500 mb-1">Régime</p><div class="flex flex-wrap gap-1.5">${dietary.map(d => `<span class="inline-block px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm">${d}</span>`).join('')}</div></div>` : ''}
+                ${cuisines.length ? `<div><p class="text-xs text-gray-500 mb-1">Cuisines</p><div class="flex flex-wrap gap-1.5">${cuisines.map(c => `<span class="inline-block px-3 py-1 bg-sp-50 text-sp-700 rounded-full text-sm">${c}</span>`).join('')}</div></div>` : ''}
+            `;
+        }
+
+        // ── Tabs ────────────────────────────────────────────
+        function activateTab(name) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('hidden', p.id !== 'tab-' + name));
+            history.replaceState(null, '', '#' + name);
+            if (name === 'mes-recettes' && !window.__myLoaded) loadMine();
+            if (name === 'favoris'      && !window.__favLoaded) loadFavorites();
+        }
+        document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => activateTab(b.dataset.tab)));
+        const initialTab = (location.hash || '').replace('#','');
+        if (['infos','mes-recettes','favoris','parametres'].includes(initialTab)) activateTab(initialTab);
+
+        // ── Edit profile ────────────────────────────────────
+        const inputs = ['fldUsername','fldEmail','fldBio','fldAvatar'];
+        function setEditMode(on) {
+            inputs.forEach(id => document.getElementById(id).disabled = !on);
+            document.getElementById('profileEditActions').classList.toggle('hidden', !on);
+            document.getElementById('editProfileBtn').textContent = on ? 'Lecture seule' : 'Modifier';
+        }
+        document.getElementById('editProfileBtn').addEventListener('click', () => {
+            const editing = !document.getElementById('fldUsername').disabled;
+            setEditMode(!editing);
+        });
+        document.getElementById('cancelEditBtn').addEventListener('click', () => {
+            fillForm(window.SP.user);
+            setEditMode(false);
+        });
+        document.getElementById('fldBio').addEventListener('input', function () {
+            document.getElementById('bioCount').textContent = this.value.length;
+        });
+        document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+            const errBox = document.getElementById('profileSaveError');
+            errBox.classList.add('hidden');
+            const payload = {
+                username: document.getElementById('fldUsername').value.trim(),
+                email:    document.getElementById('fldEmail').value.trim(),
+                bio:      document.getElementById('fldBio').value.trim(),
+                avatar:   document.getElementById('fldAvatar').value.trim(),
+                preferences: window.SP.user.preferences || null,
+            };
+            try {
+                const res = await fetch(window.SP.apiPath('auth.php?action=update_profile'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || 'Erreur');
+                window.SP.setUser(data.user);
+                renderHeader(data.user);
+                renderPrefs(data.user);
+                fillForm(data.user);
+                setEditMode(false);
+            } catch (e) {
+                errBox.textContent = e.message;
+                errBox.classList.remove('hidden');
+            }
+        });
+
+        // ── Change password ─────────────────────────────────
+        document.getElementById('changePwdBtn').addEventListener('click', async () => {
+            const cur = document.getElementById('curPwd').value;
+            const np  = document.getElementById('newPwd').value;
+            const cp  = document.getElementById('confirmPwd').value;
+            const errBox = document.getElementById('pwdError');
+            const okBox  = document.getElementById('pwdSuccess');
+            errBox.classList.add('hidden'); okBox.classList.add('hidden');
+            if (np !== cp) { errBox.textContent = 'Les deux nouveaux mots de passe ne correspondent pas.'; errBox.classList.remove('hidden'); return; }
+            if (np.length < 8) { errBox.textContent = '8 caractères minimum.'; errBox.classList.remove('hidden'); return; }
+            try {
+                const res = await fetch(window.SP.apiPath('auth.php?action=change_password'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ current_password: cur, new_password: np })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || 'Erreur');
+                document.getElementById('curPwd').value = '';
+                document.getElementById('newPwd').value = '';
+                document.getElementById('confirmPwd').value = '';
+                okBox.classList.remove('hidden');
+            } catch (e) {
+                errBox.textContent = e.message;
+                errBox.classList.remove('hidden');
+            }
+        });
+
+        // ── Delete account ──────────────────────────────────
+        const deleteModal = document.getElementById('deleteModal');
+        document.getElementById('openDeleteBtn').addEventListener('click', () => deleteModal.classList.remove('hidden'));
+        document.getElementById('cancelDeleteBtn').addEventListener('click', () => deleteModal.classList.add('hidden'));
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            const pwd = document.getElementById('deletePwd').value;
+            const err = document.getElementById('deleteError');
+            err.classList.add('hidden');
+            if (!pwd) { err.textContent = 'Mot de passe requis.'; err.classList.remove('hidden'); return; }
+            try {
+                const res = await fetch(window.SP.apiPath('auth.php?action=delete_account'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ password: pwd }),
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || 'Erreur');
+                window.SP.setUser(null);
+                window.location.href = 'index.html';
+            } catch (e) {
+                err.textContent = e.message;
+                err.classList.remove('hidden');
+            }
+        });
+
+        // ── Recipe mini-card ────────────────────────────────
+        function statusBadge(s) {
+            const map = { published: ['badge-published','Publiée'], pending:['badge-pending','En attente'], rejected:['badge-rejected','Refusée'] };
+            const v = map[s] || ['badge-pending', s];
+            return `<span class="badge-status ${v[0]}">${v[1]}</span>`;
+        }
+        function recipeCard(r, opts = {}) {
+            const img = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600';
+            const editBtn = opts.editable
+                ? `<a href="publier.html?slug=${r.slug}" class="flex-1 px-3 py-2 bg-white border border-gray-200 text-encre rounded-lg text-xs font-semibold hover:bg-gray-50 text-center">Modifier</a>` : '';
+            const delBtn = opts.deletable
+                ? `<button data-id="${r.id}" data-title="${(r.title||'').replace(/"/g,'&quot;')}" class="js-delete-recipe px-3 py-2 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-semibold hover:bg-red-100">Supprimer</button>` : '';
+            const unfavBtn = opts.unfavorite
+                ? `<button data-id="${r.id}" class="js-unfav px-3 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg text-xs font-semibold hover:bg-gray-50 inline-flex items-center gap-1.5"><i data-lucide="heart-off" class="w-3.5 h-3.5"></i>Retirer</button>` : '';
+            const viewBtn = r.status === 'published' || opts.unfavorite
+                ? `<a href="recette-detail.html?slug=${r.slug}" class="flex-1 px-3 py-2 bg-sp-500 text-white rounded-lg text-xs font-semibold hover:bg-sp-600 text-center">Voir</a>` : '';
+            return `
+            <div class="recipe-mini-card">
+                <a href="${(r.status==='published'||opts.unfavorite)?'recette-detail.html?slug='+r.slug:'#'}" class="block">
+                    <div class="aspect-[4/3] overflow-hidden">
+                        <img src="${img}" alt="${r.title||''}" class="w-full h-full object-cover" loading="lazy">
+                    </div>
+                </a>
+                <div class="p-4">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <h3 class="font-display font-bold text-base leading-snug flex-1">${r.title||''}</h3>
+                        ${opts.editable ? statusBadge(r.status) : ''}
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3 flex items-center gap-2"><i data-lucide="clock" class="w-3 h-3"></i> ${fmtTime(r.total_time)} · ${r.difficulty || 'Facile'}</p>
+                    <div class="flex gap-2">${viewBtn}${editBtn}${delBtn}${unfavBtn}</div>
+                </div>
+            </div>`;
+        }
+
+        // ── Mes recettes ───────────────────────────────────
+        async function loadMine() {
+            const box = document.getElementById('myRecipesList');
+            try {
+                const res = await fetch(window.SP.apiPath('recipes.php?action=mine'), { credentials: 'include' });
+                const data = await res.json();
+                window.__myLoaded = true;
+                const list = data.recipes || [];
+                document.getElementById('statRecipes').textContent = list.filter(r => r.status === 'published').length;
+                document.getElementById('statPending').textContent  = list.filter(r => r.status === 'pending').length;
+                if (list.length === 0) {
+                    box.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-white border-2 border-dashed border-gray-200 rounded-2xl">
+                        <i data-lucide="utensils" class="w-12 h-12 text-gray-300 mx-auto mb-3"></i>
+                        <p class="text-gray-500 mb-4">Vous n'avez pas encore publié de recette.</p>
+                        <a href="publier.html" class="inline-block px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Publier ma première recette</a>
+                    </div>`;
+                    if (window.lucide) lucide.createIcons();
+                    return;
+                }
+                box.innerHTML = list.map(r => recipeCard(r, { editable: true, deletable: true })).join('');
+                box.querySelectorAll('.js-delete-recipe').forEach(b => b.addEventListener('click', e => deleteOwnRecipe(b.dataset.id, b.dataset.title)));
+                if (window.lucide) lucide.createIcons();
+            } catch {
+                box.innerHTML = '<p class="text-red-500 col-span-full text-center py-10">Impossible de charger vos recettes.</p>';
+            }
+        }
+        async function deleteOwnRecipe(id, title) {
+            if (!confirm(`Supprimer la recette "${title}" ? Cette action est irréversible.`)) return;
+            try {
+                const res = await fetch(window.SP.apiPath('recipes.php?action=delete&id=') + id, { method: 'DELETE', credentials: 'include' });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Erreur');
+                window.__myLoaded = false; loadMine();
+            } catch (e) { alert('Erreur : ' + e.message); }
+        }
+
+        // ── Favoris ────────────────────────────────────────
+        async function loadFavorites() {
+            const box = document.getElementById('favoritesList');
+            try {
+                const res = await fetch(window.SP.apiPath('favorites.php?action=list'), { credentials: 'include' });
+                const data = await res.json();
+                window.__favLoaded = true;
+                const list = data.recipes || [];
+                document.getElementById('statFavorites').textContent = list.length;
+                if (list.length === 0) {
+                    box.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-white border-2 border-dashed border-gray-200 rounded-2xl">
+                        <i data-lucide="heart" class="w-12 h-12 text-gray-300 mx-auto mb-3"></i>
+                        <p class="text-gray-500 mb-4">Vous n'avez encore aucun favori.</p>
+                        <a href="recettes.html" class="inline-block px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Découvrir les recettes</a>
+                    </div>`;
+                    if (window.lucide) lucide.createIcons();
+                    return;
+                }
+                box.innerHTML = list.map(r => recipeCard(r, { unfavorite: true })).join('');
+                box.querySelectorAll('.js-unfav').forEach(b => b.addEventListener('click', async () => {
+                    try {
+                        await fetch(window.SP.apiPath('favorites.php?action=remove'), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ recipe_id: +b.dataset.id })
+                        });
+                        window.__favLoaded = false; loadFavorites();
+                    } catch {}
+                }));
+                if (window.lucide) lucide.createIcons();
+            } catch {
+                box.innerHTML = '<p class="text-red-500 col-span-full text-center py-10">Impossible de charger vos favoris.</p>';
+            }
+        }
+
+        // ── Stats globales (count favorites pre-tab + average rating from my published) ──
+        async function loadGlobalStats() {
+            try {
+                const r1 = await fetch(window.SP.apiPath('favorites.php?action=list'), { credentials: 'include' });
+                const d1 = await r1.json();
+                document.getElementById('statFavorites').textContent = (d1.recipes || []).length;
+            } catch {}
+            try {
+                const r2 = await fetch(window.SP.apiPath('recipes.php?action=mine'), { credentials: 'include' });
+                const d2 = await r2.json();
+                const pub = (d2.recipes || []).filter(r => r.status === 'published');
+                const pend = (d2.recipes || []).filter(r => r.status === 'pending');
+                document.getElementById('statRecipes').textContent = pub.length;
+                document.getElementById('statPending').textContent  = pend.length;
+                const rated = pub.filter(r => r.rating_count > 0);
+                if (rated.length > 0) {
+                    const avg = rated.reduce((s,r) => s + parseFloat(r.rating || 0), 0) / rated.length;
+                    document.getElementById('statRating').textContent = avg.toFixed(1);
+                } else {
+                    document.getElementById('statRating').textContent = '—';
+                }
+            } catch {}
+        }
+
+        // ── Init ───────────────────────────────────────────
+        async function init() {
+            // refresh server-side user (gets bio, preferences, avatar, etc.)
+            const fresh = await window.SP.verifySession();
+            const u = fresh || user;
+            renderHeader(u);
+            renderPrefs(u);
+            fillForm(u);
+            await loadGlobalStats();
+            if (window.lucide) lucide.createIcons();
+        }
+        init();
+    })();
+    </script>
+</body>
+</html>

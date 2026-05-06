@@ -9,11 +9,13 @@ $slug   = $_GET['slug'] ?? '';
 switch ("$method:$action") {
     case 'GET:list':      getList();           break;
     case 'GET:single':    getSingle($slug);    break;
+    case 'GET:mine':      getMine();           break;
     case 'POST:create':   createRecipe();      break;
     case 'PUT:update':    updateRecipe($id);   break;
     case 'DELETE:delete': deleteRecipe($id);   break;
     case 'GET:pending':   getPending();        break;
     case 'POST:approve':  approveRecipe($id);  break;
+    case 'POST:reject':   rejectRecipe($id);   break;
     default: jsonResponse(['error' => 'Route inconnue'], 404);
 }
 
@@ -23,6 +25,7 @@ function getList() {
     $category = $_GET['category'] ?? '';
     $search   = $_GET['search']   ?? '';
     $sort     = $_GET['sort']     ?? 'recentes';
+    $userId   = $_SESSION['user_id'] ?? 0;
 
     $where = ["r.status = 'published'"];
     $params = [];
@@ -44,10 +47,15 @@ function getList() {
         default      => 'r.created_at DESC',
     };
 
+    $favSelect = $userId
+        ? "(SELECT 1 FROM favorites f WHERE f.recipe_id = r.id AND f.user_id = " . (int)$userId . ") AS is_favorited,"
+        : "0 AS is_favorited,";
+
     $sql = "SELECT r.id, r.slug, r.title, r.description, r.category,
                    r.prep_time, r.cook_time, r.total_time, r.servings,
                    r.difficulty, r.rating, r.rating_count, r.image_url,
                    r.created_at,
+                   $favSelect
                    CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'mijote' ELSE 'user' END AS author_type,
                    CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
                         ELSE COALESCE(u.username, 'Communauté')
@@ -63,6 +71,7 @@ function getList() {
 
     foreach ($recipes as &$r) {
         $r['tags'] = getTags($db, $r['id']);
+        $r['is_favorited'] = (bool)($r['is_favorited'] ?? false);
     }
 
     jsonResponse(['recipes' => $recipes, 'total' => count($recipes)]);
@@ -72,20 +81,63 @@ function getList() {
 function getSingle($slug) {
     if (!$slug) jsonResponse(['error' => 'Slug manquant'], 400);
     $db = getDB();
+    $userId = $_SESSION['user_id'] ?? 0;
 
-    $s = $db->prepare("SELECT r.*, u.username AS author_name, u.avatar AS author_avatar
-                       FROM recipes r
-                       LEFT JOIN users u ON r.author_id = u.id
-                       WHERE r.slug = ? AND r.status = 'published'");
+    $favSelect = $userId
+        ? "(SELECT 1 FROM favorites f WHERE f.recipe_id = r.id AND f.user_id = " . (int)$userId . ") AS is_favorited,"
+        : "0 AS is_favorited,";
+
+    $sql = "SELECT r.*,
+                   $favSelect
+                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'mijote' ELSE 'user' END AS norm_author_type,
+                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
+                        ELSE COALESCE(u.username, 'Communauté')
+                   END AS author_name,
+                   u.avatar AS author_avatar
+            FROM recipes r
+            LEFT JOIN users u ON r.author_id = u.id
+            WHERE r.slug = ? AND r.status = 'published'";
+
+    $s = $db->prepare($sql);
     $s->execute([$slug]);
     $recipe = $s->fetch();
     if (!$recipe) jsonResponse(['error' => 'Recette introuvable'], 404);
 
-    $recipe['ingredients'] = getIngredients($db, $recipe['id']);
-    $recipe['steps']       = getSteps($db, $recipe['id']);
-    $recipe['tags']        = getTags($db, $recipe['id']);
+    $recipe['author_type']   = $recipe['norm_author_type'];
+    $recipe['is_favorited']  = (bool)($recipe['is_favorited'] ?? false);
+    $recipe['ingredients']   = getIngredients($db, $recipe['id']);
+    $recipe['steps']         = getSteps($db, $recipe['id']);
+    $recipe['tags']          = getTags($db, $recipe['id']);
+    unset($recipe['norm_author_type']);
 
     jsonResponse($recipe);
+}
+
+/* ── Mes recettes (tous statuts) ─────────────────────────────── */
+function getMine() {
+    requireAuth();
+    $db = getDB();
+    $s  = $db->prepare("SELECT r.id, r.slug, r.title, r.description, r.category,
+                               r.total_time, r.difficulty, r.rating, r.rating_count,
+                               r.image_url, r.status, r.created_at, r.updated_at
+                        FROM recipes r
+                        WHERE r.author_id = ?
+                        ORDER BY r.created_at DESC");
+    $s->execute([$_SESSION['user_id']]);
+    $recipes = $s->fetchAll();
+    foreach ($recipes as &$r) {
+        $r['tags'] = getTags($db, $r['id']);
+    }
+    jsonResponse(['recipes' => $recipes, 'total' => count($recipes)]);
+}
+
+/* ── Rejeter (admin) ─────────────────────────────────────────── */
+function rejectRecipe($id) {
+    requireAdmin();
+    if (!$id) jsonResponse(['error' => 'ID manquant'], 400);
+    $db = getDB();
+    $db->prepare("UPDATE recipes SET status = 'rejected' WHERE id = ?")->execute([$id]);
+    jsonResponse(['success' => true]);
 }
 
 /* ── Créer une recette ───────────────────────────────────────── */

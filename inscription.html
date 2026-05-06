@@ -737,9 +737,13 @@
         }
 
         /* ===== SUBMIT ===== */
+        function isCBChecked(boxId) {
+            return document.getElementById(boxId).innerHTML.trim() !== '';
+        }
+
         async function submitForm() {
-            const cgu = document.getElementById('acceptCGU').checked;
-            const privacy = document.getElementById('acceptPrivacy').checked;
+            const cgu     = isCBChecked('cguBox');
+            const privacy = isCBChecked('privacyBox');
 
             if (!cgu || !privacy) {
                 const btn = document.getElementById('submitBtn');
@@ -776,9 +780,7 @@
 
                 if (data.success) {
                     localStorage.setItem('sp_user', JSON.stringify(data.user));
-                    ['formStep1','formStep2','formStep3'].forEach(id => document.getElementById(id).classList.add('hidden'));
-                    document.getElementById('formSuccess').classList.remove('hidden');
-                    document.getElementById('stepIndicator').classList.add('hidden');
+                    window.location.href = 'index.html';
                 } else {
                     btn.innerHTML = 'Créer mon compte';
                     btn.disabled = false;

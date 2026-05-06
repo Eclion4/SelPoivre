@@ -38,6 +38,24 @@
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
+    <!-- Fallback layout for quickRecipes if Swiper fails to init -->
+    <style>
+        .quickRecipesSwiper { overflow: hidden; }
+        .quickRecipesSwiper .swiper-wrapper {
+            display: flex !important;
+            flex-direction: row !important;
+        }
+        .quickRecipesSwiper .swiper-slide {
+            flex-shrink: 0 !important;
+            width: 280px;
+        }
+        .quickRecipesSwiper.swiper-initialized .swiper-slide { width: auto; }
+        @media (max-width: 640px) {
+            .quickRecipesSwiper:not(.swiper-initialized) { overflow-x: auto; }
+            .quickRecipesSwiper:not(.swiper-initialized) .swiper-slide { width: 240px; }
+        }
+    </style>
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 

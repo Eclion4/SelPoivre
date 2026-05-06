@@ -317,7 +317,7 @@
         const badge = getBadge(r);
         document.getElementById('heroBadges').innerHTML = badge + (r.category ? `<span class="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-semibold text-gray-600 capitalize">${r.category}</span>` : '');
 
-        // Author
+        // Author (clickable to public profile, except for "mijote" team account)
         const authorName = r.author_name || 'Communauté';
         const authorBlock = document.getElementById('authorBlock');
         if (r.author_type === 'mijote') {
@@ -325,9 +325,12 @@
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sp-500 to-sp-600 flex items-center justify-center text-white font-bold text-xs">SP</div>
                 <div><p class="text-sm font-semibold">Équipe Sel &amp; Poivre</p><p class="text-xs text-gray-500">Recette officielle</p></div>`;
         } else {
+            const link = `utilisateur.html?username=${encodeURIComponent(authorName)}`;
             authorBlock.innerHTML = `
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs" style="background:${colorFor(authorName)}">${initials(authorName)}</div>
-                <div><p class="text-sm font-semibold">${escape(authorName)}</p><p class="text-xs text-gray-500">Membre · ${r.created_at ? fmtDate(r.created_at) : ''}</p></div>`;
+                <a href="${link}" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style="background:${colorFor(authorName)}">${initials(authorName)}</div>
+                    <div><p class="text-sm font-semibold hover:underline">${escape(authorName)}</p><p class="text-xs text-gray-500">Membre · ${r.created_at ? fmtDate(r.created_at) : ''}</p></div>
+                </a>`;
         }
 
         // Stats
@@ -583,14 +586,17 @@
         const u = window.SP && window.SP.user;
         const canDelete = u && (c.user_id == u.id || u.role === 'admin');
         const ratingHTML = c.rating ? `<div class="flex gap-0.5">${starsHTML(c.rating)}</div>` : '';
+        const userLink = `utilisateur.html?username=${encodeURIComponent(name)}`;
         return `
         <div class="bg-ivoire rounded-2xl p-5 border border-gray-100" data-id="${c.id}">
             <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style="background:${colorFor(name)}">${initials(name)}</div>
+                <a href="${userLink}" class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs hover:opacity-80 transition-opacity" style="background:${colorFor(name)}">${initials(name)}</div>
+                </a>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                         <div class="flex items-center gap-3">
-                            <p class="font-semibold text-sm">${escape(name)}</p>
+                            <a href="${userLink}" class="font-semibold text-sm hover:underline">${escape(name)}</a>
                             ${ratingHTML}
                         </div>
                         <div class="flex items-center gap-3">

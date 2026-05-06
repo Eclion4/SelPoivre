@@ -354,43 +354,26 @@
                 <p class="mt-4 text-gray-400 max-w-2xl mx-auto text-lg">Des passionnés de cuisine qui partagent, commentent et s'entraident chaque jour.</p>
             </div>
 
-            <!-- Join CTAs -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-all duration-300" data-aos="fade-up" data-aos-delay="0">
-                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-sp-500/30 to-sp-600/30 border-2 border-dashed border-sp-500/40 flex items-center justify-center mx-auto">
-                        <i data-lucide="chef-hat" class="w-8 h-8 text-sp-400"></i>
-                    </div>
-                    <h3 class="mt-4 text-lg font-bold text-white">Partagez vos recettes</h3>
-                    <p class="text-gray-400 text-sm mt-2">Publiez vos créations et faites découvrir votre cuisine à la communauté.</p>
-                    <a href="inscription.html" class="mt-4 inline-block px-5 py-2 bg-sp-500/20 text-sp-400 rounded-full text-sm font-semibold hover:bg-sp-500/40 transition-all">Créer un compte</a>
-                </div>
-                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-or-500/30 to-or-600/30 border-2 border-dashed border-or-500/40 flex items-center justify-center mx-auto">
-                        <i data-lucide="star" class="w-8 h-8 text-or-400"></i>
-                    </div>
-                    <h3 class="mt-4 text-lg font-bold text-white">Notez &amp; commentez</h3>
-                    <p class="text-gray-400 text-sm mt-2">Donnez votre avis sur les recettes et aidez la communauté à trouver les meilleures.</p>
-                    <a href="inscription.html" class="mt-4 inline-block px-5 py-2 bg-or-500/20 text-or-400 rounded-full text-sm font-semibold hover:bg-or-500/40 transition-all">Rejoindre</a>
-                </div>
-                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500/30 to-blue-600/30 border-2 border-dashed border-blue-500/40 flex items-center justify-center mx-auto">
-                        <i data-lucide="users" class="w-8 h-8 text-blue-400"></i>
-                    </div>
-                    <h3 class="mt-4 text-lg font-bold text-white">Rejoignez les pionniers</h3>
-                    <p class="text-gray-400 text-sm mt-2">La communauté Sel &amp; Poivre est en pleine croissance. Faites partie des premiers membres.</p>
-                    <a href="inscription.html" class="mt-4 inline-block px-5 py-2 bg-blue-500/20 text-blue-400 rounded-full text-sm font-semibold hover:bg-blue-500/40 transition-all">S'inscrire</a>
-                </div>
+            <!-- Feed scope tabs (visible only when logged in) -->
+            <div id="feedTabs" class="hidden flex items-center justify-center gap-2 mb-8">
+                <button data-scope="all" class="js-feed-tab px-5 py-2 rounded-full text-sm font-semibold bg-white text-encre">Tout</button>
+                <button data-scope="me"  class="js-feed-tab px-5 py-2 rounded-full text-sm font-semibold bg-white/10 text-white border border-white/20">Mes abonnements</button>
             </div>
 
-            <!-- Teaser activité -->
-            <div class="max-w-2xl mx-auto" data-aos="fade-up">
+            <!-- Activity feed -->
+            <div id="feedList" class="max-w-2xl mx-auto space-y-3">
+                <p class="text-gray-500 text-center py-8 text-sm">Chargement du fil…</p>
+            </div>
+
+            <!-- Empty/CTA placeholder shown when no events -->
+            <div id="feedEmpty" class="hidden max-w-2xl mx-auto" data-aos="fade-up">
                 <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 text-center">
                     <i data-lucide="message-circle" class="w-10 h-10 text-gray-600 mx-auto mb-4"></i>
-                    <p class="text-gray-400 font-medium">Le fil d'activité s'animera avec les premiers membres.</p>
+                    <p id="feedEmptyMsg" class="text-gray-400 font-medium">Le fil d'activité s'animera avec les premiers membres.</p>
                     <p class="text-gray-600 text-sm mt-1">Publiez une recette, notez, commentez — et donnez vie à cette communauté.</p>
-                    <a href="inscription.html" class="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-sp-500/30 transition-all text-sm">
+                    <a id="feedEmptyCta" href="inscription.html" class="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-sp-500/30 transition-all text-sm">
                         <i data-lucide="user-plus" class="w-4 h-4"></i>
-                        Créer mon compte gratuitement
+                        <span id="feedEmptyCtaLabel">Créer mon compte gratuitement</span>
                     </a>
                 </div>
             </div>
@@ -637,7 +620,6 @@
                 e.preventDefault();
                 const email = document.getElementById('newsletterEmail').value.trim();
                 if (!email) return;
-                // Stockage local — implémentation backend à venir
                 try {
                     const list = JSON.parse(localStorage.getItem('sp_newsletter') || '[]');
                     if (!list.includes(email)) list.push(email);
@@ -647,6 +629,123 @@
                 msg.textContent = 'Merci ! Vous recevrez notre prochaine sélection.';
                 msg.className = 'mt-4 text-center text-sm text-green-600 font-medium';
             });
+        });
+
+        // ── Activity feed ─────────────────────────────────────────
+        function avatarHTML(name, avatar, sizeClasses = 'w-10 h-10') {
+            if (avatar) {
+                return `<img src="${avatar}" alt="" class="${sizeClasses} rounded-full object-cover flex-shrink-0">`;
+            }
+            const c = colorFor(name || '');
+            const i = (name || 'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
+            return `<div class="${sizeClasses} rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style="background:${c}">${i}</div>`;
+        }
+
+        function relativeTime(iso) {
+            try {
+                const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+                if (diff < 60)    return 'à l\'instant';
+                if (diff < 3600)  return 'il y a ' + Math.floor(diff/60) + ' min';
+                if (diff < 86400) return 'il y a ' + Math.floor(diff/3600) + ' h';
+                if (diff < 86400*30) return 'il y a ' + Math.floor(diff/86400) + ' j';
+                return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+            } catch { return ''; }
+        }
+
+        function escapeHtml(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+        function eventCard(ev) {
+            const userLink = ev.username && ev.username !== 'Équipe Sel & Poivre'
+                ? `utilisateur.html?username=${encodeURIComponent(ev.username)}` : null;
+            const userBlock = userLink
+                ? `<a href="${userLink}" class="hover:opacity-80 flex-shrink-0">${avatarHTML(ev.username, ev.avatar)}</a>`
+                : avatarHTML(ev.username, ev.avatar);
+            const userName = userLink
+                ? `<a href="${userLink}" class="font-semibold text-white hover:underline">${escapeHtml(ev.username)}</a>`
+                : `<strong class="text-white">${escapeHtml(ev.username)}</strong>`;
+
+            let action = '';
+            if (ev.type === 'recipe_published') {
+                action = `a publié <a href="recette-detail.html?slug=${ev.recipe.slug}" class="text-sp-400 hover:underline font-semibold">${escapeHtml(ev.recipe.title)}</a>`;
+            } else if (ev.type === 'recipe_rated') {
+                const stars = '⭐'.repeat(ev.rating);
+                action = `a noté ${stars} <a href="recette-detail.html?slug=${ev.recipe.slug}" class="text-sp-400 hover:underline font-semibold">${escapeHtml(ev.recipe.title)}</a>`;
+            } else if (ev.type === 'recipe_commented') {
+                action = `a commenté <a href="recette-detail.html?slug=${ev.recipe.slug}" class="text-sp-400 hover:underline font-semibold">${escapeHtml(ev.recipe.title)}</a>`;
+            }
+
+            const preview = ev.content
+                ? `<p class="text-sm text-gray-300 mt-2 line-clamp-2 italic">"${escapeHtml(ev.content.slice(0,180))}${ev.content.length > 180 ? '…' : ''}"</p>`
+                : '';
+
+            const recipeImg = ev.recipe.image_url
+                ? `<a href="recette-detail.html?slug=${ev.recipe.slug}" class="flex-shrink-0">
+                       <img src="${ev.recipe.image_url}" alt="" class="w-14 h-14 rounded-lg object-cover">
+                   </a>`
+                : '';
+
+            return `
+            <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 flex items-start gap-3 hover:bg-white/10 transition-all">
+                ${userBlock}
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm text-gray-200">${userName} ${action}</p>
+                    <span class="text-xs text-gray-500">${relativeTime(ev.event_at)}</span>
+                    ${preview}
+                </div>
+                ${recipeImg}
+            </div>`;
+        }
+
+        async function loadFeed(scope) {
+            const list = document.getElementById('feedList');
+            const empty = document.getElementById('feedEmpty');
+            list.innerHTML = '<p class="text-gray-500 text-center py-8 text-sm">Chargement…</p>';
+            empty.classList.add('hidden');
+            try {
+                const res = await fetch('api/feed.php?action=list&scope=' + scope + '&limit=15', { credentials: 'include' });
+                const data = await res.json();
+                const events = data.events || [];
+                if (events.length === 0) {
+                    list.innerHTML = '';
+                    if (scope === 'me') {
+                        document.getElementById('feedEmptyMsg').textContent = 'Aucune activité de vos abonnements pour le moment.';
+                        document.getElementById('feedEmptyCtaLabel').textContent = 'Découvrir des comptes';
+                        document.getElementById('feedEmptyCta').href = 'recettes.html';
+                    } else {
+                        document.getElementById('feedEmptyMsg').textContent = 'Le fil d\'activité s\'animera avec les premiers membres.';
+                        document.getElementById('feedEmptyCtaLabel').textContent = window.SP && window.SP.user ? 'Publier ma première recette' : 'Créer mon compte gratuitement';
+                        document.getElementById('feedEmptyCta').href = window.SP && window.SP.user ? 'publier.html' : 'inscription.html';
+                    }
+                    empty.classList.remove('hidden');
+                } else {
+                    list.innerHTML = events.map(eventCard).join('');
+                }
+            } catch (e) {
+                list.innerHTML = '<p class="text-red-400 text-center py-6 text-sm">Impossible de charger le fil.</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Show tabs only when logged in
+            const tabs = document.getElementById('feedTabs');
+            if (window.SP && window.SP.user) {
+                tabs?.classList.remove('hidden');
+                tabs?.classList.add('flex');
+                document.querySelectorAll('.js-feed-tab').forEach(b => b.addEventListener('click', () => {
+                    const scope = b.dataset.scope;
+                    document.querySelectorAll('.js-feed-tab').forEach(x => {
+                        const isActive = x === b;
+                        x.classList.toggle('bg-white', isActive);
+                        x.classList.toggle('text-encre', isActive);
+                        x.classList.toggle('bg-white/10', !isActive);
+                        x.classList.toggle('text-white', !isActive);
+                        x.classList.toggle('border', !isActive);
+                        x.classList.toggle('border-white/20', !isActive);
+                    });
+                    loadFeed(scope);
+                }));
+            }
+            loadFeed('all');
         });
     })();
     </script>

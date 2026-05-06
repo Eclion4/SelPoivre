@@ -8,10 +8,59 @@ $id     = isset($_GET['id']) ? (int)$_GET['id'] : null;
 switch ("$method:$action") {
     case 'GET:list':         listUsers();           break;
     case 'GET:single':       singleUser($id);       break;
+    case 'GET:profile':      publicProfile();       break;
     case 'POST:role':        updateRole($id);       break;
     case 'POST:toggle_active': toggleActive($id);   break;
     case 'DELETE:delete':    deleteUser($id);       break;
     default: jsonResponse(['error' => 'Route inconnue'], 404);
+}
+
+/* ── Profil public par username (pas d'auth requise) ─── */
+function publicProfile() {
+    $username = trim($_GET['username'] ?? '');
+    if (!$username) jsonResponse(['error' => 'username requis'], 400);
+
+    $db = getDB();
+    $s = $db->prepare("SELECT id, username, avatar, bio, created_at, role
+                       FROM users WHERE username = ? AND is_active = 1");
+    $s->execute([$username]);
+    $u = $s->fetch();
+    if (!$u) jsonResponse(['error' => 'Utilisateur introuvable'], 404);
+
+    // Counts
+    $rc = $db->prepare("SELECT COUNT(*) FROM recipes WHERE author_id = ? AND status = 'published'");
+    $rc->execute([$u['id']]);
+    $u['recipe_count'] = (int)$rc->fetchColumn();
+
+    $fl = $db->prepare("SELECT COUNT(*) FROM follows WHERE followed_id = ?");
+    $fl->execute([$u['id']]);
+    $u['follower_count'] = (int)$fl->fetchColumn();
+
+    $fg = $db->prepare("SELECT COUNT(*) FROM follows WHERE follower_id = ?");
+    $fg->execute([$u['id']]);
+    $u['following_count'] = (int)$fg->fetchColumn();
+
+    // Following status from current viewer
+    $viewerId = $_SESSION['user_id'] ?? 0;
+    $u['is_following'] = false;
+    $u['is_self'] = false;
+    if ($viewerId) {
+        $u['is_self'] = ((int)$viewerId === (int)$u['id']);
+        if (!$u['is_self']) {
+            $f = $db->prepare("SELECT 1 FROM follows WHERE follower_id = ? AND followed_id = ?");
+            $f->execute([$viewerId, $u['id']]);
+            $u['is_following'] = (bool)$f->fetch();
+        }
+    }
+
+    // Latest published recipes (up to 12)
+    $rs = $db->prepare("SELECT id, slug, title, image_url, total_time, difficulty, rating, rating_count, created_at, category
+                        FROM recipes WHERE author_id = ? AND status = 'published'
+                        ORDER BY created_at DESC LIMIT 12");
+    $rs->execute([$u['id']]);
+    $u['recipes'] = $rs->fetchAll();
+
+    jsonResponse($u);
 }
 
 function listUsers() {

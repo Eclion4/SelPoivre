@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Profil — Sel & Poivre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'sp':    { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12' },
+                    'or':    { 50:'#FDF9EF',100:'#FDF3DC',300:'#F2C860',500:'#C4892A',600:'#A36E20' },
+                    'ivoire':'#F8F5EF', 'encre':'#18130F',
+                },
+                fontFamily: { 'display':['Playfair Display','serif'],'body':['Inter','sans-serif'],'handwrite':['Caveat','cursive'] }
+            }
+        }
+    }
+    </script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background:#F8F5EF; font-family:'Inter',sans-serif; color:#18130F; }
+        .recipe-mini-card { background:#fff; border-radius:14px; overflow:hidden; border:1px solid #E5E7EB; transition:all .2s; }
+        .recipe-mini-card:hover { box-shadow:0 8px 20px rgba(0,0,0,0.06); transform:translateY(-2px); }
+    </style>
+</head>
+<body>
+
+<nav id="navbar" class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl shadow-sm border-b border-sp-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300">
+                    <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="text-2xl font-display font-bold"><span class="text-sp-500">Sel</span><span class="text-encre"> &amp; Poivre</span></span>
+            </a>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="index.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Accueil</a>
+                <a href="recettes.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Recettes</a>
+            </div>
+            <div class="hidden md:flex items-center gap-4">
+                <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Loading -->
+<div id="loadingState" class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center">
+        <svg class="animate-spin mx-auto mb-4 w-10 h-10 text-sp-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.291l3-2z"></path>
+        </svg>
+        <p class="text-gray-500 text-sm">Chargement…</p>
+    </div>
+</div>
+
+<!-- Error -->
+<div id="errorState" class="hidden min-h-[60vh] flex items-center justify-center px-4">
+    <div class="text-center max-w-md">
+        <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <i data-lucide="user-x" class="w-10 h-10 text-gray-400"></i>
+        </div>
+        <h1 class="text-2xl font-display font-bold mb-2">Profil introuvable</h1>
+        <p id="errorMsg" class="text-gray-500 mb-6">Cet utilisateur n'existe pas ou n'est plus actif.</p>
+        <a href="index.html" class="inline-block px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Retour à l'accueil</a>
+    </div>
+</div>
+
+<main id="profileContent" class="hidden max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Header -->
+    <div class="bg-white rounded-3xl border border-gray-100 p-8 sm:p-10 shadow-sm">
+        <div class="flex flex-col sm:flex-row gap-6 sm:items-center">
+            <div id="avatarBox" class="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-sm flex-shrink-0">SP</div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h1 id="username" class="text-3xl sm:text-4xl font-display font-bold">…</h1>
+                    <span id="adminBadge" class="hidden inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sp-100 text-sp-700">Admin</span>
+                </div>
+                <p id="bio" class="text-gray-500 mt-2 leading-relaxed"></p>
+                <p id="memberSince" class="text-xs text-gray-400 mt-2"></p>
+
+                <!-- Stats line -->
+                <div class="mt-4 flex flex-wrap gap-6 text-sm">
+                    <div><strong id="recipeCount" class="text-encre font-bold">0</strong> <span class="text-gray-500">recettes</span></div>
+                    <button id="followersBtn" class="text-left hover:underline"><strong id="followerCount" class="text-encre font-bold">0</strong> <span class="text-gray-500">abonnés</span></button>
+                    <button id="followingBtn" class="text-left hover:underline"><strong id="followingCount" class="text-encre font-bold">0</strong> <span class="text-gray-500">abonnements</span></button>
+                </div>
+            </div>
+            <div class="flex-shrink-0">
+                <button id="followBtn" class="hidden px-6 py-3 bg-sp-500 text-white rounded-full font-semibold text-sm hover:bg-sp-600 transition-all">
+                    <span id="followLabel">Suivre</span>
+                </button>
+                <a id="editProfileLink" href="profil.html" class="hidden px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-full font-semibold text-sm hover:bg-gray-50 transition-colors">Modifier mon profil</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipes -->
+    <section class="mt-10">
+        <h2 class="font-display font-bold text-2xl mb-5">Recettes publiées</h2>
+        <div id="recipesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <p class="text-gray-400 col-span-full text-center py-10">Chargement…</p>
+        </div>
+    </section>
+
+</main>
+
+<!-- Followers/Following modal -->
+<div id="usersModal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full max-h-[80vh] flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <h3 id="usersModalTitle" class="font-display font-bold text-xl">Abonnés</h3>
+            <button id="closeUsersModal" class="text-gray-400 hover:text-gray-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="usersModalList" class="flex-1 overflow-y-auto px-2 py-2">
+            <p class="text-gray-400 text-center py-8 text-sm">Chargement…</p>
+        </div>
+    </div>
+</div>
+
+<script src="js/auth-ui.js"></script>
+<script>
+(function () {
+    const PALETTE = ['#E85D26','#16A34A','#7C3AED','#DB2777','#0284C7','#CA8A04'];
+    function colorFor(name){let h=0;for(const c of (name||''))h=(h*31+c.charCodeAt(0))&0xFFFF;return PALETTE[h%PALETTE.length];}
+    function initials(name){return (name||'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+    function fmtTime(min){if(!min)return '—';if(min<60)return min+' min';const h=Math.floor(min/60),m=min%60;return m?h+'h'+String(m).padStart(2,'0'):h+'h';}
+    function fmtDate(iso){try{return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});}catch{return '';}}
+    function escape(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+    let currentProfile = null;
+
+    function showError(msg) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('errorState').classList.remove('hidden');
+        if (msg) document.getElementById('errorMsg').textContent = msg;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function recipeCard(r) {
+        const img = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600';
+        return `
+        <a href="recette-detail.html?slug=${r.slug}" class="recipe-mini-card block">
+            <div class="aspect-[4/3] overflow-hidden">
+                <img src="${img}" alt="${escape(r.title)}" class="w-full h-full object-cover" loading="lazy">
+            </div>
+            <div class="p-4">
+                <h3 class="font-display font-bold text-base leading-snug">${escape(r.title)}</h3>
+                <p class="text-xs text-gray-500 mt-2 flex items-center gap-2">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    ${fmtTime(r.total_time)} · ${escape(r.difficulty || 'Facile')}
+                </p>
+            </div>
+        </a>`;
+    }
+
+    function renderProfile(p) {
+        currentProfile = p;
+        document.title = p.username + ' — Sel & Poivre';
+        const a = document.getElementById('avatarBox');
+        if (p.avatar) {
+            a.style.background = 'transparent';
+            a.innerHTML = `<img src="${p.avatar}" alt="" class="w-24 h-24 rounded-full object-cover">`;
+        } else {
+            a.style.background = colorFor(p.username);
+            a.textContent = initials(p.username);
+        }
+        document.getElementById('username').textContent = p.username;
+        if (p.role === 'admin') document.getElementById('adminBadge').classList.remove('hidden');
+        document.getElementById('bio').textContent = p.bio || '';
+        if (p.created_at) document.getElementById('memberSince').textContent = 'Membre depuis ' + fmtDate(p.created_at);
+        document.getElementById('recipeCount').textContent    = p.recipe_count;
+        document.getElementById('followerCount').textContent  = p.follower_count;
+        document.getElementById('followingCount').textContent = p.following_count;
+
+        // Buttons: follow vs edit-self
+        const u = window.SP && window.SP.user;
+        const followBtn = document.getElementById('followBtn');
+        const editLink  = document.getElementById('editProfileLink');
+        if (p.is_self) {
+            editLink.classList.remove('hidden');
+        } else if (u) {
+            followBtn.classList.remove('hidden');
+            updateFollowBtn(p.is_following);
+        } else {
+            followBtn.classList.remove('hidden');
+            followBtn.onclick = () => window.location.href = 'connexion.html';
+            document.getElementById('followLabel').textContent = 'Suivre';
+        }
+
+        // Recipes
+        const grid = document.getElementById('recipesGrid');
+        const recipes = p.recipes || [];
+        if (recipes.length === 0) {
+            grid.innerHTML = `<div class="col-span-full text-center py-12 bg-white border-2 border-dashed border-gray-200 rounded-2xl">
+                <p class="text-gray-500">Aucune recette publiée pour le moment.</p>
+            </div>`;
+        } else {
+            grid.innerHTML = recipes.map(recipeCard).join('');
+        }
+
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('profileContent').classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function updateFollowBtn(following) {
+        const btn = document.getElementById('followBtn');
+        const lbl = document.getElementById('followLabel');
+        if (following) {
+            btn.classList.remove('bg-sp-500', 'hover:bg-sp-600', 'text-white');
+            btn.classList.add('bg-white', 'border-2', 'border-gray-200', 'text-gray-700', 'hover:bg-gray-50');
+            lbl.textContent = 'Abonné ✓';
+        } else {
+            btn.classList.add('bg-sp-500', 'hover:bg-sp-600', 'text-white');
+            btn.classList.remove('bg-white', 'border-2', 'border-gray-200', 'text-gray-700', 'hover:bg-gray-50');
+            lbl.textContent = 'Suivre';
+        }
+    }
+
+    document.getElementById('followBtn').addEventListener('click', async function () {
+        if (!window.SP.user) { window.location.href = 'connexion.html'; return; }
+        if (!currentProfile) return;
+        try {
+            const res = await fetch('api/follows.php?action=toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ user_id: currentProfile.id })
+            });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error || 'Erreur');
+            currentProfile.is_following = data.following;
+            updateFollowBtn(data.following);
+            // Update follower count
+            const cur = parseInt(document.getElementById('followerCount').textContent) || 0;
+            document.getElementById('followerCount').textContent = data.following ? cur + 1 : Math.max(0, cur - 1);
+        } catch (e) { alert('Erreur : ' + e.message); }
+    });
+
+    // ── Followers / Following modal ──
+    async function openUsersModal(kind) {
+        if (!currentProfile) return;
+        const modal = document.getElementById('usersModal');
+        const list  = document.getElementById('usersModalList');
+        document.getElementById('usersModalTitle').textContent = kind === 'followers' ? 'Abonnés' : 'Abonnements';
+        modal.classList.remove('hidden');
+        list.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">Chargement…</p>';
+        try {
+            const res  = await fetch('api/follows.php?action=' + kind + '&user_id=' + currentProfile.id);
+            const data = await res.json();
+            const users = data.users || [];
+            if (users.length === 0) {
+                list.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">' + (kind === 'followers' ? 'Aucun abonné.' : 'N\'abonné à personne.') + '</p>';
+            } else {
+                list.innerHTML = users.map(u => {
+                    const av = u.avatar
+                        ? `<img src="${u.avatar}" alt="" class="w-10 h-10 rounded-full object-cover flex-shrink-0">`
+                        : `<div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0" style="background:${colorFor(u.username)}">${initials(u.username)}</div>`;
+                    return `
+                    <a href="utilisateur.html?username=${encodeURIComponent(u.username)}" class="flex items-center gap-3 px-3 py-2 hover:bg-sp-50 rounded-xl transition-colors">
+                        ${av}
+                        <div class="min-w-0 flex-1">
+                            <p class="font-semibold text-sm truncate">${escape(u.username)}</p>
+                            <p class="text-xs text-gray-500 truncate">${escape(u.bio || '')}</p>
+                        </div>
+                    </a>`;
+                }).join('');
+            }
+        } catch {
+            list.innerHTML = '<p class="text-red-500 text-center py-8 text-sm">Erreur de chargement.</p>';
+        }
+    }
+    document.getElementById('followersBtn').addEventListener('click', () => openUsersModal('followers'));
+    document.getElementById('followingBtn').addEventListener('click', () => openUsersModal('following'));
+    document.getElementById('closeUsersModal').addEventListener('click', () => document.getElementById('usersModal').classList.add('hidden'));
+    document.getElementById('usersModal').addEventListener('click', (e) => {
+        if (e.target.id === 'usersModal') document.getElementById('usersModal').classList.add('hidden');
+    });
+
+    async function init() {
+        const username = new URLSearchParams(window.location.search).get('username');
+        if (!username) { showError('Aucun utilisateur demandé.'); return; }
+        try {
+            const res  = await fetch('api/users.php?action=profile&username=' + encodeURIComponent(username), { credentials: 'include' });
+            const data = await res.json();
+            if (!res.ok || data.error) throw new Error(data.error || 'Erreur');
+            renderProfile(data);
+        } catch (e) {
+            showError(e.message);
+        }
+    }
+    init();
+})();
+</script>
+</body>
+</html>

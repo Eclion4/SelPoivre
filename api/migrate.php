@@ -42,6 +42,16 @@ $migrations = [
     'images.crumble_pommes'  => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=600&q=80' WHERE slug = 'crumble-pomme-noisette'",
     // Fix Pizza napolitaine total_time: 2918min (48h fermentation + actif) → 38min actif. Description mentionne déjà la fermentation 48h.
     'pizza.totaltime'        => "UPDATE recipes SET total_time = 38 WHERE slug = 'pizza-napolitaine' AND total_time > 1000",
+    'follows.create'         => "CREATE TABLE IF NOT EXISTS follows (
+        follower_id INT NOT NULL,
+        followed_id INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (follower_id, followed_id),
+        INDEX idx_follower (follower_id),
+        INDEX idx_followed (followed_id),
+        FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (followed_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 ];
 
 foreach ($migrations as $name => $sql) {

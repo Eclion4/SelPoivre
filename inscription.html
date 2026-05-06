@@ -594,6 +594,14 @@
 
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script>
+        // Redirect already-logged-in users
+        (function() {
+            try {
+                const u = JSON.parse(localStorage.getItem('sp_user') || 'null');
+                if (u && u.id) window.location.replace('index.html');
+            } catch {}
+        })();
+
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             // Show cookie banner only if not already answered

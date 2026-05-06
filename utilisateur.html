@@ -306,7 +306,58 @@
         }
     }
     init();
+    if (window.lucide) lucide.createIcons();
 })();
 </script>
+
+<!-- FOOTER -->
+<footer class="bg-encre text-white pt-16 pb-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            <div class="col-span-2 md:col-span-1">
+                <a href="index.html" class="flex items-center gap-2 mb-4">
+                    <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center">
+                        <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="text-lg font-display font-bold">Sel &amp; Poivre</span>
+                </a>
+                <p class="text-gray-400 text-sm leading-relaxed">La plateforme de recettes moderne et communautaire. Cuisinez, partagez, savourez.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Explorer</h4>
+                <ul class="space-y-3">
+                    <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Toutes les recettes</a></li>
+                    <li><a href="recettes.html?category=plats" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Plats principaux</a></li>
+                    <li><a href="recettes.html?category=desserts" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Desserts</a></li>
+                    <li><a href="recettes.html?search=végétarien" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Végétariennes</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Communauté</h4>
+                <ul class="space-y-3">
+                    <li><a href="communaute.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Fil d'actualité</a></li>
+                    <li><a href="inscription.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Publier une recette</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Informations</h4>
+                <ul class="space-y-3">
+                    <li><a href="a-propos.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">À propos</a></li>
+                    <li><a href="contact.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Contact</a></li>
+                    <li><a href="cgu.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">CGU</a></li>
+                    <li><a href="confidentialite.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Confidentialité</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre. Tous droits réservés.</p>
+            <div class="flex items-center gap-2 text-gray-500 text-sm">
+                <span>Fait avec</span>
+                <i data-lucide="heart" class="w-4 h-4 text-red-400 fill-red-400"></i>
+                <span>en France</span>
+            </div>
+        </div>
+    </div>
+</footer>
 </body>
 </html>

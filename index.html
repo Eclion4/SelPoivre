@@ -138,10 +138,10 @@
 
                 <!-- Right Actions -->
                 <div class="hidden md:flex items-center gap-4">
-                    <button id="searchToggle" class="p-2 rounded-full hover:bg-sp-100 transition-colors">
+                    <button id="searchToggle" class="p-2 rounded-full hover:bg-sp-100 transition-colors" aria-label="Rechercher une recette" aria-expanded="false" aria-controls="searchOverlay">
                         <i data-lucide="search" class="w-5 h-5"></i>
                     </button>
-                    <a href="connexion.html" class="p-2 rounded-full hover:bg-sp-100 transition-colors" title="Connectez-vous pour accéder à vos favoris">
+                    <a href="connexion.html" class="p-2 rounded-full hover:bg-sp-100 transition-colors" aria-label="Mes favoris">
                         <i data-lucide="heart" class="w-5 h-5"></i>
                     </a>
                     <a href="connexion.html" class="ml-2 px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all duration-300">
@@ -150,7 +150,7 @@
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors">
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -481,6 +481,7 @@
                 <div>
                     <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Communauté</h4>
                     <ul class="space-y-3">
+                        <li><a href="communaute.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Fil d'actualité</a></li>
                         <li><a href="inscription.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Publier une recette</a></li>
                     </ul>
                 </div>
@@ -571,7 +572,7 @@
         <div class="relative aspect-[4/3] overflow-hidden">
             <img src="${img}" alt="${r.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
             ${badge ? `<div class="absolute top-4 left-4">${badge}</div>` : ''}
-            <button type="button" data-fav data-id="${r.id}"
+            <button type="button" data-fav data-id="${r.id}" aria-label="${r.is_favorited ? 'Retirer des favoris' : 'Ajouter aux favoris'}" aria-pressed="${!!r.is_favorited}"
                 onclick="event.stopPropagation();event.preventDefault();window.SP&&window.SP.toggleFavorite(${r.id}, this);"
                 class="absolute top-4 right-4 w-10 h-10 ${r.is_favorited ? 'bg-sp-500 text-white' : 'bg-white/90'} backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="${r.is_favorited?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>

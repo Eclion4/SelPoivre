@@ -87,29 +87,27 @@ const searchToggle = document.getElementById('searchToggle');
 const searchOverlay = document.getElementById('searchOverlay');
 
 if (searchToggle && searchOverlay) {
-    searchToggle.addEventListener('click', () => {
-        searchOverlay.classList.toggle('hidden');
-        if (!searchOverlay.classList.contains('hidden')) {
-            searchOverlay.querySelector('input')?.focus();
-        }
-    });
+    function setSearchOpen(open) {
+        searchOverlay.classList.toggle('hidden', !open);
+        searchToggle.setAttribute('aria-expanded', String(open));
+        if (open) searchOverlay.querySelector('input')?.focus();
+    }
+
+    searchToggle.addEventListener('click', () => setSearchOpen(searchOverlay.classList.contains('hidden')));
 
     document.addEventListener('click', (e) => {
         if (!searchOverlay.contains(e.target) && !searchToggle.contains(e.target)) {
-            searchOverlay.classList.add('hidden');
+            setSearchOpen(false);
         }
     });
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            searchOverlay.classList.add('hidden');
+            setSearchOpen(false);
         }
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
-            searchOverlay.classList.toggle('hidden');
-            if (!searchOverlay.classList.contains('hidden')) {
-                searchOverlay.querySelector('input')?.focus();
-            }
+            setSearchOpen(searchOverlay.classList.contains('hidden'));
         }
     });
 }
@@ -120,7 +118,8 @@ const mobileMenu = document.getElementById('mobileMenu');
 
 if (mobileMenuBtn && mobileMenu) {
     mobileMenuBtn.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
+        const isOpen = mobileMenu.classList.toggle('hidden') === false;
+        mobileMenuBtn.setAttribute('aria-expanded', String(isOpen));
     });
 }
 

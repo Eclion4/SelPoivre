@@ -83,7 +83,7 @@
                 <div class="hidden md:flex items-center gap-4">
                     <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all duration-300">Connexion</a>
                 </div>
-                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors">
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -365,7 +365,7 @@
         // Mobile menu
         const mb = document.getElementById('mobileMenuBtn');
         const mm = document.getElementById('mobileMenu');
-        if (mb && mm) mb.addEventListener('click', () => mm.classList.toggle('hidden'));
+        if (mb && mm) mb.addEventListener('click', () => { const o = mm.classList.toggle('hidden') === false; mb.setAttribute('aria-expanded', String(o)); });
 
         // Load live stats
         fetch('api/stats.php').then(r => r.json()).then(d => {

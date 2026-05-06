@@ -73,7 +73,7 @@
                 <div class="hidden md:flex items-center gap-4">
                     <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all duration-300">Connexion</a>
                 </div>
-                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors">
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -333,7 +333,7 @@
         <div class="relative aspect-[4/3] overflow-hidden flex-shrink-0">
             <img src="${r.image}" alt="${r.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
             ${badge ? `<div class="absolute top-3 left-3">${badge}</div>` : ''}
-            <button type="button" data-fav data-id="${r.id}"
+            <button type="button" data-fav data-id="${r.id}" aria-label="${r.is_favorited ? 'Retirer des favoris' : 'Ajouter aux favoris'}" aria-pressed="${!!r.is_favorited}"
                 onclick="event.stopPropagation();event.preventDefault();window.SP&&window.SP.toggleFavorite(${r.id}, this);"
                 class="absolute top-3 right-3 w-9 h-9 ${r.is_favorited ? 'bg-sp-500 text-white' : 'bg-white/90'} backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all is-favorited-${!!r.is_favorited}">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="${r.is_favorited?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>

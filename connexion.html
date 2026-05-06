@@ -172,6 +172,14 @@
     </div>
 
     <script>
+    // Redirect already-logged-in users
+    (function() {
+        try {
+            const u = JSON.parse(localStorage.getItem('sp_user') || 'null');
+            if (u && u.id) window.location.replace('index.html');
+        } catch {}
+    })();
+
     function togglePasswordVisibility() {
         const input = document.getElementById('password');
         const icon = document.getElementById('eyeIcon');

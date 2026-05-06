@@ -14,7 +14,7 @@ function updateAllStats(recipes) {
     document.querySelectorAll('[data-stat]').forEach(el => {
         switch (el.dataset.stat) {
             case 'recipeCount': el.textContent = formatStat(recipeCount); break;
-            case 'memberCount': el.textContent = '—'; break;
+            case 'memberCount': el.textContent = '0'; break;
             case 'rating':      el.textContent = SP_STATS.averageRating.toFixed(1); break;
         }
     });

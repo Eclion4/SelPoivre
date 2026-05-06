@@ -47,8 +47,11 @@ function getList() {
     $sql = "SELECT r.id, r.slug, r.title, r.description, r.category,
                    r.prep_time, r.cook_time, r.total_time, r.servings,
                    r.difficulty, r.rating, r.rating_count, r.image_url,
-                   r.author_type, r.created_at,
-                   u.username AS author_name, u.avatar AS author_avatar
+                   r.created_at,
+                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'mijote' ELSE 'user' END AS author_type,
+                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
+                        ELSE COALESCE(u.username, 'Communauté')
+                   END AS author_name
             FROM recipes r
             LEFT JOIN users u ON r.author_id = u.id
             WHERE " . implode(' AND ', $where) . "

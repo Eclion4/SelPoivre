@@ -8,8 +8,89 @@
 require_once 'config.php';
 
 $action = $_GET['action'] ?? '';
-if ($_SERVER['REQUEST_METHOD'] !== 'GET' || $action !== 'list') {
+if ($_SERVER['REQUEST_METHOD'] !== 'GET' || !in_array($action, ['list', 'posts'], true)) {
     jsonResponse(['error' => 'Route inconnue'], 404);
+}
+
+if ($action === 'posts') { listPosts(); exit; }
+
+function listPosts() {
+    $scope  = $_GET['scope'] ?? 'all';
+    $limit  = max(1, min(50, (int)($_GET['limit'] ?? 20)));
+    $offset = max(0, (int)($_GET['offset'] ?? 0));
+    $userId = $_SESSION['user_id'] ?? 0;
+    $db = getDB();
+
+    // Build follow filter for scope=me
+    $where = ["r.status = 'published'"];
+    $params = [];
+    if ($scope === 'me') {
+        if (!$userId) jsonResponse(['error' => 'Non authentifié'], 401);
+        $s = $db->prepare("SELECT followed_id FROM follows WHERE follower_id = ?");
+        $s->execute([$userId]);
+        $ids = array_column($s->fetchAll(), 'followed_id');
+        if (count($ids) === 0) {
+            jsonResponse(['posts' => [], 'scope' => 'me', 'following_count' => 0]);
+        }
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $where[] = "r.author_id IN ($placeholders)";
+        $params = $ids;
+    }
+
+    $favSelect = $userId
+        ? "(SELECT 1 FROM favorites f WHERE f.recipe_id = r.id AND f.user_id = " . (int)$userId . ") AS is_favorited,"
+        : "0 AS is_favorited,";
+
+    $sql = "SELECT r.id, r.slug, r.title, r.description, r.image_url, r.created_at,
+                   r.author_id, r.category, r.total_time, r.difficulty, r.rating,
+                   $favSelect
+                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'mijote' ELSE 'user' END AS author_type,
+                   CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
+                        ELSE COALESCE(u.username, 'Communauté')
+                   END AS author_name,
+                   u.avatar AS author_avatar,
+                   (SELECT COUNT(*) FROM favorites WHERE recipe_id = r.id) AS like_count,
+                   (SELECT COUNT(*) FROM comments  WHERE recipe_id = r.id) AS comment_count
+            FROM recipes r
+            LEFT JOIN users u ON r.author_id = u.id
+            WHERE " . implode(' AND ', $where) . "
+            ORDER BY r.created_at DESC
+            LIMIT $limit OFFSET $offset";
+    $rs = $db->prepare($sql);
+    $rs->execute($params);
+    $posts = $rs->fetchAll();
+
+    // Cast bool/int and fetch top-3 comments per recipe in one shot
+    foreach ($posts as &$p) {
+        $p['like_count']    = (int)$p['like_count'];
+        $p['comment_count'] = (int)$p['comment_count'];
+        $p['is_favorited']  = (bool)($p['is_favorited'] ?? false);
+        $p['comments_preview'] = [];
+    }
+    unset($p);
+
+    $ids = array_column($posts, 'id');
+    if (count($ids) > 0) {
+        $ph = implode(',', array_fill(0, count($ids), '?'));
+        $cs = $db->prepare("SELECT c.id, c.recipe_id, c.content, c.rating, c.created_at,
+                                   c.user_id, u.username, u.avatar
+                            FROM comments c
+                            LEFT JOIN users u ON c.user_id = u.id
+                            WHERE c.recipe_id IN ($ph)
+                            ORDER BY c.created_at DESC");
+        $cs->execute($ids);
+        $byRecipe = [];
+        foreach ($cs->fetchAll() as $c) {
+            $rid = (int)$c['recipe_id'];
+            if (!isset($byRecipe[$rid])) $byRecipe[$rid] = [];
+            if (count($byRecipe[$rid]) < 3) $byRecipe[$rid][] = $c;
+        }
+        foreach ($posts as &$p) {
+            $p['comments_preview'] = $byRecipe[(int)$p['id']] ?? [];
+        }
+    }
+
+    jsonResponse(['posts' => $posts, 'scope' => $scope]);
 }
 
 $scope  = $_GET['scope'] ?? 'all';

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communauté — Sel & Poivre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'sp':    { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12' },
+                    'or':    { 50:'#FDF9EF',100:'#FDF3DC',300:'#F2C860',500:'#C4892A',600:'#A36E20' },
+                    'ivoire':'#F8F5EF', 'encre':'#18130F',
+                },
+                fontFamily: { 'display':['Playfair Display','serif'],'body':['Inter','sans-serif'],'handwrite':['Caveat','cursive'] }
+            }
+        }
+    }
+    </script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background:#F8F5EF; font-family:'Inter',sans-serif; color:#18130F; }
+        .post-card { background:#fff; border:1px solid #E5E7EB; border-radius:18px; overflow:hidden; }
+        @media (max-width: 640px) { .post-card { border-radius: 0; border-left: none; border-right: none; } }
+        .heart-btn { transition: transform 0.15s; }
+        .heart-btn.is-fav svg { fill: #C4311B; color: #C4311B; }
+        .heart-btn:active { transform: scale(0.92); }
+        .heart-btn.popping { animation: heartPop 0.4s ease; }
+        @keyframes heartPop { 0%,100% { transform: scale(1); } 30% { transform: scale(1.3); } }
+        .comment-bubble { background:#F9FAFB; }
+        .scope-tab {
+            padding:8px 18px; border-radius:9999px; font-size:0.875rem; font-weight:600;
+            background:#fff; color:#6B7280; border:1.5px solid #E5E7EB;
+            cursor:pointer; transition: all .15s;
+        }
+        .scope-tab:hover { background:#F9FAFB; }
+        .scope-tab.active { background:#C4311B; color:white; border-color:#C4311B; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar" class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl shadow-sm border-b border-sp-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300">
+                    <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="text-2xl font-display font-bold"><span class="text-sp-500">Sel</span><span class="text-encre"> &amp; Poivre</span></span>
+            </a>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="index.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Accueil</a>
+                <a href="recettes.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Recettes</a>
+                <a href="communaute.html" class="font-medium text-sm tracking-wide uppercase text-sp-600 border-b-2 border-sp-500 pb-1">Communauté</a>
+            </div>
+            <div class="hidden md:flex items-center gap-4">
+                <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
+            </div>
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden bg-white/95 backdrop-blur-xl shadow-2xl border-t border-sp-100">
+        <div class="px-4 py-6 space-y-4">
+            <a href="index.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Accueil</a>
+            <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
+            <a href="communaute.html" class="block py-3 px-4 rounded-xl bg-sp-50 text-sp-700 font-medium">Communauté</a>
+            <a href="connexion.html" class="block w-full text-center px-5 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Connexion</a>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-2xl mx-auto px-0 sm:px-4 lg:px-8 py-6 sm:py-10">
+
+    <!-- Header -->
+    <header class="px-4 sm:px-0 mb-6">
+        <h1 class="text-3xl sm:text-4xl font-display font-bold">Communauté</h1>
+        <p class="text-gray-500 text-sm mt-1">Le fil des recettes, avis et découvertes de la communauté Sel &amp; Poivre.</p>
+
+        <div class="mt-5 flex items-center gap-2 flex-wrap">
+            <button id="tabAll" class="scope-tab active" data-scope="all">Tout</button>
+            <button id="tabMe"  class="scope-tab hidden" data-scope="me">Mes abonnements</button>
+            <a id="publishCta" href="publier.html" class="hidden ml-auto inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Publier
+            </a>
+        </div>
+    </header>
+
+    <!-- Feed -->
+    <div id="feedList" class="space-y-6">
+        <p class="text-gray-400 text-center py-16">Chargement…</p>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="hidden text-center py-20 px-4">
+        <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <i data-lucide="users" class="w-10 h-10 text-gray-400"></i>
+        </div>
+        <h2 class="text-xl font-display font-bold mb-2" id="emptyTitle">Aucune publication pour le moment</h2>
+        <p id="emptyMsg" class="text-gray-500 mb-6"></p>
+        <a id="emptyCta" href="recettes.html" class="inline-block px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Découvrir des recettes</a>
+    </div>
+
+    <!-- Load more -->
+    <div id="loadMoreBox" class="hidden text-center mt-8">
+        <button id="loadMoreBtn" class="px-6 py-3 bg-white border-2 border-gray-200 rounded-full font-semibold text-sm hover:bg-gray-50 transition-colors">Charger plus</button>
+    </div>
+</main>
+
+<script src="js/auth-ui.js"></script>
+<script>
+(function () {
+    const PALETTE = ['#E85D26','#16A34A','#7C3AED','#DB2777','#0284C7','#CA8A04','#DC2626','#059669'];
+    function colorFor(name){let h=0;for(const c of (name||''))h=(h*31+c.charCodeAt(0))&0xFFFF;return PALETTE[h%PALETTE.length];}
+    function initials(name){return (name||'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+    function escape(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function relativeTime(iso) {
+        try {
+            const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+            if (diff < 60)    return "à l'instant";
+            if (diff < 3600)  return 'il y a ' + Math.floor(diff/60) + ' min';
+            if (diff < 86400) return 'il y a ' + Math.floor(diff/3600) + ' h';
+            if (diff < 86400*7) return 'il y a ' + Math.floor(diff/86400) + ' j';
+            return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+        } catch { return ''; }
+    }
+
+    function avatarHTML(name, avatar, sizeClasses = 'w-10 h-10') {
+        if (avatar) {
+            return `<img src="${avatar}" alt="" class="${sizeClasses} rounded-full object-cover flex-shrink-0">`;
+        }
+        return `<div class="${sizeClasses} rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style="background:${colorFor(name||'')}">${initials(name||'')}</div>`;
+    }
+
+    function userLink(name) {
+        if (!name || name === 'Équipe Sel & Poivre' || name === 'Communauté') return null;
+        return 'utilisateur.html?username=' + encodeURIComponent(name);
+    }
+
+    function commentLine(c) {
+        const link = userLink(c.username);
+        const namePart = link
+            ? `<a href="${link}" class="font-semibold text-encre hover:underline">${escape(c.username || 'Anonyme')}</a>`
+            : `<span class="font-semibold text-encre">${escape(c.username || 'Anonyme')}</span>`;
+        const ratingPart = c.rating
+            ? ` <span class="text-amber-500">${'⭐'.repeat(c.rating)}</span>`
+            : '';
+        return `<p class="text-sm leading-snug">${namePart}${ratingPart} <span class="text-gray-700">${escape(c.content || '')}</span></p>`;
+    }
+
+    function postCard(p) {
+        const aLink = userLink(p.author_name);
+        const authorBlock = aLink
+            ? `<a href="${aLink}" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                  ${avatarHTML(p.author_name, p.author_avatar)}
+                  <div class="min-w-0">
+                      <p class="font-semibold text-sm truncate">${escape(p.author_name)}</p>
+                      <p class="text-xs text-gray-400">${relativeTime(p.created_at)} · <span class="capitalize">${escape(p.category || '')}</span></p>
+                  </div>
+              </a>`
+            : `<div class="flex items-center gap-3">
+                  ${avatarHTML(p.author_name, p.author_avatar)}
+                  <div class="min-w-0">
+                      <p class="font-semibold text-sm truncate">${escape(p.author_name)}</p>
+                      <p class="text-xs text-gray-400">${relativeTime(p.created_at)} · <span class="capitalize">${escape(p.category || '')}</span></p>
+                  </div>
+              </div>`;
+
+        const img = p.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=900';
+        const heartFilled = p.is_favorited;
+
+        const commentsHTML = (p.comments_preview && p.comments_preview.length > 0)
+            ? `<div class="px-4 sm:px-5 pb-3 space-y-1.5">
+                  ${p.comments_preview.map(commentLine).join('')}
+                  ${p.comment_count > p.comments_preview.length
+                      ? `<a href="recette-detail.html?slug=${p.slug}" class="block text-xs text-gray-500 hover:underline mt-1">Voir les ${p.comment_count} avis</a>`
+                      : ''
+                  }
+              </div>`
+            : '';
+
+        return `
+        <article class="post-card" data-recipe-id="${p.id}" data-slug="${p.slug}">
+            <header class="flex items-center justify-between px-4 sm:px-5 py-3">
+                ${authorBlock}
+                <a href="recette-detail.html?slug=${p.slug}" class="text-xs text-sp-600 font-semibold hover:underline">Voir la recette</a>
+            </header>
+
+            <a href="recette-detail.html?slug=${p.slug}" class="block">
+                <div class="aspect-[4/3] sm:aspect-square overflow-hidden bg-gray-100">
+                    <img src="${img}" alt="${escape(p.title)}" class="w-full h-full object-cover" loading="lazy">
+                </div>
+            </a>
+
+            <div class="px-4 sm:px-5 pt-3 pb-2 flex items-center gap-4">
+                <button class="js-fav heart-btn flex items-center gap-1.5 ${heartFilled ? 'is-fav' : ''}" aria-pressed="${heartFilled}">
+                    <svg class="w-6 h-6" fill="${heartFilled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <span class="js-fav-count text-sm font-semibold">${p.like_count}</span>
+                </button>
+                <button class="js-comment-focus flex items-center gap-1.5 text-gray-700 hover:text-sp-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                    <span class="text-sm font-semibold">${p.comment_count}</span>
+                </button>
+                <button class="js-share ml-auto flex items-center gap-1.5 text-gray-700 hover:text-sp-600 transition-colors" title="Partager">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                </button>
+            </div>
+
+            <div class="px-4 sm:px-5 pb-2">
+                <h3 class="font-display font-bold text-base">${escape(p.title)}</h3>
+                <p class="text-sm text-gray-600 mt-1 leading-snug">${escape(p.description || '')}</p>
+            </div>
+
+            ${commentsHTML}
+
+            <div class="px-4 sm:px-5 py-3 border-t border-gray-100 js-comment-box">
+                <!-- Comment input filled by JS depending on auth -->
+            </div>
+        </article>`;
+    }
+
+    let currentScope = 'all';
+    let currentOffset = 0;
+    let pageSize = 10;
+    let isLoading = false;
+
+    async function loadFeed(append = false) {
+        if (isLoading) return;
+        isLoading = true;
+        const list = document.getElementById('feedList');
+        const loadMoreBox = document.getElementById('loadMoreBox');
+        const empty = document.getElementById('emptyState');
+
+        if (!append) {
+            currentOffset = 0;
+            list.innerHTML = '<p class="text-gray-400 text-center py-16">Chargement…</p>';
+            empty.classList.add('hidden');
+            loadMoreBox.classList.add('hidden');
+        }
+
+        try {
+            const url = window.SP.apiPath('feed.php?action=posts&scope=' + currentScope + '&limit=' + pageSize + '&offset=' + currentOffset);
+            const res = await fetch(url, { credentials: 'include' });
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+
+            const posts = data.posts || [];
+
+            if (!append) list.innerHTML = '';
+
+            if (!append && posts.length === 0) {
+                if (currentScope === 'me') {
+                    document.getElementById('emptyTitle').textContent = "Votre fil est encore vide";
+                    document.getElementById('emptyMsg').textContent   = "Suivez des membres pour voir leurs publications ici.";
+                    document.getElementById('emptyCta').textContent   = "Découvrir des comptes";
+                    document.getElementById('emptyCta').href          = "recettes.html";
+                } else {
+                    document.getElementById('emptyTitle').textContent = "Aucune publication pour le moment";
+                    document.getElementById('emptyMsg').textContent   = "Soyez les premiers à animer cette communauté.";
+                    document.getElementById('emptyCta').textContent   = window.SP.user ? "Publier ma recette" : "Créer mon compte";
+                    document.getElementById('emptyCta').href          = window.SP.user ? "publier.html" : "inscription.html";
+                }
+                empty.classList.remove('hidden');
+                isLoading = false;
+                return;
+            }
+
+            const html = posts.map(postCard).join('');
+            list.insertAdjacentHTML('beforeend', html);
+
+            // Wire each newly-added card
+            const cards = list.querySelectorAll('.post-card:not(.js-wired)');
+            cards.forEach(wireCard);
+
+            currentOffset += posts.length;
+            // Show "Load more" if we got a full page
+            if (posts.length === pageSize) loadMoreBox.classList.remove('hidden');
+            else loadMoreBox.classList.add('hidden');
+
+            if (window.lucide) lucide.createIcons();
+        } catch (e) {
+            list.innerHTML = '<p class="text-red-500 text-center py-12 text-sm">Impossible de charger le fil. ' + escape(e.message) + '</p>';
+        }
+        isLoading = false;
+    }
+
+    function wireCard(card) {
+        card.classList.add('js-wired');
+        const recipeId = +card.dataset.recipeId;
+        const slug     = card.dataset.slug;
+
+        // Like button
+        const heart = card.querySelector('.js-fav');
+        heart.addEventListener('click', async () => {
+            if (!window.SP.user) { window.location.href = 'connexion.html'; return; }
+            heart.classList.add('popping');
+            setTimeout(() => heart.classList.remove('popping'), 400);
+            try {
+                const res = await fetch(window.SP.apiPath('favorites.php?action=toggle'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ recipe_id: recipeId })
+                });
+                const d = await res.json();
+                if (!d.success) throw new Error(d.error || 'Erreur');
+                heart.classList.toggle('is-fav', d.favorited);
+                const svg = heart.querySelector('svg');
+                svg.setAttribute('fill', d.favorited ? 'currentColor' : 'none');
+                const cnt = heart.querySelector('.js-fav-count');
+                cnt.textContent = Math.max(0, parseInt(cnt.textContent || '0') + (d.favorited ? 1 : -1));
+            } catch (e) { /* noop */ }
+        });
+
+        // Share
+        card.querySelector('.js-share').addEventListener('click', async () => {
+            const url = location.origin + '/recette-detail.html?slug=' + slug;
+            const title = card.querySelector('h3')?.textContent || 'Recette Sel & Poivre';
+            if (navigator.share) { try { await navigator.share({ title, url }); } catch {} }
+            else { try { await navigator.clipboard.writeText(url); alert('Lien copié dans le presse-papiers'); } catch { alert(url); } }
+        });
+
+        // Comment input box (auth-dependent)
+        const commentBox = card.querySelector('.js-comment-box');
+        if (window.SP.user) {
+            commentBox.innerHTML = `
+                <form class="js-comment-form flex items-center gap-2">
+                    <input type="text" maxlength="500" required placeholder="Laisser un avis…" class="flex-1 px-4 py-2 bg-gray-50 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-sp-500 text-sm">
+                    <button type="submit" class="px-4 py-2 bg-sp-500 text-white rounded-full text-sm font-semibold hover:bg-sp-600 transition-colors">Publier</button>
+                </form>`;
+            const form = commentBox.querySelector('form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = form.querySelector('input');
+                const content = input.value.trim();
+                if (!content) return;
+                input.disabled = true;
+                try {
+                    const res = await fetch(window.SP.apiPath('comments.php?action=add'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ recipe_id: recipeId, content })
+                    });
+                    const d = await res.json();
+                    if (!d.success) throw new Error(d.error || 'Erreur');
+                    // Insert new comment at top of preview
+                    const c = d.comment;
+                    let prev = card.querySelector('.post-card > .px-4.sm\\:px-5.pb-3.space-y-1\\.5');
+                    if (!prev) {
+                        // No comments yet → create the block before the comment input
+                        const div = document.createElement('div');
+                        div.className = 'px-4 sm:px-5 pb-3 space-y-1.5';
+                        commentBox.parentNode.insertBefore(div, commentBox);
+                        prev = div;
+                    }
+                    prev.insertAdjacentHTML('afterbegin', commentLine(c));
+                    // Bump comment count badge
+                    const cntEl = card.querySelector('.js-comment-focus span');
+                    cntEl.textContent = parseInt(cntEl.textContent || '0') + 1;
+                    input.value = '';
+                } catch (err) {
+                    alert('Erreur : ' + err.message);
+                } finally {
+                    input.disabled = false;
+                }
+            });
+        } else {
+            commentBox.innerHTML = `
+                <a href="connexion.html" class="block text-center text-sm text-sp-600 font-semibold hover:underline">Connectez-vous pour commenter</a>`;
+        }
+
+        // Focus comment input on click
+        card.querySelector('.js-comment-focus').addEventListener('click', () => {
+            const input = card.querySelector('.js-comment-form input');
+            if (input) input.focus();
+            else window.location.href = 'connexion.html';
+        });
+    }
+
+    // Tabs
+    document.getElementById('tabAll').addEventListener('click', () => {
+        currentScope = 'all';
+        document.getElementById('tabAll').classList.add('active');
+        document.getElementById('tabMe').classList.remove('active');
+        loadFeed(false);
+    });
+    document.getElementById('tabMe').addEventListener('click', () => {
+        currentScope = 'me';
+        document.getElementById('tabMe').classList.add('active');
+        document.getElementById('tabAll').classList.remove('active');
+        loadFeed(false);
+    });
+
+    document.getElementById('loadMoreBtn').addEventListener('click', () => loadFeed(true));
+
+    // Mobile menu toggle
+    const mb = document.getElementById('mobileMenuBtn');
+    const mm = document.getElementById('mobileMenu');
+    if (mb && mm) mb.addEventListener('click', () => mm.classList.toggle('hidden'));
+
+    // Show "me" tab + Publish CTA when logged in
+    if (window.SP && window.SP.user) {
+        document.getElementById('tabMe').classList.remove('hidden');
+        document.getElementById('publishCta').classList.remove('hidden');
+    }
+
+    loadFeed(false);
+})();
+</script>
+</body>
+</html>

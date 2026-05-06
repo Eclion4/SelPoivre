@@ -80,7 +80,7 @@
                 <div class="hidden md:flex items-center gap-8">
                     <a href="index.html" class="nav-link active font-medium text-sm tracking-wide uppercase">Accueil</a>
                     <a href="recettes.html" class="nav-link font-medium text-sm tracking-wide uppercase">Recettes</a>
-                    <a href="#communaute" class="nav-link font-medium text-sm tracking-wide uppercase">Communauté</a>
+                    <a href="communaute.html" class="nav-link font-medium text-sm tracking-wide uppercase">Communauté</a>
                 </div>
 
                 <!-- Right Actions -->
@@ -128,7 +128,7 @@
             <div class="px-4 py-6 space-y-4">
                 <a href="index.html" class="block py-3 px-4 rounded-xl bg-sp-50 text-sp-700 font-medium">Accueil</a>
                 <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
-                <a href="#communaute" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Communauté</a>
+                <a href="communaute.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Communauté</a>
                 <div class="pt-4 border-t border-gray-100">
                     <a href="connexion.html" class="block w-full text-center px-5 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Connexion</a>
                 </div>
@@ -340,42 +340,41 @@
         </div>
     </section>
 
-    <!-- ========== COMMUNITY ========== -->
+    <!-- ========== COMMUNITY TEASER ========== -->
     <section id="communaute" class="py-20 bg-encre text-white relative overflow-hidden">
         <div class="absolute inset-0 opacity-5">
             <div class="absolute top-10 left-10 w-80 h-80 bg-sp-500 rounded-full blur-3xl"></div>
             <div class="absolute bottom-10 right-10 w-96 h-96 bg-or-500 rounded-full blur-3xl"></div>
         </div>
 
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16" data-aos="fade-up">
+        <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center" data-aos="fade-up">
                 <span class="font-handwrite text-2xl text-sp-400">Ensemble, c'est meilleur</span>
                 <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2">La communauté Sel &amp; Poivre</h2>
                 <p class="mt-4 text-gray-400 max-w-2xl mx-auto text-lg">Des passionnés de cuisine qui partagent, commentent et s'entraident chaque jour.</p>
             </div>
 
-            <!-- Feed scope tabs (visible only when logged in) -->
-            <div id="feedTabs" class="hidden flex items-center justify-center gap-2 mb-8">
-                <button data-scope="all" class="js-feed-tab px-5 py-2 rounded-full text-sm font-semibold bg-white text-encre">Tout</button>
-                <button data-scope="me"  class="js-feed-tab px-5 py-2 rounded-full text-sm font-semibold bg-white/10 text-white border border-white/20">Mes abonnements</button>
-            </div>
-
-            <!-- Activity feed -->
-            <div id="feedList" class="max-w-2xl mx-auto space-y-3">
-                <p class="text-gray-500 text-center py-8 text-sm">Chargement du fil…</p>
-            </div>
-
-            <!-- Empty/CTA placeholder shown when no events -->
-            <div id="feedEmpty" class="hidden max-w-2xl mx-auto" data-aos="fade-up">
-                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 text-center">
-                    <i data-lucide="message-circle" class="w-10 h-10 text-gray-600 mx-auto mb-4"></i>
-                    <p id="feedEmptyMsg" class="text-gray-400 font-medium">Le fil d'activité s'animera avec les premiers membres.</p>
-                    <p class="text-gray-600 text-sm mt-1">Publiez une recette, notez, commentez — et donnez vie à cette communauté.</p>
-                    <a id="feedEmptyCta" href="inscription.html" class="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-sp-500/30 transition-all text-sm">
-                        <i data-lucide="user-plus" class="w-4 h-4"></i>
-                        <span id="feedEmptyCtaLabel">Créer mon compte gratuitement</span>
-                    </a>
+            <div class="grid sm:grid-cols-3 gap-5 mt-12 text-center max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
+                    <div class="text-3xl font-bold text-white" data-stat="memberCount">—</div>
+                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Membres</p>
                 </div>
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
+                    <div class="text-3xl font-bold text-white" data-stat="recipeCount">—</div>
+                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Recettes</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
+                    <div class="text-3xl font-bold text-white" data-stat="rating">—</div>
+                    <p class="text-xs text-gray-400 mt-1 uppercase tracking-wider">Note moyenne</p>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center" data-aos="fade-up" data-aos-delay="200">
+                <a href="communaute.html" class="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-base hover:shadow-2xl hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all">
+                    <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    Ouvrir le fil de la communauté
+                </a>
+                <p class="mt-3 text-xs text-gray-500">Recettes, avis, abonnements — tout ce qui se passe en direct.</p>
             </div>
         </div>
     </section>
@@ -631,122 +630,7 @@
             });
         });
 
-        // ── Activity feed ─────────────────────────────────────────
-        function avatarHTML(name, avatar, sizeClasses = 'w-10 h-10') {
-            if (avatar) {
-                return `<img src="${avatar}" alt="" class="${sizeClasses} rounded-full object-cover flex-shrink-0">`;
-            }
-            const c = colorFor(name || '');
-            const i = (name || 'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
-            return `<div class="${sizeClasses} rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style="background:${c}">${i}</div>`;
-        }
-
-        function relativeTime(iso) {
-            try {
-                const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-                if (diff < 60)    return 'à l\'instant';
-                if (diff < 3600)  return 'il y a ' + Math.floor(diff/60) + ' min';
-                if (diff < 86400) return 'il y a ' + Math.floor(diff/3600) + ' h';
-                if (diff < 86400*30) return 'il y a ' + Math.floor(diff/86400) + ' j';
-                return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
-            } catch { return ''; }
-        }
-
-        function escapeHtml(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-        function eventCard(ev) {
-            const userLink = ev.username && ev.username !== 'Équipe Sel & Poivre'
-                ? `utilisateur.html?username=${encodeURIComponent(ev.username)}` : null;
-            const userBlock = userLink
-                ? `<a href="${userLink}" class="hover:opacity-80 flex-shrink-0">${avatarHTML(ev.username, ev.avatar)}</a>`
-                : avatarHTML(ev.username, ev.avatar);
-            const userName = userLink
-                ? `<a href="${userLink}" class="font-semibold text-white hover:underline">${escapeHtml(ev.username)}</a>`
-                : `<strong class="text-white">${escapeHtml(ev.username)}</strong>`;
-
-            let action = '';
-            if (ev.type === 'recipe_published') {
-                action = `a publié <a href="recette-detail.html?slug=${ev.recipe.slug}" class="text-sp-400 hover:underline font-semibold">${escapeHtml(ev.recipe.title)}</a>`;
-            } else if (ev.type === 'recipe_rated') {
-                const stars = '⭐'.repeat(ev.rating);
-                action = `a noté ${stars} <a href="recette-detail.html?slug=${ev.recipe.slug}" class="text-sp-400 hover:underline font-semibold">${escapeHtml(ev.recipe.title)}</a>`;
-            } else if (ev.type === 'recipe_commented') {
-                action = `a commenté <a href="recette-detail.html?slug=${ev.recipe.slug}" class="text-sp-400 hover:underline font-semibold">${escapeHtml(ev.recipe.title)}</a>`;
-            }
-
-            const preview = ev.content
-                ? `<p class="text-sm text-gray-300 mt-2 line-clamp-2 italic">"${escapeHtml(ev.content.slice(0,180))}${ev.content.length > 180 ? '…' : ''}"</p>`
-                : '';
-
-            const recipeImg = ev.recipe.image_url
-                ? `<a href="recette-detail.html?slug=${ev.recipe.slug}" class="flex-shrink-0">
-                       <img src="${ev.recipe.image_url}" alt="" class="w-14 h-14 rounded-lg object-cover">
-                   </a>`
-                : '';
-
-            return `
-            <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 flex items-start gap-3 hover:bg-white/10 transition-all">
-                ${userBlock}
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm text-gray-200">${userName} ${action}</p>
-                    <span class="text-xs text-gray-500">${relativeTime(ev.event_at)}</span>
-                    ${preview}
-                </div>
-                ${recipeImg}
-            </div>`;
-        }
-
-        async function loadFeed(scope) {
-            const list = document.getElementById('feedList');
-            const empty = document.getElementById('feedEmpty');
-            list.innerHTML = '<p class="text-gray-500 text-center py-8 text-sm">Chargement…</p>';
-            empty.classList.add('hidden');
-            try {
-                const res = await fetch('api/feed.php?action=list&scope=' + scope + '&limit=15', { credentials: 'include' });
-                const data = await res.json();
-                const events = data.events || [];
-                if (events.length === 0) {
-                    list.innerHTML = '';
-                    if (scope === 'me') {
-                        document.getElementById('feedEmptyMsg').textContent = 'Aucune activité de vos abonnements pour le moment.';
-                        document.getElementById('feedEmptyCtaLabel').textContent = 'Découvrir des comptes';
-                        document.getElementById('feedEmptyCta').href = 'recettes.html';
-                    } else {
-                        document.getElementById('feedEmptyMsg').textContent = 'Le fil d\'activité s\'animera avec les premiers membres.';
-                        document.getElementById('feedEmptyCtaLabel').textContent = window.SP && window.SP.user ? 'Publier ma première recette' : 'Créer mon compte gratuitement';
-                        document.getElementById('feedEmptyCta').href = window.SP && window.SP.user ? 'publier.html' : 'inscription.html';
-                    }
-                    empty.classList.remove('hidden');
-                } else {
-                    list.innerHTML = events.map(eventCard).join('');
-                }
-            } catch (e) {
-                list.innerHTML = '<p class="text-red-400 text-center py-6 text-sm">Impossible de charger le fil.</p>';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Show tabs only when logged in
-            const tabs = document.getElementById('feedTabs');
-            if (window.SP && window.SP.user) {
-                tabs?.classList.remove('hidden');
-                tabs?.classList.add('flex');
-                document.querySelectorAll('.js-feed-tab').forEach(b => b.addEventListener('click', () => {
-                    const scope = b.dataset.scope;
-                    document.querySelectorAll('.js-feed-tab').forEach(x => {
-                        const isActive = x === b;
-                        x.classList.toggle('bg-white', isActive);
-                        x.classList.toggle('text-encre', isActive);
-                        x.classList.toggle('bg-white/10', !isActive);
-                        x.classList.toggle('text-white', !isActive);
-                        x.classList.toggle('border', !isActive);
-                        x.classList.toggle('border-white/20', !isActive);
-                    });
-                    loadFeed(scope);
-                }));
-            }
-            loadFeed('all');
-        });
+        // (Activity feed moved to dedicated communaute.html page)
     })();
     </script>
 

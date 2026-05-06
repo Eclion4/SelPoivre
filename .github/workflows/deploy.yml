@@ -14,11 +14,11 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ftp.gupi3719.odns.fr
-          username: admin@gupi3719.odns.fr
+          username: deploy@gupi3719.odns.fr
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftps
           port: 21
-          server-dir: public_html/
+          server-dir: ./
           exclude: |
             **/.git*
             **/.git*/**

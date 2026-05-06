@@ -10,6 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Build Tailwind CSS
+        run: |
+          npm ci
+          npm run build:css
+
       - name: Generate DB config
         env:
           DB_NAME: ${{ secrets.DB_NAME }}
@@ -38,7 +43,7 @@ jobs:
                   print(f'[mkdir] Created {d}/')
               except ftplib.error_perm as e:
                   print(f'[mkdir] {d}/ skipped: {e}')
-          for f in ['.ftp-deploy-sync-state.json', 'css/tailwind.css']:
+          for f in ['.ftp-deploy-sync-state.json', 'css/sp.css']:
               try:
                   ftp.delete(f)
                   print(f'[clean] Removed {f}')
@@ -67,3 +72,4 @@ jobs:
             **/tailwind.config.js
             **/css/input.css
             **/migrate-tailwind.js
+            **/css/tailwind.css

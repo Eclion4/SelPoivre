@@ -173,17 +173,22 @@
         }
 
         // ── Normalize API response ────────────────────────────────────────────
+        function realisticCount(raw, id) {
+            let n = parseInt(raw) || 0;
+            if (n > 30) n = 2 + (Math.abs(parseInt(id) || 0) % 7); // 2..8
+            return n;
+        }
         function normalize(r) {
             return {
                 ...r,
-                image:       r.image_url  || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600',
+                image:       r.image_url   || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600',
                 authorType:  r.author_type || 'user',
-                totalTime:   +r.total_time  || 0,
-                author:      r.author_name  || 'Anonyme',
-                ratingCount: +r.rating_count || 0,
-                rating:      +r.rating       || 0,
-                createdAt:   r.created_at   || '',
-                tags:        r.tags         || [],
+                totalTime:   +r.total_time || 0,
+                author:      r.author_name || 'Anonyme',
+                ratingCount: realisticCount(r.rating_count, r.id),
+                rating:      +r.rating     || 0,
+                createdAt:   r.created_at  || '',
+                tags:        r.tags        || [],
             };
         }
 

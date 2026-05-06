@@ -21,15 +21,24 @@ tailwind.config = {
 }
 </script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
   body { font-family: 'Inter', sans-serif; background: #F8F7F4; }
-  .sidebar-link { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:12px; color:#CBD5E1; font-size:14px; font-weight:500; transition:all .2s; }
-  .sidebar-link:hover { background:#16213E; color:#fff; }
-  .sidebar-link.active { background:#E85D26; color:#fff; }
-  .recipe-row { transition: background 0.15s, box-shadow 0.15s; }
-  .recipe-row:hover { background: #F9FAFB; }
-  .recipe-row.selected { background: #FFF7ED; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  .sidebar-link { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:12px; color:#cbd5e1; transition:all .2s; font-size:0.875rem; font-weight:500; }
+  .sidebar-link:hover { background:#16213E; color:white; }
+  .sidebar-link.active { background:#C4311B; color:white; }
+  .badge-pending { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:9999px; font-size:0.75rem; font-weight:600; background:#FEF3C7; color:#92400E; }
+  .badge-published { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:9999px; font-size:0.75rem; font-weight:600; background:#D1FAE5; color:#065F46; }
+  .badge-rejected { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:9999px; font-size:0.75rem; font-weight:600; background:#FEE2E2; color:#991B1B; }
+  .filter-tab { padding:8px 16px; border-radius:9999px; font-size:0.8125rem; font-weight:500; color:#64748b; background:white; border:1px solid #e2e8f0; cursor:pointer; transition:all .15s; }
+  .filter-tab:hover { background:#f8fafc; }
+  .filter-tab.active { background:#C4311B; color:white; border-color:#C4311B; }
+  #sidebar { transition: transform 0.3s ease; }
+  @media (max-width: 1023px) { #sidebar { position:fixed; top:0; left:0; bottom:0; z-index:50; transform:translateX(-100%); } #sidebar.open { transform:translateX(0); } }
+  .recipe-row { transition: background-color .15s; }
+  .recipe-row:hover { background:#F9FAFB; }
   .modal-overlay { backdrop-filter: blur(4px); }
+  .toast { position:fixed; bottom:20px; right:20px; z-index:100; padding:14px 20px; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.15); display:flex; align-items:center; gap:10px; font-weight:500; animation: slideIn .3s ease; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
 </style>
 </head>
 <body class="min-h-screen">
@@ -44,12 +53,11 @@ tailwind.config = {
 
 <div class="flex h-screen overflow-hidden">
 
-  <!-- SIDEBAR -->
-  <aside class="w-64 flex-shrink-0 bg-sidebar flex flex-col overflow-y-auto">
+  <aside id="sidebar" class="w-64 flex-shrink-0 bg-sidebar flex flex-col overflow-y-auto">
     <div class="px-5 py-6 border-b border-white/10">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-sp rounded-xl flex items-center justify-center">
-          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 4 6 4 12c0 4 2 7 5 9h6c3-2 5-5 5-9 0-6-4-10-8-10zm0 3c2.2 0 4 2.2 4 5s-1.8 4-4 4-4-1.8-4-4 1.8-5 4-5z"/></svg>
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 4 6 4 12c0 4 2 7 5 9h6c3-2 5-5 5-9 0-6-4-10-8-10z"/></svg>
         </div>
         <div>
           <div class="text-white font-bold text-sm">Sel &amp; Poivre Admin</div>
@@ -57,6 +65,7 @@ tailwind.config = {
         </div>
       </div>
     </div>
+
     <nav class="flex-1 px-3 py-4 space-y-1">
       <p class="px-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Principal</p>
       <a href="index.html" class="sidebar-link">
@@ -64,487 +73,436 @@ tailwind.config = {
         Tableau de bord
       </a>
       <a href="recettes.html" class="sidebar-link active">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
         Recettes
-        <span class="ml-auto bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full" id="sidebarBadge">3</span>
+        <span id="navPendingCount" class="ml-auto bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
       </a>
       <a href="utilisateurs.html" class="sidebar-link">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
         Utilisateurs
       </a>
-      <p class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Contenu</p>
-      <a href="#" class="sidebar-link" onclick="return false;">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
-        Commentaires <span class="ml-auto text-slate-500 text-xs">bientôt</span>
-      </a>
+
       <p class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Système</p>
       <a href="../index.html" target="_blank" class="sidebar-link">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
         Voir le site
       </a>
     </nav>
+
     <div class="px-4 py-4 border-t border-white/10">
       <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-sp flex items-center justify-center text-white text-xs font-bold flex-shrink-0">AD</div>
+        <div id="adminAvatar" class="w-8 h-8 rounded-full bg-sp flex items-center justify-center text-white text-xs font-bold flex-shrink-0">A</div>
         <div class="min-w-0">
-          <div class="text-white text-sm font-medium truncate">Admin</div>
-          <div class="text-slate-400 text-xs truncate">admin@seletpoivre.fr</div>
+          <div id="adminName" class="text-white text-sm font-medium truncate">Admin</div>
+          <div id="adminEmail" class="text-slate-400 text-xs truncate">—</div>
         </div>
-        <button onclick="logout()" title="Déconnexion" class="ml-auto text-slate-500 hover:text-red-400 transition-colors flex-shrink-0">
+        <button onclick="window.SP.logout()" title="Déconnexion" class="ml-auto text-slate-500 hover:text-red-400 transition-colors flex-shrink-0">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         </button>
       </div>
     </div>
   </aside>
 
-  <!-- MAIN -->
   <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-    <!-- Top bar -->
     <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4 flex-shrink-0">
+      <button id="sidebarToggle" class="lg:hidden text-slate-500 hover:text-slate-900">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
       <div>
-        <h1 class="text-lg font-semibold text-slate-900">Gestion des recettes</h1>
-        <p class="text-xs text-slate-500" id="recipeCountLabel">Chargement...</p>
-      </div>
-      <div class="ml-auto flex items-center gap-3">
-        <!-- Bulk action bar (hidden until selection) -->
-        <div id="bulkBar" class="hidden items-center gap-2">
-          <span class="text-sm text-slate-600" id="selectedCount">0 sélectionnée(s)</span>
-          <button onclick="bulkAction('approve')" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors">Publier tout</button>
-          <button onclick="bulkAction('reject')" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg transition-colors">Refuser tout</button>
-          <button onclick="bulkAction('delete')" class="px-3 py-1.5 bg-white border border-red-300 text-red-600 hover:bg-red-50 text-xs font-semibold rounded-lg transition-colors">Supprimer</button>
-        </div>
-        <button onclick="openAddModal()" class="px-4 py-2 bg-sp hover:bg-sp-dark text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-          Ajouter
-        </button>
+        <h1 class="text-lg font-semibold text-slate-900">Recettes</h1>
+        <p class="text-xs text-slate-500"><span id="totalCount">—</span> au total</p>
       </div>
     </header>
 
-    <!-- Filters & search -->
-    <div class="bg-white border-b border-slate-200 px-6 py-3 flex flex-wrap items-center gap-3">
-      <div class="relative flex-1 min-w-[200px] max-w-xs">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="searchInput" placeholder="Rechercher une recette..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sp focus:ring-2 focus:ring-sp/20 transition-all" oninput="filterRecipes()">
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <button onclick="setFilter('all')" id="filter-all" class="filter-btn active-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-sp text-white">Tout</button>
-        <button onclick="setFilter('pending')" id="filter-pending" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">En attente <span id="count-pending" class="ml-1 bg-amber-500 text-white px-1.5 py-0.5 rounded-full text-[10px]">3</span></button>
-        <button onclick="setFilter('published')" id="filter-published" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">Publiées</button>
-        <button onclick="setFilter('rejected')" id="filter-rejected" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">Refusées</button>
-        <button onclick="setFilter('mijote')" id="filter-mijote" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">S&amp;P</button>
-      </div>
-      <div class="ml-auto">
-        <select id="sortSelect" onchange="filterRecipes()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-600 focus:outline-none focus:border-sp">
-          <option value="newest">Plus récent</option>
-          <option value="oldest">Plus ancien</option>
-          <option value="rating">Meilleure note</option>
-          <option value="title">A → Z</option>
-        </select>
-      </div>
-    </div>
+    <main class="flex-1 overflow-y-auto p-6 space-y-4">
 
-    <!-- Table content -->
-    <main class="flex-1 overflow-y-auto">
-      <div id="recipeTableWrapper" class="min-w-full">
-
-        <!-- Pending section -->
-        <div id="section-pending" class="px-6 py-3">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-2 h-2 rounded-full bg-amber-500"></div>
-            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">En attente de modération</h2>
-            <span id="section-pending-count" class="text-xs text-amber-600 font-bold">3</span>
-          </div>
-          <div id="pending-list" class="bg-white rounded-2xl border border-amber-100 overflow-hidden shadow-sm"></div>
+      <!-- Filters + search -->
+      <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+        <div class="flex flex-wrap gap-2">
+          <button class="filter-tab active" data-filter="all">Toutes <span class="ml-1.5 px-1.5 py-0.5 bg-white/20 rounded text-xs" data-count="all">—</span></button>
+          <button class="filter-tab" data-filter="pending">En attente <span class="ml-1.5 px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs" data-count="pending">—</span></button>
+          <button class="filter-tab" data-filter="published">Publiées <span class="ml-1.5 px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs" data-count="published">—</span></button>
+          <button class="filter-tab" data-filter="rejected">Refusées <span class="ml-1.5 px-1.5 py-0.5 bg-red-100 text-red-700 rounded text-xs" data-count="rejected">—</span></button>
         </div>
-
-        <!-- Published section -->
-        <div id="section-published" class="px-6 py-3">
-          <div class="flex items-center gap-2 mb-3">
-            <div class="w-2 h-2 rounded-full bg-green-500"></div>
-            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Recettes publiées</h2>
-            <span id="section-published-count" class="text-xs text-green-600 font-bold">40</span>
-          </div>
-          <div id="published-list" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"></div>
+        <div class="relative w-full sm:w-64">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input id="searchInput" type="text" placeholder="Rechercher…" class="w-full pl-10 pr-3 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-sp focus:ring-1 focus:ring-sp">
         </div>
-
       </div>
 
-      <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-slate-400">
-        <svg class="w-16 h-16 mb-4 opacity-30" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-        <p class="text-sm font-medium">Aucune recette trouvée</p>
+      <!-- Bulk actions (hidden until selection) -->
+      <div id="bulkBar" class="hidden bg-sp/10 border border-sp/30 rounded-xl px-4 py-3 flex items-center gap-3 text-sm">
+        <span class="font-semibold text-sp"><span id="bulkCount">0</span> sélectionnée(s)</span>
+        <button id="bulkApprove" class="ml-auto px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700">✓ Valider</button>
+        <button id="bulkReject"  class="px-3 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-700">✗ Refuser</button>
+        <button id="bulkClear"   class="text-slate-500 hover:text-slate-900 text-xs">Tout désélectionner</button>
       </div>
+
+      <!-- Recipes list -->
+      <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
+              <tr>
+                <th class="px-4 py-3 w-8"><input id="selectAll" type="checkbox" class="w-4 h-4 accent-sp"></th>
+                <th class="px-4 py-3 text-left">Recette</th>
+                <th class="px-4 py-3 text-left hidden md:table-cell">Auteur</th>
+                <th class="px-4 py-3 text-left hidden lg:table-cell">Date</th>
+                <th class="px-4 py-3 text-left">Statut</th>
+                <th class="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="recipesBody" class="divide-y divide-slate-100">
+              <tr><td colspan="6" class="px-4 py-12 text-center text-slate-400 text-sm">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </main>
   </div>
 </div>
 
-<!-- Recipe detail modal -->
-<div id="recipeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/50 p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" id="recipeModalContent">
-    <div class="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-      <h2 class="text-base font-semibold text-slate-900" id="modalTitle">Recette</h2>
-      <div class="flex items-center gap-2">
-        <span id="modalBadge" class="badge-pending text-xs px-2 py-1 rounded-full font-medium"></span>
-        <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
+<!-- Toast container -->
+<div id="toastContainer"></div>
+
+<!-- Confirm modal -->
+<div id="confirmModal" class="hidden fixed inset-0 bg-black/40 modal-overlay z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6">
+        <h3 id="confirmTitle" class="font-bold text-lg mb-2">Confirmer</h3>
+        <p id="confirmMsg" class="text-sm text-slate-600 mb-5">…</p>
+        <div class="flex gap-3 justify-end">
+            <button id="confirmCancel" class="px-4 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50">Annuler</button>
+            <button id="confirmOk" class="px-4 py-2 rounded-lg text-sm font-semibold text-white">Confirmer</button>
+        </div>
     </div>
-    <div class="p-6" id="modalBody"></div>
-    <div id="modalActions" class="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4 flex gap-3"></div>
-  </div>
 </div>
 
-<!-- Add recipe modal -->
-<div id="addModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/50 p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl">
-    <div class="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-      <h2 class="text-base font-semibold text-slate-900">Ajouter une recette SEL &amp; POIVRE</h2>
-      <button onclick="document.getElementById('addModal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="p-6 space-y-4">
-      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-700">
-        <strong>Note :</strong> En mode démo, les modifications ne sont pas persistées. Cette fonctionnalité nécessite un backend (PHP/MySQL disponible sur o2switch).
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="col-span-2">
-          <label class="block text-xs font-medium text-slate-700 mb-1">Titre de la recette</label>
-          <input type="text" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp focus:ring-2 focus:ring-sp/20" placeholder="Ex: Tarte Tatin classique">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">Catégorie</label>
-          <select class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp bg-white">
-            <option>entrées</option><option>plats</option><option>desserts</option><option>soupes</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">Auteur</label>
-          <input type="text" value="SEL & POIVRE" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">Temps prép. (min)</label>
-          <input type="number" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp" placeholder="20">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-700 mb-1">Temps cuisson (min)</label>
-          <input type="number" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp" placeholder="45">
-        </div>
-        <div class="col-span-2">
-          <label class="block text-xs font-medium text-slate-700 mb-1">URL image (Unsplash, etc.)</label>
-          <input type="url" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp" placeholder="https://images.unsplash.com/...">
-        </div>
-      </div>
-    </div>
-    <div class="border-t border-slate-200 px-6 py-4 flex gap-3 justify-end">
-      <button onclick="document.getElementById('addModal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Annuler</button>
-      <button onclick="toast('Fonctionnalité disponible avec backend o2switch', 'info'); document.getElementById(\'addModal\').classList.add(\'hidden\')" class="px-4 py-2 bg-sp text-white text-sm font-semibold rounded-xl hover:bg-sp-dark transition-colors">Créer la recette</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div id="toastContainer" class="fixed top-4 right-4 z-[100] space-y-2"></div>
-
-<script src="../js/recipes-data.js"></script>
+<script src="../js/auth-ui.js"></script>
 <script>
-let currentFilter = 'all';
-let selectedIds = new Set();
-let localStatuses = {}; // track in-session status changes
+(function () {
+    const PALETTE = ['#E85D26','#16A34A','#7C3AED','#DB2777','#0284C7','#CA8A04'];
+    function colorFor(name){let h=0;for(const c of (name||''))h=(h*31+c.charCodeAt(0))&0xFFFF;return PALETTE[h%PALETTE.length];}
+    function initials(name){return (name||'A').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+    function fmtDate(iso){try{return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});}catch{return '';}}
+    function escape(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-function logout() {
-  if (confirm('Se déconnecter ?')) {
-    sessionStorage.removeItem('adminAuth');
-    window.location.href = 'login.html';
-  }
-}
+    // Sidebar mobile toggle
+    document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+    });
 
-function toast(msg, type = 'success') {
-  const t = document.createElement('div');
-  const colors = { success:'bg-green-600', error:'bg-red-600', info:'bg-blue-600', warn:'bg-amber-600' };
-  t.className = `${colors[type]||colors.info} text-white text-sm px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 min-w-[220px] max-w-xs transform transition-all duration-300 translate-x-4 opacity-0`;
-  const icon = type === 'error' ? 'M6 18L18 6M6 6l12 12' : type === 'warn' ? 'M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z' : 'M5 13l4 4L19 7';
-  t.innerHTML = `<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="${icon}"/></svg><span>${msg}</span>`;
-  document.getElementById('toastContainer').appendChild(t);
-  requestAnimationFrame(() => t.classList.remove('translate-x-4','opacity-0'));
-  setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.remove(), 300); }, 4000);
-}
+    const u = window.SP && window.SP.user;
+    if (u) {
+        document.getElementById('adminAvatar').textContent = initials(u.username);
+        document.getElementById('adminAvatar').style.background = colorFor(u.username);
+        document.getElementById('adminName').textContent  = u.username;
+        document.getElementById('adminEmail').textContent = u.email;
+    }
 
-function getStatus(r) {
-  return localStatuses[r.id] ?? r.status;
-}
+    // ── State ──
+    let allRecipes = [];
+    let activeFilter = 'all';
+    let searchQuery = '';
+    const selected = new Set();
 
-function badgeHtml(status) {
-  const map = {
-    pending: '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">En attente</span>',
-    published: '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Publiée</span>',
-    rejected: '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Refusée</span>',
-  };
-  return map[status] || '';
-}
+    // Apply ?status= URL param
+    const urlStatus = new URLSearchParams(window.location.search).get('status');
+    if (['pending','published','rejected'].includes(urlStatus)) activeFilter = urlStatus;
 
-function difficultyColor(d) {
-  return d === 'facile' ? 'text-green-700' : d === 'intermédiaire' ? 'text-amber-700' : 'text-red-700';
-}
+    // ── Toast ──
+    function toast(msg, type = 'success') {
+        const el = document.createElement('div');
+        const color = type === 'success' ? 'bg-green-600 text-white' : type === 'error' ? 'bg-red-600 text-white' : 'bg-slate-800 text-white';
+        el.className = 'toast ' + color;
+        el.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="${type==='success' ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'}"/></svg> ${escape(msg)}`;
+        document.getElementById('toastContainer').appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = 'all .25s'; }, 2500);
+        setTimeout(() => el.remove(), 2800);
+    }
 
-function renderRow(r) {
-  const status = getStatus(r);
-  const checked = selectedIds.has(r.id);
-  const isMijote = r.authorType === 'mijote';
-  return `
-  <div class="recipe-row border-b border-slate-100 last:border-0 px-4 py-3 flex items-center gap-4 ${checked ? 'selected' : ''}" id="row-${r.id}">
-    <input type="checkbox" class="recipe-check w-4 h-4 rounded accent-sp flex-shrink-0 cursor-pointer" data-id="${r.id}" ${checked ? 'checked' : ''} onchange="toggleSelect(${r.id}, this.checked)">
-    <img src="${r.image}" alt="${r.title}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-slate-200 cursor-pointer" onclick="openModal(${r.id})" loading="lazy" onerror="this.src='https://placehold.co/48x48/e2e8f0/94a3b8?text=?'">
-    <div class="flex-1 min-w-0 cursor-pointer" onclick="openModal(${r.id})">
-      <div class="flex items-center gap-2 flex-wrap">
-        <p class="text-sm font-semibold text-slate-900 truncate">${r.title}</p>
-        ${isMijote ? '<span class="text-[10px] font-bold bg-sp/10 text-sp px-1.5 py-0.5 rounded uppercase tracking-wide">S&amp;P</span>' : ''}
-      </div>
-      <p class="text-xs text-slate-500 mt-0.5">par <strong>${r.author}</strong> · ${r.category} · ${r.prepTime + r.cookTime} min · <span class="${difficultyColor(r.difficulty)}">${r.difficulty}</span></p>
-    </div>
-    <div class="hidden md:flex items-center gap-1 flex-shrink-0">
-      <svg class="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-      <span class="text-xs font-medium text-slate-700">${r.rating}</span>
-      <span class="text-xs text-slate-400">(${r.ratingCount})</span>
-    </div>
-    <div class="flex-shrink-0">${badgeHtml(status)}</div>
-    <div class="flex items-center gap-1 flex-shrink-0">
-      ${status === 'pending' ? `
-        <button onclick="changeStatus(${r.id},'published')" title="Publier" class="w-8 h-8 flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-        </button>
-        <button onclick="changeStatus(${r.id},'rejected')" title="Refuser" class="w-8 h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      ` : status === 'rejected' ? `
-        <button onclick="changeStatus(${r.id},'published')" title="Republier" class="w-8 h-8 flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-        </button>
-      ` : `
-        <button onclick="changeStatus(${r.id},'pending')" title="Dépublier" class="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-amber-50 text-slate-400 hover:text-amber-600 rounded-lg transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-        </button>
-      `}
-      <button onclick="deleteRecipe(${r.id})" title="Supprimer" class="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-      </button>
-    </div>
-  </div>`;
-}
+    // ── Confirm modal ──
+    function confirmAction({ title, msg, btnClass, btnLabel }) {
+        return new Promise(resolve => {
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMsg').textContent   = msg;
+            const ok = document.getElementById('confirmOk');
+            ok.textContent = btnLabel;
+            ok.className = 'px-4 py-2 rounded-lg text-sm font-semibold text-white ' + btnClass;
+            modal.classList.remove('hidden');
 
-function getFilteredRecipes() {
-  const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  const sort = document.getElementById('sortSelect').value;
+            const cleanup = (val) => {
+                modal.classList.add('hidden');
+                ok.removeEventListener('click', onOk);
+                document.getElementById('confirmCancel').removeEventListener('click', onCancel);
+                resolve(val);
+            };
+            const onOk = () => cleanup(true);
+            const onCancel = () => cleanup(false);
+            ok.addEventListener('click', onOk);
+            document.getElementById('confirmCancel').addEventListener('click', onCancel);
+        });
+    }
 
-  let list = RECIPES_DB.filter(r => {
-    const status = getStatus(r);
-    if (currentFilter === 'pending' && status !== 'pending') return false;
-    if (currentFilter === 'published' && status !== 'published') return false;
-    if (currentFilter === 'rejected' && status !== 'rejected') return false;
-    if (currentFilter === 'mijote' && r.authorType !== 'mijote') return false;
-    if (q && !r.title.toLowerCase().includes(q) && !r.author.toLowerCase().includes(q) && !r.category.toLowerCase().includes(q)) return false;
-    return true;
-  });
+    // ── Render ──
+    function statusBadge(s) {
+        const map = {
+            published: ['badge-published', 'Publiée'],
+            pending:   ['badge-pending',   'En attente'],
+            rejected:  ['badge-rejected',  'Refusée'],
+        };
+        const v = map[s] || [];
+        return `<span class="${v[0]||''}">${v[1]||s}</span>`;
+    }
 
-  list.sort((a, b) => {
-    if (sort === 'rating') return b.rating - a.rating;
-    if (sort === 'title') return a.title.localeCompare(b.title, 'fr');
-    if (sort === 'oldest') return a.id - b.id;
-    return b.id - a.id;
-  });
+    function actionButtons(r) {
+        const view = `<a href="../recette-detail.html?slug=${r.slug}" target="_blank" class="px-2.5 py-1 bg-slate-50 text-slate-600 border border-slate-200 rounded-md text-xs font-semibold hover:bg-slate-100 transition-colors">Voir</a>`;
+        const edit = `<a href="../publier.html?slug=${r.slug}" class="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-md text-xs font-semibold hover:bg-blue-100 transition-colors">Modifier</a>`;
+        const del  = `<button data-id="${r.id}" data-title="${escape(r.title)}" class="js-delete px-2.5 py-1 bg-red-50 text-red-600 border border-red-200 rounded-md text-xs font-semibold hover:bg-red-100 transition-colors">Supprimer</button>`;
 
-  return list;
-}
+        if (r.status === 'pending') {
+            const approve = `<button data-id="${r.id}" class="js-approve px-2.5 py-1 bg-green-600 text-white border border-green-600 rounded-md text-xs font-semibold hover:bg-green-700">✓ Valider</button>`;
+            const reject  = `<button data-id="${r.id}" class="js-reject px-2.5 py-1 bg-red-600 text-white border border-red-600 rounded-md text-xs font-semibold hover:bg-red-700">✗ Refuser</button>`;
+            return `${approve}${reject}${view}${del}`;
+        } else if (r.status === 'rejected') {
+            const restore = `<button data-id="${r.id}" class="js-approve px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-md text-xs font-semibold hover:bg-green-100">↻ Republier</button>`;
+            return `${restore}${view}${del}`;
+        } else {
+            const reject = `<button data-id="${r.id}" class="js-reject px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-md text-xs font-semibold hover:bg-amber-100">Dépublier</button>`;
+            return `${reject}${view}${edit}${del}`;
+        }
+    }
 
-function filterRecipes() {
-  const filtered = getFilteredRecipes();
-  const pendingList = document.getElementById('pending-list');
-  const publishedList = document.getElementById('published-list');
+    function row(r) {
+        const img = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=200';
+        const sel = selected.has(r.id) ? 'checked' : '';
+        return `
+        <tr class="recipe-row" data-row-id="${r.id}">
+            <td class="px-4 py-3"><input type="checkbox" data-id="${r.id}" class="js-row-check w-4 h-4 accent-sp" ${sel}></td>
+            <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                    <img src="${img}" alt="" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
+                    <div class="min-w-0">
+                        <p class="font-semibold text-slate-900 truncate">${escape(r.title)}</p>
+                        <p class="text-xs text-slate-500 truncate">${escape(r.category || '')}</p>
+                    </div>
+                </div>
+            </td>
+            <td class="px-4 py-3 hidden md:table-cell text-slate-700">${escape(r.author_name || 'Communauté')}</td>
+            <td class="px-4 py-3 hidden lg:table-cell text-slate-500 text-xs">${fmtDate(r.created_at)}</td>
+            <td class="px-4 py-3">${statusBadge(r.status)}</td>
+            <td class="px-4 py-3 text-right">
+                <div class="inline-flex flex-wrap gap-1.5 justify-end">${actionButtons(r)}</div>
+            </td>
+        </tr>`;
+    }
 
-  const pending = filtered.filter(r => getStatus(r) === 'pending');
-  const others = filtered.filter(r => getStatus(r) !== 'pending');
+    function getFiltered() {
+        let list = activeFilter === 'all' ? allRecipes : allRecipes.filter(r => r.status === activeFilter);
+        if (searchQuery.trim()) {
+            const q = searchQuery.trim().toLowerCase();
+            list = list.filter(r =>
+                (r.title || '').toLowerCase().includes(q) ||
+                (r.author_name || '').toLowerCase().includes(q) ||
+                (r.category || '').toLowerCase().includes(q)
+            );
+        }
+        return list;
+    }
 
-  const showSections = currentFilter === 'all';
+    function render() {
+        const tbody = document.getElementById('recipesBody');
+        const list  = getFiltered();
+        if (list.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-12 text-center text-slate-400">Aucune recette dans cette vue.</td></tr>';
+        } else {
+            tbody.innerHTML = list.map(row).join('');
+            tbody.querySelectorAll('.js-approve').forEach(b => b.addEventListener('click', () => approveOne(+b.dataset.id)));
+            tbody.querySelectorAll('.js-reject').forEach(b => b.addEventListener('click', () => rejectOne(+b.dataset.id)));
+            tbody.querySelectorAll('.js-delete').forEach(b => b.addEventListener('click', () => deleteOne(+b.dataset.id, b.dataset.title)));
+            tbody.querySelectorAll('.js-row-check').forEach(c => c.addEventListener('change', () => {
+                const id = +c.dataset.id;
+                if (c.checked) selected.add(id); else selected.delete(id);
+                refreshBulk();
+            }));
+        }
+        // Counts
+        const counts = {
+            all: allRecipes.length,
+            pending:   allRecipes.filter(r => r.status === 'pending').length,
+            published: allRecipes.filter(r => r.status === 'published').length,
+            rejected:  allRecipes.filter(r => r.status === 'rejected').length,
+        };
+        document.querySelectorAll('[data-count]').forEach(el => el.textContent = counts[el.dataset.count]);
+        document.getElementById('totalCount').textContent = counts.all;
+        const navBadge = document.getElementById('navPendingCount');
+        if (counts.pending > 0) {
+            navBadge.textContent = counts.pending;
+            navBadge.classList.remove('hidden');
+        } else navBadge.classList.add('hidden');
+    }
 
-  document.getElementById('section-pending').style.display = (showSections && pending.length) ? '' : 'none';
-  document.getElementById('section-published').style.display = (showSections && others.length) ? '' : 'none';
+    function refreshBulk() {
+        const bar = document.getElementById('bulkBar');
+        if (selected.size === 0) {
+            bar.classList.add('hidden');
+            document.getElementById('selectAll').checked = false;
+        } else {
+            bar.classList.remove('hidden');
+            document.getElementById('bulkCount').textContent = selected.size;
+        }
+    }
 
-  if (!showSections) {
-    // Render in single list under published section
-    document.getElementById('section-published').style.display = filtered.length ? '' : 'none';
-    document.getElementById('section-published').querySelector('h2').textContent =
-      currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1);
-    publishedList.innerHTML = filtered.length ? filtered.map(renderRow).join('') : '';
-    pendingList.innerHTML = '';
-    document.getElementById('section-pending').style.display = 'none';
-  } else {
-    pendingList.innerHTML = pending.length ? pending.map(renderRow).join('') : '<p class="px-6 py-4 text-sm text-slate-400">Aucune recette en attente</p>';
-    publishedList.innerHTML = others.length ? others.map(renderRow).join('') : '<p class="px-6 py-4 text-sm text-slate-400">Aucune recette publiée</p>';
-  }
+    // ── API actions ──
+    async function loadRecipes() {
+        try {
+            const res = await fetch('../api/recipes.php?action=all', { credentials: 'include' });
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            allRecipes = data.recipes || [];
+            render();
+            // Activate the right tab from URL
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === activeFilter));
+        } catch (e) {
+            document.getElementById('recipesBody').innerHTML = `<tr><td colspan="6" class="px-4 py-12 text-center text-red-500">Erreur: ${escape(e.message)}</td></tr>`;
+        }
+    }
 
-  document.getElementById('section-pending-count').textContent = pending.length;
-  document.getElementById('section-published-count').textContent = others.length;
-  document.getElementById('recipeCountLabel').textContent = `${filtered.length} recette${filtered.length>1?'s':''} · ${pending.length} en attente`;
-  document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'flex';
+    async function approveOne(id) {
+        const r = allRecipes.find(x => x.id == id);
+        const ok = await confirmAction({
+            title: 'Valider la recette',
+            msg: `"${r?.title || ''}" sera visible publiquement et notifiée comme publiée.`,
+            btnClass: 'bg-green-600 hover:bg-green-700',
+            btnLabel: '✓ Valider',
+        });
+        if (!ok) return;
+        try {
+            const res = await fetch('../api/recipes.php?action=approve&id=' + id, { method: 'POST', credentials: 'include' });
+            const d = await res.json();
+            if (!d.success) throw new Error(d.error || 'Erreur');
+            toast('Recette publiée', 'success');
+            // Animate row out
+            const rowEl = document.querySelector(`tr[data-row-id="${id}"]`);
+            if (rowEl) { rowEl.style.transition = 'opacity .3s'; rowEl.style.opacity = '0'; }
+            await new Promise(r => setTimeout(r, 300));
+            await loadRecipes();
+        } catch (e) { toast(e.message, 'error'); }
+    }
 
-  // Update pending badge counts
-  const totalPending = RECIPES_DB.filter(r => getStatus(r) === 'pending').length;
-  document.getElementById('sidebarBadge').textContent = totalPending;
-  document.getElementById('count-pending').textContent = totalPending;
-}
+    async function rejectOne(id) {
+        const r = allRecipes.find(x => x.id == id);
+        const ok = await confirmAction({
+            title: 'Refuser la recette',
+            msg: `"${r?.title || ''}" sera marquée comme refusée et retirée du site public.`,
+            btnClass: 'bg-red-600 hover:bg-red-700',
+            btnLabel: '✗ Refuser',
+        });
+        if (!ok) return;
+        try {
+            const res = await fetch('../api/recipes.php?action=reject&id=' + id, { method: 'POST', credentials: 'include' });
+            const d = await res.json();
+            if (!d.success) throw new Error(d.error || 'Erreur');
+            toast('Recette refusée', 'success');
+            const rowEl = document.querySelector(`tr[data-row-id="${id}"]`);
+            if (rowEl) { rowEl.style.transition = 'opacity .3s'; rowEl.style.opacity = '0'; }
+            await new Promise(r => setTimeout(r, 300));
+            await loadRecipes();
+        } catch (e) { toast(e.message, 'error'); }
+    }
 
-function setFilter(f) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.remove('bg-sp','text-white','active-filter');
-    b.classList.add('bg-slate-100','text-slate-600');
-  });
-  const active = document.getElementById(`filter-${f}`);
-  active.classList.add('bg-sp','text-white','active-filter');
-  active.classList.remove('bg-slate-100','text-slate-600');
-  filterRecipes();
-}
+    async function deleteOne(id, title) {
+        const ok = await confirmAction({
+            title: 'Supprimer définitivement',
+            msg: `"${title}" sera supprimée définitivement de la base. Cette action est irréversible.`,
+            btnClass: 'bg-red-700 hover:bg-red-800',
+            btnLabel: 'Supprimer',
+        });
+        if (!ok) return;
+        try {
+            const res = await fetch('../api/recipes.php?action=delete&id=' + id, { method: 'DELETE', credentials: 'include' });
+            const d = await res.json();
+            if (!d.success) throw new Error(d.error || 'Erreur');
+            toast('Recette supprimée', 'success');
+            await loadRecipes();
+        } catch (e) { toast(e.message, 'error'); }
+    }
 
-function changeStatus(id, newStatus) {
-  const r = RECIPES_DB.find(x => x.id === id);
-  if (!r) return;
-  localStatuses[id] = newStatus;
-  const labels = { published: 'publiée', rejected: 'refusée', pending: 'mise en attente' };
-  toast(`"${r.title}" ${labels[newStatus]}`, newStatus === 'published' ? 'success' : newStatus === 'rejected' ? 'error' : 'info');
-  filterRecipes();
-}
+    // ── Bulk actions ──
+    document.getElementById('bulkApprove').addEventListener('click', async () => {
+        if (selected.size === 0) return;
+        const ok = await confirmAction({
+            title: `Valider ${selected.size} recette(s)`,
+            msg: 'Toutes les recettes sélectionnées passeront en publié.',
+            btnClass: 'bg-green-600 hover:bg-green-700',
+            btnLabel: '✓ Valider tout',
+        });
+        if (!ok) return;
+        for (const id of [...selected]) {
+            try {
+                await fetch('../api/recipes.php?action=approve&id=' + id, { method: 'POST', credentials: 'include' });
+            } catch {}
+        }
+        toast(selected.size + ' recette(s) validée(s)', 'success');
+        selected.clear();
+        refreshBulk();
+        await loadRecipes();
+    });
 
-function deleteRecipe(id) {
-  const r = RECIPES_DB.find(x => x.id === id);
-  if (!r) return;
-  if (!confirm(`Supprimer "${r.title}" ?\n\nEn mode démo, cela ne persiste pas au rechargement.`)) return;
-  const row = document.getElementById(`row-${id}`);
-  if (row) { row.style.opacity = '0'; row.style.transform = 'translateX(20px)'; row.style.transition = 'all 0.3s'; setTimeout(() => { row.remove(); filterRecipes(); }, 300); }
-  toast(`"${r.title}" supprimée (session uniquement)`, 'error');
-}
+    document.getElementById('bulkReject').addEventListener('click', async () => {
+        if (selected.size === 0) return;
+        const ok = await confirmAction({
+            title: `Refuser ${selected.size} recette(s)`,
+            msg: 'Les recettes sélectionnées seront marquées comme refusées.',
+            btnClass: 'bg-red-600 hover:bg-red-700',
+            btnLabel: '✗ Refuser tout',
+        });
+        if (!ok) return;
+        for (const id of [...selected]) {
+            try {
+                await fetch('../api/recipes.php?action=reject&id=' + id, { method: 'POST', credentials: 'include' });
+            } catch {}
+        }
+        toast(selected.size + ' recette(s) refusée(s)', 'success');
+        selected.clear();
+        refreshBulk();
+        await loadRecipes();
+    });
 
-function toggleSelect(id, checked) {
-  if (checked) selectedIds.add(id); else selectedIds.delete(id);
-  const row = document.getElementById(`row-${id}`);
-  if (row) row.classList.toggle('selected', checked);
-  updateBulkBar();
-}
+    document.getElementById('bulkClear').addEventListener('click', () => {
+        selected.clear();
+        document.querySelectorAll('.js-row-check').forEach(c => c.checked = false);
+        refreshBulk();
+    });
 
-function updateBulkBar() {
-  const bar = document.getElementById('bulkBar');
-  document.getElementById('selectedCount').textContent = `${selectedIds.size} sélectionnée(s)`;
-  if (selectedIds.size > 0) { bar.classList.remove('hidden'); bar.classList.add('flex'); }
-  else { bar.classList.add('hidden'); bar.classList.remove('flex'); }
-}
+    document.getElementById('selectAll').addEventListener('change', function () {
+        const list = getFiltered();
+        if (this.checked) list.forEach(r => selected.add(r.id));
+        else selected.clear();
+        document.querySelectorAll('.js-row-check').forEach(c => c.checked = this.checked);
+        refreshBulk();
+    });
 
-function bulkAction(action) {
-  if (selectedIds.size === 0) return;
-  const map = { approve: 'published', reject: 'rejected', delete: null };
-  const ids = [...selectedIds];
-  if (action === 'delete') {
-    if (!confirm(`Supprimer ${ids.length} recette(s) ?`)) return;
-    ids.forEach(id => { const row = document.getElementById(`row-${id}`); if (row) row.remove(); });
-    toast(`${ids.length} recette(s) supprimée(s)`, 'error');
-  } else {
-    ids.forEach(id => { localStatuses[id] = map[action]; });
-    toast(`${ids.length} recette(s) ${action === 'approve' ? 'publiées' : 'refusées'}`, action === 'approve' ? 'success' : 'error');
-  }
-  selectedIds.clear();
-  updateBulkBar();
-  filterRecipes();
-}
+    // ── Filters ──
+    document.querySelectorAll('.filter-tab').forEach(t => t.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+        t.classList.add('active');
+        activeFilter = t.dataset.filter;
+        selected.clear();
+        refreshBulk();
+        render();
+    }));
 
-function openModal(id) {
-  const r = RECIPES_DB.find(x => x.id === id);
-  if (!r) return;
-  const status = getStatus(r);
-  document.getElementById('modalTitle').textContent = r.title;
-  const b = document.getElementById('modalBadge');
-  b.textContent = status === 'pending' ? 'En attente' : status === 'published' ? 'Publiée' : 'Refusée';
-  b.className = `text-xs px-2 py-1 rounded-full font-medium ${status==='pending'?'bg-amber-100 text-amber-800':status==='published'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}`;
+    let searchTimer;
+    document.getElementById('searchInput').addEventListener('input', function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => { searchQuery = this.value; render(); }, 200);
+    });
 
-  document.getElementById('modalBody').innerHTML = `
-    <div class="flex gap-4 mb-5">
-      <img src="${r.image}" alt="${r.title}" class="w-24 h-24 rounded-xl object-cover flex-shrink-0 bg-slate-200" onerror="this.src='https://placehold.co/96x96/e2e8f0/94a3b8?text=?'">
-      <div>
-        <p class="text-sm text-slate-600 mb-1">par <strong>${r.author}</strong>${r.authorType==='mijote'?' <span class="text-[10px] font-bold bg-sp/10 text-sp px-1.5 py-0.5 rounded uppercase">S&amp;P</span>':''}</p>
-        <div class="flex flex-wrap gap-2 text-xs text-slate-500">
-          <span class="bg-slate-100 px-2 py-1 rounded-lg">📂 ${r.category}</span>
-          <span class="bg-slate-100 px-2 py-1 rounded-lg">⏱ ${r.prepTime + r.cookTime} min</span>
-          <span class="bg-slate-100 px-2 py-1 rounded-lg">👤 ${r.servings} pers.</span>
-          <span class="bg-slate-100 px-2 py-1 rounded-lg">🔥 ${r.calories} kcal</span>
-          <span class="bg-slate-100 px-2 py-1 rounded-lg ${difficultyColor(r.difficulty)}">${r.difficulty}</span>
-        </div>
-        <div class="flex items-center gap-1 mt-2">
-          ${[1,2,3,4,5].map(i=>`<svg class="w-4 h-4 ${i<=Math.round(r.rating)?'text-yellow-500 fill-yellow-500':'text-slate-300 fill-slate-300'}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`).join('')}
-          <span class="text-sm font-semibold text-slate-700 ml-1">${r.rating}</span>
-          <span class="text-xs text-slate-400">(${r.ratingCount} avis)</span>
-        </div>
-      </div>
-    </div>
-    ${r.description ? `<p class="text-sm text-slate-600 mb-4 leading-relaxed">${r.description}</p>` : ''}
-    <div class="grid grid-cols-2 gap-3">
-      <div class="bg-slate-50 rounded-xl p-3">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Infos</p>
-        <ul class="text-xs text-slate-700 space-y-1">
-          <li>ID : <strong>#${r.id}</strong></li>
-          <li>Slug : <code class="bg-slate-200 px-1 rounded text-[11px]">${r.slug}</code></li>
-          <li>Calories : <strong>${r.calories} kcal</strong></li>
-          <li>Régimes : ${r.tags?.join(', ') || '—'}</li>
-        </ul>
-      </div>
-      <div class="bg-slate-50 rounded-xl p-3">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Engagement</p>
-        <ul class="text-xs text-slate-700 space-y-1">
-          <li>Note : <strong>${r.rating} / 5</strong></li>
-          <li>Avis : <strong>${r.ratingCount.toLocaleString('fr-FR')}</strong></li>
-          <li>Auteur type : <strong>${r.authorType}</strong></li>
-          <li>Statut actuel : <strong>${getStatus(r)}</strong></li>
-        </ul>
-      </div>
-    </div>
-  `;
-
-  const actions = document.getElementById('modalActions');
-  if (status === 'pending') {
-    actions.innerHTML = `
-      <button onclick="changeStatus(${r.id},'rejected'); closeModal()" class="flex-1 px-4 py-2.5 bg-white border border-red-300 text-red-600 font-semibold text-sm rounded-xl hover:bg-red-50 transition-colors">Refuser</button>
-      <button onclick="changeStatus(${r.id},'published'); closeModal()" class="flex-1 px-4 py-2.5 bg-green-600 text-white font-semibold text-sm rounded-xl hover:bg-green-700 transition-colors">Publier la recette</button>
-    `;
-  } else if (status === 'rejected') {
-    actions.innerHTML = `
-      <button onclick="deleteRecipe(${r.id}); closeModal()" class="px-4 py-2.5 bg-white border border-red-300 text-red-600 font-semibold text-sm rounded-xl hover:bg-red-50 transition-colors">Supprimer</button>
-      <button onclick="changeStatus(${r.id},'published'); closeModal()" class="flex-1 px-4 py-2.5 bg-green-600 text-white font-semibold text-sm rounded-xl hover:bg-green-700 transition-colors">Republier</button>
-    `;
-  } else {
-    actions.innerHTML = `
-      <button onclick="deleteRecipe(${r.id}); closeModal()" class="px-4 py-2.5 bg-white border border-red-300 text-red-600 font-semibold text-sm rounded-xl hover:bg-red-50 transition-colors">Supprimer</button>
-      <button onclick="changeStatus(${r.id},'pending'); closeModal()" class="px-4 py-2.5 bg-amber-500 text-white font-semibold text-sm rounded-xl hover:bg-amber-600 transition-colors">Dépublier</button>
-      <button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 font-semibold text-sm rounded-xl hover:bg-slate-200 transition-colors">Fermer</button>
-    `;
-  }
-
-  document.getElementById('recipeModal').classList.remove('hidden');
-}
-
-function closeModal() {
-  document.getElementById('recipeModal').classList.add('hidden');
-}
-
-function openAddModal() {
-  document.getElementById('addModal').classList.remove('hidden');
-}
-
-// Close modals on overlay click
-document.getElementById('recipeModal').addEventListener('click', e => { if (e.target === document.getElementById('recipeModal')) closeModal(); });
-document.getElementById('addModal').addEventListener('click', e => { if (e.target === document.getElementById('addModal')) document.getElementById('addModal').classList.add('hidden'); });
-
-// Keyboard
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); document.getElementById('addModal').classList.add('hidden'); } });
-
-// Init
-filterRecipes();
+    loadRecipes();
+})();
 </script>
+
 </body>
 </html>

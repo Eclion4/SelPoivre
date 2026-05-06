@@ -134,8 +134,26 @@
                             <p class="text-xs text-gray-400 mt-1"><span id="bioCount">0</span>/500</p>
                         </div>
                         <div class="sm:col-span-2">
-                            <label class="field-label">URL d'avatar (facultatif)</label>
-                            <input id="fldAvatar" type="url" class="field-input" placeholder="https://…" disabled>
+                            <label class="field-label">Photo de profil</label>
+                            <input type="hidden" id="fldAvatar">
+                            <div id="avatarSection" class="flex items-center gap-4">
+                                <div id="avatarThumb" class="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-xl shadow flex-shrink-0">SP</div>
+                                <div class="flex-1 min-w-0">
+                                    <button type="button" id="avatarChooseBtn" class="px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:border-sp-300 hover:text-sp-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2" disabled>
+                                        <i data-lucide="upload" class="w-4 h-4"></i> Choisir une image
+                                    </button>
+                                    <button type="button" id="avatarRemoveBtn" class="ml-2 px-3 py-2 text-red-600 text-xs font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed hidden" disabled>Retirer</button>
+                                    <input type="file" id="avatarFile" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden">
+                                    <p class="text-xs text-gray-400 mt-2">JPG, PNG, WebP ou GIF · 5 Mo max</p>
+                                </div>
+                            </div>
+                            <div id="avatarUploadProgress" class="hidden mt-3 text-sm text-gray-500">
+                                <span class="inline-flex items-center gap-2">
+                                    <svg class="animate-spin w-4 h-4 text-sp-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                                    Envoi en cours…
+                                </span>
+                            </div>
+                            <div id="avatarUploadError" class="hidden mt-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm"></div>
                         </div>
                     </div>
                     <div id="profileEditActions" class="hidden mt-5 flex gap-3 justify-end">
@@ -225,8 +243,13 @@
 
         function renderHeader(u) {
             const a = document.getElementById('avatarBox');
-            a.style.background = colorFor(u.username);
-            a.textContent = initials(u.username);
+            if (u.avatar) {
+                a.style.background = 'transparent';
+                a.innerHTML = `<img src="${u.avatar}" alt="" class="w-20 h-20 rounded-full object-cover">`;
+            } else {
+                a.style.background = colorFor(u.username);
+                a.textContent = initials(u.username);
+            }
             document.getElementById('displayName').textContent  = u.username;
             document.getElementById('displayEmail').textContent = u.email;
             if (u.created_at) document.getElementById('memberSince').textContent = 'Membre depuis ' + fmtDate(u.created_at);
@@ -237,6 +260,21 @@
             document.getElementById('fldBio').value      = u.bio || '';
             document.getElementById('fldAvatar').value   = u.avatar || '';
             document.getElementById('bioCount').textContent = (u.bio || '').length;
+            renderAvatarThumb(u);
+        }
+
+        function renderAvatarThumb(u) {
+            const thumb = document.getElementById('avatarThumb');
+            const removeBtn = document.getElementById('avatarRemoveBtn');
+            if (u.avatar) {
+                thumb.style.background = 'transparent';
+                thumb.innerHTML = `<img src="${u.avatar}" alt="" class="w-20 h-20 rounded-full object-cover">`;
+                removeBtn.classList.remove('hidden');
+            } else {
+                thumb.style.background = colorFor(u.username);
+                thumb.textContent = initials(u.username);
+                removeBtn.classList.add('hidden');
+            }
         }
         function renderPrefs(u) {
             const box = document.getElementById('prefsSummary');
@@ -266,11 +304,70 @@
         if (['infos','mes-recettes','favoris','parametres'].includes(initialTab)) activateTab(initialTab);
 
         // ── Edit profile ────────────────────────────────────
-        const inputs = ['fldUsername','fldEmail','fldBio','fldAvatar'];
+        const inputs = ['fldUsername','fldEmail','fldBio'];
         function setEditMode(on) {
             inputs.forEach(id => document.getElementById(id).disabled = !on);
+            document.getElementById('avatarChooseBtn').disabled = !on;
+            document.getElementById('avatarRemoveBtn').disabled = !on;
             document.getElementById('profileEditActions').classList.toggle('hidden', !on);
             document.getElementById('editProfileBtn').textContent = on ? 'Lecture seule' : 'Modifier';
+        }
+
+        // ── Avatar upload ───────────────────────────────────
+        const avatarFile      = document.getElementById('avatarFile');
+        const avatarChooseBtn = document.getElementById('avatarChooseBtn');
+        const avatarRemoveBtn = document.getElementById('avatarRemoveBtn');
+        const avatarHidden    = document.getElementById('fldAvatar');
+        const avatarProgress  = document.getElementById('avatarUploadProgress');
+        const avatarError     = document.getElementById('avatarUploadError');
+
+        avatarChooseBtn.addEventListener('click', () => avatarFile.click());
+
+        avatarFile.addEventListener('change', async function () {
+            avatarError.classList.add('hidden');
+            const f = this.files && this.files[0];
+            if (!f) return;
+            if (!f.type.startsWith('image/')) { showAvatarError('Le fichier doit être une image.'); return; }
+            if (f.size > 5 * 1024 * 1024)    { showAvatarError('Image trop lourde (5 Mo max).'); return; }
+
+            // Local preview while uploading
+            const localUrl = URL.createObjectURL(f);
+            const thumb = document.getElementById('avatarThumb');
+            thumb.style.background = 'transparent';
+            thumb.innerHTML = `<img src="${localUrl}" alt="" class="w-20 h-20 rounded-full object-cover">`;
+            avatarProgress.classList.remove('hidden');
+
+            try {
+                const fd = new FormData();
+                fd.append('image', f);
+                const res = await fetch(window.SP.apiPath('upload.php'), {
+                    method: 'POST', credentials: 'include', body: fd,
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || 'Échec de l\'upload');
+                avatarHidden.value = data.url;
+                avatarProgress.classList.add('hidden');
+                avatarRemoveBtn.classList.remove('hidden');
+                // Update header avatar instantly too
+                const headerAvatar = document.getElementById('avatarBox');
+                headerAvatar.style.background = 'transparent';
+                headerAvatar.innerHTML = `<img src="${data.url}" alt="" class="w-20 h-20 rounded-full object-cover">`;
+            } catch (e) {
+                avatarProgress.classList.add('hidden');
+                showAvatarError(e.message);
+                renderAvatarThumb(window.SP.user);
+            }
+        });
+
+        avatarRemoveBtn.addEventListener('click', () => {
+            avatarHidden.value = '';
+            avatarFile.value = '';
+            renderAvatarThumb({ ...window.SP.user, avatar: '' });
+        });
+
+        function showAvatarError(msg) {
+            avatarError.textContent = msg;
+            avatarError.classList.remove('hidden');
         }
         document.getElementById('editProfileBtn').addEventListener('click', () => {
             const editing = !document.getElementById('fldUsername').disabled;

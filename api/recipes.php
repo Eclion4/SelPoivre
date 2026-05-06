@@ -10,6 +10,7 @@ switch ("$method:$action") {
     case 'GET:list':      getList();           break;
     case 'GET:single':    getSingle($slug);    break;
     case 'GET:mine':      getMine();           break;
+    case 'GET:all':       getAllAdmin();       break;
     case 'POST:create':   createRecipe();      break;
     case 'PUT:update':    updateRecipe($id);   break;
     case 'DELETE:delete': deleteRecipe($id);   break;
@@ -17,6 +18,33 @@ switch ("$method:$action") {
     case 'POST:approve':  approveRecipe($id);  break;
     case 'POST:reject':   rejectRecipe($id);   break;
     default: jsonResponse(['error' => 'Route inconnue'], 404);
+}
+
+/* ── Toutes les recettes (admin) ─────────────────────────────── */
+function getAllAdmin() {
+    requireAdmin();
+    $db = getDB();
+    $status = $_GET['status'] ?? '';
+    $where  = [];
+    $params = [];
+    if (in_array($status, ['published', 'pending', 'rejected'])) {
+        $where[]  = 'r.status = ?';
+        $params[] = $status;
+    }
+    $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+    $s = $db->prepare("SELECT r.id, r.slug, r.title, r.description, r.category, r.status,
+                              r.total_time, r.difficulty, r.rating, r.rating_count,
+                              r.image_url, r.created_at, r.author_id,
+                              CASE WHEN r.author_type IN ('mijote','sel-poivre') THEN 'Équipe Sel & Poivre'
+                                   ELSE COALESCE(u.username, 'Communauté')
+                              END AS author_name
+                       FROM recipes r
+                       LEFT JOIN users u ON r.author_id = u.id
+                       $whereSql
+                       ORDER BY r.created_at DESC");
+    $s->execute($params);
+    $recipes = $s->fetchAll();
+    jsonResponse(['recipes' => $recipes, 'total' => count($recipes)]);
 }
 
 /* ── Liste publique ──────────────────────────────────────────── */

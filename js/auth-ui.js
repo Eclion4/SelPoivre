@@ -39,9 +39,16 @@
         return (name || 'U').trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
     }
 
-    function buildDesktopMenu(user) {
+    function avatarBlock(user, size) {
         const color = colorFor(user.username);
         const inits = initials(user.username);
+        if (user.avatar) {
+            return `<div class="w-${size} h-${size} rounded-full overflow-hidden shadow-sm flex-shrink-0"><img src="${user.avatar}" alt="" class="w-full h-full object-cover"></div>`;
+        }
+        return `<div class="w-${size} h-${size} rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0" style="background:${color}">${inits}</div>`;
+    }
+
+    function buildDesktopMenu(user) {
         const adminLink = user.role === 'admin'
             ? `<a href="${pagePath('admin/index.html')}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-encre hover:bg-sp-50 transition-colors">
                 <svg class="w-4 h-4 text-or-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
@@ -49,7 +56,7 @@
         return `
 <div class="relative js-sp-userwrap">
     <button type="button" class="js-sp-trigger flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-sp-50 transition-all">
-        <div class="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm" style="background:${color}">${inits}</div>
+        ${avatarBlock(user, 9)}
         <span class="hidden lg:inline text-sm font-medium text-encre max-w-[110px] truncate">${user.username}</span>
         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
@@ -88,14 +95,12 @@
     }
 
     function buildMobileMenu(user) {
-        const color = colorFor(user.username);
-        const inits = initials(user.username);
         const adminLink = user.role === 'admin'
             ? `<a href="${pagePath('admin/index.html')}" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium text-sm">Espace admin</a>` : '';
         return `
 <div class="space-y-2">
     <div class="flex items-center gap-3 px-4 py-3 bg-sp-50 rounded-xl">
-        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style="background:${color}">${inits}</div>
+        ${avatarBlock(user, 10)}
         <div class="min-w-0 flex-1">
             <p class="text-sm font-semibold text-encre truncate">${user.username}</p>
             <p class="text-xs text-gray-500 truncate">${user.email}</p>

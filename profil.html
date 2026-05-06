@@ -485,7 +485,7 @@
             return `<span class="badge-status ${v[0]}">${v[1]}</span>`;
         }
         function recipeCard(r, opts = {}) {
-            const img = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600';
+            const img = r.image_url || '/assets/recipes/_default.jpg';
             const editBtn = opts.editable
                 ? `<a href="publier.html?slug=${r.slug}" class="flex-1 px-3 py-2 bg-white border border-gray-200 text-encre rounded-lg text-xs font-semibold hover:bg-gray-50 text-center">Modifier</a>` : '';
             const delBtn = opts.deletable

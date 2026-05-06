@@ -31,7 +31,8 @@ jobs:
           ftp = ftplib.FTP_TLS('ftp.gupi3719.odns.fr', context=ctx)
           ftp.login('deploy@gupi3719.odns.fr', os.environ['FTP_PASSWORD'])
           ftp.prot_p()
-          for d in ['js', 'css', 'admin', 'api']:
+          dirs = ['js', 'css', 'admin', 'api', 'assets', 'assets/recipes', 'uploads', 'uploads/recipes']
+          for d in dirs:
               try:
                   ftp.mkd(d)
                   print(f'[mkdir] Created {d}/')

@@ -500,7 +500,7 @@
         }
 
         function buildCard(r, idx) {
-            const img    = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600';
+            const img    = r.image_url || '/assets/recipes/_default.jpg';
             const rating = parseFloat(r.rating) || 4.5;
             const count  = realisticCount(r.rating_count, r.id).toLocaleString('fr-FR');
             const author = r.author_name || 'Sel & Poivre';
@@ -548,7 +548,7 @@
         }
 
         function quickCard(r) {
-            const img  = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=500';
+            const img  = r.image_url || '/assets/recipes/_default.jpg';
             const time = r.total_time ? (r.total_time < 60 ? r.total_time + ' min' : Math.floor(r.total_time/60) + 'h' + (r.total_time%60 ? String(r.total_time%60).padStart(2,'0') : '')) : '—';
             return `
             <div class="swiper-slide">

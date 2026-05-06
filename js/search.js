@@ -36,7 +36,7 @@
         function renderResults(list, q) {
             if (list.length === 0) { showEmpty(q); return; }
             results.innerHTML = list.slice(0, 8).map(r => {
-                const img = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=200';
+                const img = r.image_url || '/assets/recipes/_default.jpg';
                 const time = r.total_time ? (r.total_time < 60 ? r.total_time + ' min' : Math.floor(r.total_time/60)+'h'+(r.total_time%60? String(r.total_time%60).padStart(2,'0'): '')) : '';
                 return `
                 <a href="recette-detail.html?slug=${r.slug}" class="flex items-center gap-3 p-3 hover:bg-sp-50 rounded-xl transition-colors">

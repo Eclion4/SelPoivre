@@ -275,7 +275,7 @@ tailwind.config = {
     }
 
     function row(r) {
-        const img = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=200';
+        const img = r.image_url || '/assets/recipes/_default.jpg';
         const sel = selected.has(r.id) ? 'checked' : '';
         return `
         <tr class="recipe-row" data-row-id="${r.id}">

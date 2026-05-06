@@ -190,7 +190,7 @@ tailwind.config = {
     window.adminLogout = function () { window.SP.logout(); };
 
     function recipeRow(r, withActions = false) {
-        const img = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=200';
+        const img = r.image_url || '/assets/recipes/_default.jpg';
         const badge = r.status === 'pending'   ? '<span class="badge-pending">En attente</span>'
                     : r.status === 'published' ? '<span class="badge-published">Publiée</span>'
                     : r.status === 'rejected'  ? '<span class="badge-rejected">Refusée</span>'

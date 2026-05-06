@@ -35,11 +35,7 @@ $migrations = [
         FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
     // Fix duplicate / wrong images
-    'images.tartiflette'     => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80' WHERE slug = 'tartiflette-savoyarde'",
-    'images.coq_au_vin'      => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1518492104633-130d0cc84637?w=600&q=80' WHERE slug = 'coq-au-vin-rouge'",
-    'images.fondant_choco'   => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80' WHERE slug = 'fondant-chocolat'",
-    'images.gateau_yaourt'   => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1535141192574-5d4897c12636?w=600&q=80' WHERE slug = 'gateau-yaourt'",
-    'images.crumble_pommes'  => "UPDATE recipes SET image_url = 'https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=600&q=80' WHERE slug = 'crumble-pomme-noisette'",
+    // (anciennes migrations d'image abandonnées au profit du bloc 'imglocal.*' ci-dessous)
     // Fix Pizza napolitaine total_time: 2918min (48h fermentation + actif) → 38min actif. Description mentionne déjà la fermentation 48h.
     'pizza.totaltime'        => "UPDATE recipes SET total_time = 38 WHERE slug = 'pizza-napolitaine' AND total_time > 1000",
     'follows.create'         => "CREATE TABLE IF NOT EXISTS follows (
@@ -66,24 +62,36 @@ $migrations = [
         INDEX idx_created (created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
-    // ── Final image refresh: photos verified via TheMealDB API. Each image
-    // has been confirmed to actually depict the dish. Replaces previous
-    // duplicate or mismatched Unsplash IDs.
-    'img.boeuf'        => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/vtqxtu1511784197.jpg' WHERE slug = 'boeuf-bourguignon'",
-    'img.soupe'        => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/xvrrux1511783685.jpg' WHERE slug = 'soupe-oignon'",
-    'img.ratatouille'  => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/wrpwuu1511786491.jpg' WHERE slug = 'ratatouille'",
-    'img.poulet'       => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/nlxald1764112200.jpg' WHERE slug = 'poulet-roti-herbes'",
-    'img.brulee'       => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/uryqru1511798039.jpg' WHERE slug = 'creme-brulee'",
-    'img.padthai'      => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/rg9ze01763479093.jpg' WHERE slug = 'pad-thai'",
-    'img.hummus'       => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/gpon5u1763801180.jpg' WHERE slug = 'hummus-libanais'",
-    'img.cassoulet'    => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/wxuvuv1511299147.jpg' WHERE slug = 'cassoulet'",
-    'img.tartiflette'  => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/qwrtut1468418027.jpg' WHERE slug = 'tartiflette-savoyarde'",
-    'img.coqauvin'     => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/qstyvs1505931190.jpg' WHERE slug = 'coq-au-vin-rouge'",
-    'img.carbonara'    => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/llcbn01574260722.jpg' WHERE slug = 'spaghetti-carbonara'",
-    'img.saumon'       => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/xxyupu1468262513.jpg' WHERE slug = 'salmon-teriyaki'",
-    'img.crumble'      => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/xvsurr1511719182.jpg' WHERE slug = 'crumble-pomme-noisette'",
-    'img.brioche'      => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/qqpwsy1511796276.jpg' WHERE slug = 'brioche-maison'",
-    'img.shakshuka'    => "UPDATE recipes SET image_url = 'https://www.themealdb.com/images/media/meals/g373701551450225.jpg' WHERE slug = 'shakshuka-israelien'",
+    // ── Images stockées en local (assets/recipes/{slug}.jpg). Plus de
+    // dépendance externe : les photos sont déployées avec le site.
+    'imglocal.boeuf'         => "UPDATE recipes SET image_url = '/assets/recipes/boeuf-bourguignon.jpg' WHERE slug = 'boeuf-bourguignon'",
+    'imglocal.quiche'        => "UPDATE recipes SET image_url = '/assets/recipes/quiche-lorraine.jpg' WHERE slug = 'quiche-lorraine'",
+    'imglocal.tarte_tatin'   => "UPDATE recipes SET image_url = '/assets/recipes/tarte-tatin.jpg' WHERE slug = 'tarte-tatin'",
+    'imglocal.soupe'         => "UPDATE recipes SET image_url = '/assets/recipes/soupe-oignon.jpg' WHERE slug = 'soupe-oignon'",
+    'imglocal.crepes'        => "UPDATE recipes SET image_url = '/assets/recipes/crepes-classiques.jpg' WHERE slug = 'crepes-classiques'",
+    'imglocal.ratatouille'   => "UPDATE recipes SET image_url = '/assets/recipes/ratatouille.jpg' WHERE slug = 'ratatouille'",
+    'imglocal.mousse_choc'   => "UPDATE recipes SET image_url = '/assets/recipes/mousse-chocolat.jpg' WHERE slug = 'mousse-chocolat'",
+    'imglocal.poulet'        => "UPDATE recipes SET image_url = '/assets/recipes/poulet-roti-herbes.jpg' WHERE slug = 'poulet-roti-herbes'",
+    'imglocal.brulee'        => "UPDATE recipes SET image_url = '/assets/recipes/creme-brulee.jpg' WHERE slug = 'creme-brulee'",
+    'imglocal.blanquette'    => "UPDATE recipes SET image_url = '/assets/recipes/blanquette-veau.jpg' WHERE slug = 'blanquette-veau'",
+    'imglocal.curry'         => "UPDATE recipes SET image_url = '/assets/recipes/curry-legumes.jpg' WHERE slug = 'curry-legumes'",
+    'imglocal.madeleines'    => "UPDATE recipes SET image_url = '/assets/recipes/madeleines.jpg' WHERE slug = 'madeleines'",
+    'imglocal.padthai'       => "UPDATE recipes SET image_url = '/assets/recipes/pad-thai.jpg' WHERE slug = 'pad-thai'",
+    'imglocal.hummus'        => "UPDATE recipes SET image_url = '/assets/recipes/hummus-libanais.jpg' WHERE slug = 'hummus-libanais'",
+    'imglocal.cassoulet'     => "UPDATE recipes SET image_url = '/assets/recipes/cassoulet.jpg' WHERE slug = 'cassoulet'",
+    'imglocal.risotto'       => "UPDATE recipes SET image_url = '/assets/recipes/risotto-champignons.jpg' WHERE slug = 'risotto-champignons'",
+    'imglocal.pizza'         => "UPDATE recipes SET image_url = '/assets/recipes/pizza-napolitaine.jpg' WHERE slug = 'pizza-napolitaine'",
+    'imglocal.tiramisu'      => "UPDATE recipes SET image_url = '/assets/recipes/tiramisu-classique.jpg' WHERE slug = 'tiramisu-classique'",
+    'imglocal.tartiflette'   => "UPDATE recipes SET image_url = '/assets/recipes/tartiflette-savoyarde.jpg' WHERE slug = 'tartiflette-savoyarde'",
+    'imglocal.coq_au_vin'    => "UPDATE recipes SET image_url = '/assets/recipes/coq-au-vin-rouge.jpg' WHERE slug = 'coq-au-vin-rouge'",
+    'imglocal.fondant'       => "UPDATE recipes SET image_url = '/assets/recipes/gateau-chocolat-fondant.jpg' WHERE slug = 'gateau-chocolat-fondant'",
+    'imglocal.carbonara'     => "UPDATE recipes SET image_url = '/assets/recipes/spaghetti-carbonara.jpg' WHERE slug = 'spaghetti-carbonara'",
+    'imglocal.tabbouleh'     => "UPDATE recipes SET image_url = '/assets/recipes/tabbouleh-libanais.jpg' WHERE slug = 'tabbouleh-libanais'",
+    'imglocal.saumon'        => "UPDATE recipes SET image_url = '/assets/recipes/salmon-teriyaki.jpg' WHERE slug = 'salmon-teriyaki'",
+    'imglocal.gateau_yaourt' => "UPDATE recipes SET image_url = '/assets/recipes/gateau-yaourt.jpg' WHERE slug = 'gateau-yaourt'",
+    'imglocal.crumble'       => "UPDATE recipes SET image_url = '/assets/recipes/crumble-pomme-noisette.jpg' WHERE slug = 'crumble-pomme-noisette'",
+    'imglocal.brioche'       => "UPDATE recipes SET image_url = '/assets/recipes/brioche-maison.jpg' WHERE slug = 'brioche-maison'",
+    'imglocal.shakshuka'     => "UPDATE recipes SET image_url = '/assets/recipes/shakshuka-israelien.jpg' WHERE slug = 'shakshuka-israelien'",
 ];
 
 foreach ($migrations as $name => $sql) {

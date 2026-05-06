@@ -38,7 +38,7 @@ jobs:
                   print(f'[mkdir] Created {d}/')
               except ftplib.error_perm as e:
                   print(f'[mkdir] {d}/ skipped: {e}')
-          for f in ['.ftp-deploy-sync-state.json']:
+          for f in ['.ftp-deploy-sync-state.json', 'css/tailwind.css']:
               try:
                   ftp.delete(f)
                   print(f'[clean] Removed {f}')

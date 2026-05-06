@@ -96,6 +96,30 @@ $migrations = [
     // Rattrapage global : toute recette dont l'URL est encore externe ou vide
     // reçoit automatiquement le chemin local dérivé du slug.
     'imglocal.fallback'      => "UPDATE recipes SET image_url = CONCAT('/assets/recipes/', slug, '.jpg') WHERE image_url IS NULL OR image_url = '' OR image_url LIKE 'http%'",
+
+    // ── Collections ──────────────────────────────────────────────────────
+    'collections.create' => "CREATE TABLE IF NOT EXISTS collections (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        name VARCHAR(120) NOT NULL,
+        emoji VARCHAR(10) DEFAULT '📚',
+        color VARCHAR(20) DEFAULT 'sp',
+        is_public TINYINT(1) DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user (user_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    'collection_items.create' => "CREATE TABLE IF NOT EXISTS collection_items (
+        collection_id INT NOT NULL,
+        recipe_id INT NOT NULL,
+        added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (collection_id, recipe_id),
+        INDEX idx_collection (collection_id),
+        INDEX idx_recipe (recipe_id),
+        FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE,
+        FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 ];
 
 foreach ($migrations as $name => $sql) {

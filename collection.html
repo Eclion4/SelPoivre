@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Collection — Sel & Poivre</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C4311B'/><text y='22' x='16' text-anchor='middle' font-size='18' fill='white'>🍴</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config={theme:{extend:{colors:{
+        'sp':{50:'#FEF4F2',100:'#FCDBD5',500:'#C4311B',600:'#A42618',700:'#7F1D12'},
+        'or':{50:'#FDF9EF',500:'#C4892A',600:'#A36E20'},
+        'ivoire':'#F8F5EF','encre':'#18130F'
+    },fontFamily:{'display':['Playfair Display','serif'],'body':['Inter','sans-serif'],'handwrite':['Caveat','cursive']}}}}
+    </script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-ivoire font-body text-encre">
+
+<nav id="navbar" class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl shadow-sm border-b border-sp-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
+        <a href="index.html" class="flex items-center gap-2 group">
+            <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300">
+                <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+            </div>
+            <span class="text-2xl font-display font-bold"><span class="text-sp-500">Sel</span><span class="text-encre"> &amp; Poivre</span></span>
+        </a>
+        <a href="profil.html#collections" class="text-sm font-semibold text-gray-500 hover:text-sp-600 transition-colors flex items-center gap-1">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Mes collections
+        </a>
+    </div>
+</nav>
+
+<!-- LOADING -->
+<div id="loadingState" class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center text-gray-400">
+        <svg class="animate-spin mx-auto mb-3 w-8 h-8 text-sp-400" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+        <p>Chargement…</p>
+    </div>
+</div>
+
+<!-- ERROR -->
+<div id="errorState" class="hidden min-h-[60vh] flex items-center justify-center px-4">
+    <div class="text-center">
+        <div class="text-5xl mb-4">📚</div>
+        <h1 class="text-2xl font-display font-bold mb-2">Collection introuvable</h1>
+        <p id="errorMsg" class="text-gray-400 mb-6">Cette collection n'existe pas ou est privée.</p>
+        <a href="profil.html" class="px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Retour au profil</a>
+    </div>
+</div>
+
+<!-- CONTENT -->
+<main id="mainContent" class="hidden">
+    <!-- HEADER -->
+    <section class="bg-gradient-to-b from-sp-50 to-ivoire pt-10 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                <div id="collEmoji" class="w-20 h-20 bg-white rounded-2xl shadow-md flex items-center justify-center text-4xl flex-shrink-0"></div>
+                <div class="flex-1 min-w-0">
+                    <h1 id="collName" class="text-4xl font-display font-bold"></h1>
+                    <p id="collMeta" class="text-gray-500 mt-1 text-sm"></p>
+                </div>
+                <div id="ownerActions" class="hidden flex-shrink-0 flex gap-2">
+                    <button id="editCollBtn" class="px-4 py-2 border border-gray-200 rounded-full text-sm font-medium hover:bg-white transition-colors flex items-center gap-1.5">
+                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i> Modifier
+                    </button>
+                    <button id="deleteCollBtn" class="px-4 py-2 border border-red-200 text-red-600 rounded-full text-sm font-medium hover:bg-red-50 transition-colors flex items-center gap-1.5">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RECIPES -->
+    <section class="py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="emptyState" class="hidden text-center py-20 text-gray-400">
+                <div class="text-5xl mb-4">🍴</div>
+                <p class="text-lg font-semibold">Collection vide</p>
+                <p class="text-sm mt-2">Ajoutez des recettes depuis la page <a href="recettes.html" class="text-sp-600 underline">Recettes</a>.</p>
+            </div>
+            <div id="recipesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+</main>
+
+<!-- EDIT MODAL -->
+<div id="editModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6">
+        <h3 class="font-display font-bold text-xl mb-4">Modifier la collection</h3>
+        <div class="space-y-4">
+            <div>
+                <p class="text-sm font-semibold mb-2">Emoji</p>
+                <div class="flex flex-wrap gap-2" id="editEmojiPicker">
+                    <!-- filled by JS -->
+                </div>
+            </div>
+            <div>
+                <label class="text-sm font-semibold block mb-1">Nom</label>
+                <input id="editCollName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sp-500 text-sm">
+            </div>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="editCollPublic" class="w-4 h-4 accent-sp-500">
+                <span class="text-sm">Collection publique</span>
+            </label>
+        </div>
+        <div class="flex gap-3 mt-5 justify-end">
+            <button id="cancelEditColl" class="px-5 py-2 border border-gray-200 rounded-full text-sm font-medium">Annuler</button>
+            <button id="saveEditColl" class="px-6 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold">Enregistrer</button>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-encre text-white py-8 mt-8">
+    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-sp-500 to-sp-600 rounded-lg flex items-center justify-center">
+                <i data-lucide="utensils" class="w-4 h-4 text-white"></i>
+            </div>
+            <span class="text-lg font-display font-bold">Sel &amp; Poivre</span>
+        </a>
+        <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre</p>
+    </div>
+</footer>
+
+<script src="js/auth-ui.js"></script>
+<script>
+(function () {
+    const EMOJIS = ['📚','❤️','⭐','🎄','🎉','🍝','🥗','🍰','🥘','🌿','🍜','🥐','🍷','🏆','💡'];
+
+    function fmtTime(min) {
+        if (!min) return '—';
+        if (min < 60) return min + ' min';
+        const h = Math.floor(min / 60), m = min % 60;
+        return m ? h + 'h' + String(m).padStart(2,'0') : h + 'h';
+    }
+    function starsHTML(r) {
+        let s = '';
+        for (let i=1;i<=5;i++) {
+            const f = i <= Math.round(r||0);
+            s += `<svg class="w-3 h-3 ${f?'text-amber-400 fill-amber-400':'text-gray-300 fill-gray-200'}" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+        }
+        return s;
+    }
+    function colorFor(n){const P=['#E85D26','#16A34A','#7C3AED','#DB2777','#0284C7','#CA8A04'];let h=0;for(const c of(n||''))h=(h*31+c.charCodeAt(0))&0xFFFF;return P[h%P.length];}
+    function initials(n){return(n||'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+
+    function buildCard(r) {
+        const img   = r.image_url || '/assets/recipes/_default.jpg';
+        const auth  = r.author_name || 'Sel & Poivre';
+        const isSP  = r.author_type === 'mijote';
+        const av    = isSP
+            ? `<div class="w-6 h-6 rounded-full bg-gradient-to-br from-sp-500 to-sp-600 flex items-center justify-center flex-shrink-0"><span class="text-white font-bold" style="font-size:8px">SP</span></div>`
+            : (r.author_avatar
+                ? `<img src="${r.author_avatar}" class="w-6 h-6 rounded-full object-cover flex-shrink-0" alt="">`
+                : `<div class="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0" style="background:${colorFor(auth)};font-size:8px">${initials(auth)}</div>`);
+        return `
+        <a href="recette-detail.html?slug=${r.slug}" class="group block">
+            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
+                <div class="relative aspect-[4/3] overflow-hidden">
+                    <img src="${img}" alt="${r.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
+                    <div class="absolute bottom-3 left-3 flex gap-1.5">
+                        <span class="px-2.5 py-1 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs">${fmtTime(+r.total_time)}</span>
+                        <span class="px-2.5 py-1 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs capitalize">${r.difficulty||'Facile'}</span>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-display font-bold group-hover:text-sp-600 transition-colors leading-snug mb-3">${r.title}</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-1.5 min-w-0">${av}<span class="text-xs text-gray-500 truncate">${isSP ? 'Sel &amp; Poivre' : auth}</span></div>
+                        <div class="flex items-center gap-0.5 flex-shrink-0">${starsHTML(r.rating)}<span class="text-sm font-semibold ml-1">${(+r.rating||0).toFixed(1)}</span></div>
+                    </div>
+                </div>
+            </div>
+        </a>`;
+    }
+
+    const collId = new URLSearchParams(location.search).get('id');
+    if (!collId) { showError('ID de collection manquant.'); return; }
+
+    let currentColl = null;
+
+    function showError(msg) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('errorState').classList.remove('hidden');
+        document.getElementById('errorMsg').textContent = msg;
+        if (window.lucide) lucide.createIcons();
+    }
+
+    async function load() {
+        try {
+            const res  = await fetch(window.SP.apiPath('collections.php?action=items&id=') + collId, { credentials:'include' });
+            const data = await res.json();
+            if (!res.ok || data.error) throw new Error(data.error || 'Erreur');
+
+            currentColl = data.collection;
+            document.title = data.collection.name + ' — Sel & Poivre';
+            document.getElementById('collEmoji').textContent = data.collection.emoji || '📚';
+            document.getElementById('collName').textContent  = data.collection.name;
+            document.getElementById('collMeta').textContent  =
+                (data.recipes.length) + ' recette' + (data.recipes.length !== 1 ? 's' : '') +
+                ' · ' + (data.collection.is_public ? 'Publique' : 'Privée');
+
+            const u = window.SP && window.SP.user;
+            if (u && u.id == data.collection.user_id) {
+                document.getElementById('ownerActions').classList.remove('hidden');
+            }
+
+            const grid = document.getElementById('recipesGrid');
+            if (data.recipes.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+            } else {
+                grid.innerHTML = data.recipes.map(buildCard).join('');
+            }
+
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        } catch (e) {
+            showError(e.message);
+        }
+    }
+
+    // ── Edit / Delete ────────────────────────────────────────────
+    function fillEmojiPicker(selected) {
+        const container = document.getElementById('editEmojiPicker');
+        container.innerHTML = EMOJIS.map(e =>
+            `<button type="button" class="emoji-opt w-10 h-10 text-xl rounded-xl border-2 transition-colors ${e===selected?'border-sp-500 bg-sp-50':'border-gray-200 hover:border-sp-300'}" data-e="${e}">${e}</button>`
+        ).join('');
+        container.querySelectorAll('.emoji-opt').forEach(b => {
+            b.addEventListener('click', () => {
+                container.querySelectorAll('.emoji-opt').forEach(x => x.className = x.className.replace('border-sp-500 bg-sp-50','border-gray-200 hover:border-sp-300'));
+                b.className = b.className.replace('border-gray-200 hover:border-sp-300','border-sp-500 bg-sp-50');
+            });
+        });
+    }
+
+    document.getElementById('editCollBtn').addEventListener('click', () => {
+        if (!currentColl) return;
+        fillEmojiPicker(currentColl.emoji || '📚');
+        document.getElementById('editCollName').value      = currentColl.name;
+        document.getElementById('editCollPublic').checked  = !!+currentColl.is_public;
+        document.getElementById('editModal').classList.remove('hidden');
+    });
+    document.getElementById('cancelEditColl').addEventListener('click', () => {
+        document.getElementById('editModal').classList.add('hidden');
+    });
+    document.getElementById('saveEditColl').addEventListener('click', async () => {
+        const sel = document.querySelector('#editEmojiPicker .border-sp-500');
+        const emoji = sel ? sel.dataset.e : (currentColl.emoji || '📚');
+        const name  = document.getElementById('editCollName').value.trim();
+        if (!name) return;
+        try {
+            const res = await fetch(window.SP.apiPath('collections.php?action=update&id=') + collId, {
+                method:'PUT', credentials:'include',
+                headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ name, emoji, is_public: document.getElementById('editCollPublic').checked })
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('editModal').classList.add('hidden');
+                await load();
+            }
+        } catch {}
+    });
+
+    document.getElementById('deleteCollBtn').addEventListener('click', async () => {
+        if (!confirm('Supprimer cette collection ? Les recettes ne seront pas supprimées.')) return;
+        try {
+            await fetch(window.SP.apiPath('collections.php?action=delete&id=') + collId, {
+                method:'DELETE', credentials:'include'
+            });
+            window.location.href = 'profil.html';
+        } catch {}
+    });
+
+    load();
+})();
+</script>
+</body>
+</html>

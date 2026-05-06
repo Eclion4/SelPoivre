@@ -45,6 +45,13 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .adv-chip { padding:7px 14px; background:#F9FAFB; border:1.5px solid #E5E7EB; border-radius:999px; font-size:0.8125rem; font-weight:500; color:#374151; cursor:pointer; transition:all .15s; }
+        .adv-chip:hover  { border-color:#C4311B; color:#C4311B; background:#FEF4F2; }
+        .adv-chip.active { background:#C4311B; border-color:#C4311B; color:#fff; }
+        .active-chip-tag { display:inline-flex; align-items:center; gap:5px; padding:4px 10px 4px 12px; background:#FEF4F2; border:1.5px solid #F0806D; border-radius:999px; font-size:0.75rem; font-weight:600; color:#C4311B; cursor:pointer; transition:all .15s; }
+        .active-chip-tag:hover { background:#F8B4A8; }
+    </style>
 </head>
 <body class="bg-ivoire font-body text-encre overflow-x-hidden">
 
@@ -98,7 +105,7 @@
                 </div>
             </div>
 
-            <!-- Filter Chips -->
+            <!-- Category Chips -->
             <div class="mt-8 flex flex-wrap justify-center gap-3" data-aos="fade-up" data-aos-delay="150">
                 <button class="filter-chip active" data-group="cat">Tout</button>
                 <button class="filter-chip" data-group="cat">Entrées</button>
@@ -107,9 +114,53 @@
                 <button class="filter-chip" data-group="cat">Apéro</button>
                 <button class="filter-chip" data-group="cat">Boissons</button>
                 <button class="filter-chip" data-group="cat">Boulangerie</button>
-                <button class="filter-chip" data-group="cat">Végétarien</button>
-                <button class="filter-chip" data-group="cat">Rapide</button>
-                <button class="filter-chip" data-group="cat">Sans gluten</button>
+            </div>
+
+            <!-- Advanced Filters Toggle -->
+            <div class="mt-5 flex justify-center" data-aos="fade-up" data-aos-delay="170">
+                <button id="toggleFiltersBtn" class="flex items-center gap-2 px-5 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-600 hover:border-sp-400 hover:text-sp-600 transition-all shadow-sm">
+                    <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+                    Filtres avancés
+                    <span id="filterBadge" class="hidden px-2 py-0.5 bg-sp-500 text-white rounded-full text-xs font-bold leading-none">0</span>
+                </button>
+            </div>
+
+            <!-- Advanced Filters Panel -->
+            <div id="filterPanel" class="hidden max-w-3xl mx-auto mt-4 bg-white rounded-2xl shadow-md border border-gray-100 p-5 space-y-5" data-aos="fade-up">
+                <div class="grid sm:grid-cols-3 gap-5">
+                    <!-- Régime -->
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Régime</p>
+                        <div class="flex flex-col gap-1.5">
+                            <button class="adv-chip text-left" data-type="diet" data-val="végétarien">🥦 Végétarien</button>
+                            <button class="adv-chip text-left" data-type="diet" data-val="vegan">🌱 Vegan</button>
+                            <button class="adv-chip text-left" data-type="diet" data-val="sans gluten">🌾 Sans gluten</button>
+                            <button class="adv-chip text-left" data-type="diet" data-val="sans lactose">🥛 Sans lactose</button>
+                        </div>
+                    </div>
+                    <!-- Temps -->
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Temps max</p>
+                        <div class="flex flex-col gap-1.5">
+                            <button class="adv-chip text-left" data-type="time" data-val="20">⚡ ≤ 20 min</button>
+                            <button class="adv-chip text-left" data-type="time" data-val="45">⏱ ≤ 45 min</button>
+                            <button class="adv-chip text-left" data-type="time" data-val="90">🕐 ≤ 1h30</button>
+                        </div>
+                    </div>
+                    <!-- Difficulté -->
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Difficulté</p>
+                        <div class="flex flex-col gap-1.5">
+                            <button class="adv-chip text-left" data-type="diff" data-val="Facile">😊 Facile</button>
+                            <button class="adv-chip text-left" data-type="diff" data-val="Moyen">🤔 Moyen</button>
+                            <button class="adv-chip text-left" data-type="diff" data-val="Difficile">💪 Difficile</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                    <div id="activeFiltersChips" class="flex flex-wrap gap-2"></div>
+                    <button id="clearAdvFilters" class="text-xs text-gray-400 hover:text-red-500 transition-colors whitespace-nowrap ml-3">Tout effacer</button>
+                </div>
             </div>
 
             <!-- Sort & Count -->
@@ -159,6 +210,34 @@
             <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre. Tous droits réservés.</p>
         </div>
     </footer>
+
+    <!-- ═══ COLLECTIONS QUICK-ADD MODAL ══════════════════════════════════ -->
+    <div id="collModal" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="collModalOverlay"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 z-10">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-display font-bold text-lg">Ajouter à une collection</h3>
+                <button id="collModalClose" class="p-1.5 rounded-xl hover:bg-gray-100 transition-colors">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div id="collModalList" class="space-y-1 max-h-60 overflow-y-auto pr-1">
+                <!-- Populated dynamically -->
+            </div>
+            <button id="collModalNew" class="mt-4 w-full flex items-center gap-2 px-4 py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-500 hover:border-sp-400 hover:text-sp-600 transition-all">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Nouvelle collection
+            </button>
+            <div id="collNewForm" class="hidden mt-3 pt-3 border-t border-gray-100 space-y-2">
+                <input id="collNewName" type="text" placeholder="Nom de la collection…" maxlength="120"
+                    class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sp-500">
+                <div class="flex gap-2">
+                    <button id="collNewCancel" class="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-xs font-medium hover:bg-gray-50 transition-colors">Annuler</button>
+                    <button id="collNewSave" class="flex-1 px-3 py-2 bg-sp-500 text-white rounded-xl text-xs font-semibold hover:bg-sp-600 transition-colors">Créer &amp; ajouter</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -251,6 +330,12 @@
                 class="absolute top-3 right-3 w-9 h-9 ${r.is_favorited ? 'bg-sp-500 text-white' : 'bg-white/90'} backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all is-favorited-${!!r.is_favorited}">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="${r.is_favorited?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
+            <button type="button"
+                onclick="event.stopPropagation();event.preventDefault();openCollModal(${r.id});"
+                title="Ajouter à une collection"
+                class="absolute top-3 right-14 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-or-100 hover:text-or-600 transition-all opacity-0 group-hover:opacity-100">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+            </button>
             <div class="absolute bottom-3 left-3 flex gap-1.5">
                 <span class="px-2.5 py-1 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
                     <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -279,6 +364,10 @@
         let activeFilter = 'tout';
         let searchQuery  = '';
         let sortKey      = 'populaires';
+        // Advanced filters
+        let activeDiets  = [];      // e.g. ['végétarien', 'vegan']
+        let maxTime      = null;    // number or null
+        let activeDiff   = null;    // 'Facile' | 'Moyen' | 'Difficile' | null
 
         const FILTER_FN = {
             'tout':        () => true,
@@ -288,9 +377,6 @@
             'apéro':       r => r.category === 'apero',
             'boissons':    r => r.category === 'boissons',
             'boulangerie': r => r.category === 'boulangerie',
-            'végétarien':  r => r.tags.some(t => t.toLowerCase().includes('végétarien')),
-            'rapide':      r => r.totalTime > 0 && r.totalTime <= 30,
-            'sans gluten': r => r.tags.some(t => t.toLowerCase().includes('sans gluten')),
         };
 
         const SORT_FN = {
@@ -301,7 +387,8 @@
         };
 
         function getFiltered() {
-            let list = allRecipes.filter(FILTER_FN[activeFilter] || FILTER_FN['tout']);
+            let list = allRecipes.filter(FILTER_FN[activeFilter] || (() => true));
+            // Text search
             if (searchQuery.trim()) {
                 const q = searchQuery.toLowerCase();
                 list = list.filter(r =>
@@ -312,8 +399,121 @@
                     r.tags.some(t => t.toLowerCase().includes(q))
                 );
             }
+            // Diet filters (ALL must match)
+            if (activeDiets.length > 0) {
+                list = list.filter(r => activeDiets.every(diet =>
+                    r.tags.some(t => t.toLowerCase().includes(diet.toLowerCase()))
+                ));
+            }
+            // Max time
+            if (maxTime !== null) {
+                list = list.filter(r => r.totalTime > 0 && r.totalTime <= maxTime);
+            }
+            // Difficulty
+            if (activeDiff) {
+                list = list.filter(r => (r.difficulty || 'Facile') === activeDiff);
+            }
             return list.sort(SORT_FN[sortKey] || SORT_FN['populaires']);
         }
+
+        // ── URL sync ──────────────────────────────────────────────────────────
+        function syncUrl() {
+            const p = new URLSearchParams();
+            if (searchQuery)        p.set('search',     searchQuery);
+            if (activeFilter !== 'tout') p.set('category', activeFilter);
+            if (activeDiets.length) p.set('diet',       activeDiets.join(','));
+            if (maxTime !== null)   p.set('max_time',   maxTime);
+            if (activeDiff)         p.set('difficulty', activeDiff);
+            history.replaceState(null, '', window.location.pathname + (p.toString() ? '?' + p : ''));
+        }
+
+        // ── Active filter chips display ───────────────────────────────────────
+        const DIET_LABELS = { 'végétarien':'🥦 Végétarien','vegan':'🌱 Vegan','sans gluten':'🌾 Sans gluten','sans lactose':'🥛 Sans lactose' };
+        const TIME_LABELS = { 20:'⚡ ≤ 20 min', 45:'⏱ ≤ 45 min', 90:'🕐 ≤ 1h30' };
+        const DIFF_LABELS = { 'Facile':'😊 Facile','Moyen':'🤔 Moyen','Difficile':'💪 Difficile' };
+
+        function updateAdvUI() {
+            // Sync adv-chip active states
+            document.querySelectorAll('.adv-chip').forEach(b => {
+                const t = b.dataset.type, v = b.dataset.val;
+                const on = (t === 'diet' && activeDiets.includes(v)) ||
+                           (t === 'time' && maxTime == v) ||
+                           (t === 'diff' && activeDiff === v);
+                b.classList.toggle('active', on);
+            });
+            // Count badge
+            const count = activeDiets.length + (maxTime !== null ? 1 : 0) + (activeDiff ? 1 : 0);
+            const badge = document.getElementById('filterBadge');
+            badge.textContent = count;
+            badge.classList.toggle('hidden', count === 0);
+            // Active chips display
+            const container = document.getElementById('activeFiltersChips');
+            let chips = '';
+            activeDiets.forEach(d => { chips += `<button class="active-chip-tag" data-rm-diet="${d}">${DIET_LABELS[d]||d} ×</button>`; });
+            if (maxTime !== null) chips += `<button class="active-chip-tag" data-rm-time="1">${TIME_LABELS[maxTime]||maxTime+' min'} ×</button>`;
+            if (activeDiff)       chips += `<button class="active-chip-tag" data-rm-diff="1">${DIFF_LABELS[activeDiff]||activeDiff} ×</button>`;
+            container.innerHTML = chips;
+            container.querySelectorAll('[data-rm-diet]').forEach(b => b.addEventListener('click', () => { activeDiets = activeDiets.filter(x => x !== b.dataset.rmDiet); afterFilter(); }));
+            container.querySelectorAll('[data-rm-time]').forEach(b => b.addEventListener('click', () => { maxTime = null; afterFilter(); }));
+            container.querySelectorAll('[data-rm-diff]').forEach(b => b.addEventListener('click', () => { activeDiff = null; afterFilter(); }));
+        }
+
+        function afterFilter() { updateAdvUI(); syncUrl(); render(); }
+
+        // ── Collections quick-add modal ────────────────────────────────────────
+        let collModalRecipeId = null;
+
+        async function openCollModal(recipeId) {
+            collModalRecipeId = recipeId;
+            const modal = document.getElementById('collModal');
+            const list  = document.getElementById('collModalList');
+            document.getElementById('collNewForm').classList.add('hidden');
+            document.getElementById('collNewName').value = '';
+            modal.classList.remove('hidden');
+            list.innerHTML = '<p class="text-sm text-center text-gray-400 py-4">Chargement…</p>';
+            try {
+                const res  = await fetch(`api/collections.php?action=check&recipe_id=${recipeId}`);
+                const data = await res.json();
+                if (res.status === 401 || data.error === 'Non authentifié') {
+                    modal.classList.add('hidden');
+                    window.location.href = 'connexion.html?next=recettes';
+                    return;
+                }
+                const colls = data.collections || [];
+                if (colls.length === 0) {
+                    list.innerHTML = '<p class="text-sm text-center text-gray-400 py-4">Aucune collection — créez-en une ci-dessous !</p>';
+                } else {
+                    list.innerHTML = colls.map(c => `
+                        <label class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
+                            <input type="checkbox" data-coll-id="${c.id}" ${+c.has_recipe ? 'checked' : ''} class="w-4 h-4 accent-red-600 rounded flex-shrink-0">
+                            <span class="text-lg leading-none">${c.emoji}</span>
+                            <span class="text-sm font-medium flex-1 truncate">${c.name}</span>
+                            ${+c.has_recipe ? '<svg class="w-4 h-4 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+                        </label>`).join('');
+                    list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        cb.addEventListener('change', async () => {
+                            const cId = +cb.dataset.collId;
+                            const r2  = await fetch('api/collections.php?action=toggle', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json'},
+                                body: JSON.stringify({collection_id: cId, recipe_id: collModalRecipeId})
+                            });
+                            if (!r2.ok) { cb.checked = !cb.checked; return; }
+                            const lbl = cb.closest('label');
+                            const chk = lbl.querySelector('svg.text-green-500');
+                            if (cb.checked) {
+                                if (!chk) lbl.insertAdjacentHTML('beforeend', '<svg class="w-4 h-4 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>');
+                            } else {
+                                if (chk) chk.remove();
+                            }
+                        });
+                    });
+                }
+            } catch(e) {
+                list.innerHTML = '<p class="text-sm text-center text-red-400 py-4">Erreur de chargement.</p>';
+            }
+        }
+        window.openCollModal = openCollModal;
 
         // ── Render ────────────────────────────────────────────────────────────
         function render() {
@@ -374,14 +574,14 @@
                     document.querySelectorAll('.filter-chip[data-group="cat"]').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     activeFilter = this.textContent.trim().toLowerCase();
-                    render();
+                    afterFilter();
                 });
             });
 
             let timer;
             document.getElementById('recipeSearchInput').addEventListener('input', function () {
                 clearTimeout(timer);
-                timer = setTimeout(() => { searchQuery = this.value; render(); }, 300);
+                timer = setTimeout(() => { searchQuery = this.value; afterFilter(); }, 300);
             });
 
             document.getElementById('sortRecipes').addEventListener('change', function () {
@@ -389,7 +589,80 @@
                 render();
             });
 
-            render();
+            // ── Advanced filter URL params ─────────────────────────────────────
+            const urlDiet = params.get('diet') || '';
+            const urlTime = params.get('max_time');
+            const urlDiff = params.get('difficulty') || '';
+            if (urlDiet) activeDiets = urlDiet.split(',').filter(Boolean);
+            if (urlTime)  maxTime = +urlTime;
+            if (urlDiff)  activeDiff = urlDiff;
+            if (activeDiets.length || maxTime !== null || activeDiff) {
+                document.getElementById('filterPanel').classList.remove('hidden');
+            }
+
+            // ── Toggle filter panel ────────────────────────────────────────────
+            document.getElementById('toggleFiltersBtn').addEventListener('click', () => {
+                const panel = document.getElementById('filterPanel');
+                panel.classList.toggle('hidden');
+                if (!panel.classList.contains('hidden') && window.AOS) AOS.refreshHard();
+            });
+
+            // ── Advanced filter chips ──────────────────────────────────────────
+            document.querySelectorAll('.adv-chip').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const type = btn.dataset.type, val = btn.dataset.val;
+                    if (type === 'diet') {
+                        activeDiets.includes(val)
+                            ? (activeDiets = activeDiets.filter(x => x !== val))
+                            : activeDiets.push(val);
+                    } else if (type === 'time') {
+                        maxTime = (maxTime == val) ? null : +val;
+                    } else if (type === 'diff') {
+                        activeDiff = (activeDiff === val) ? null : val;
+                    }
+                    afterFilter();
+                });
+            });
+
+            // ── Clear all advanced filters ─────────────────────────────────────
+            document.getElementById('clearAdvFilters').addEventListener('click', () => {
+                activeDiets = []; maxTime = null; activeDiff = null;
+                afterFilter();
+            });
+
+            // ── Collections modal wiring ───────────────────────────────────────
+            const closeCollModal = () => document.getElementById('collModal').classList.add('hidden');
+            document.getElementById('collModalOverlay').addEventListener('click', closeCollModal);
+            document.getElementById('collModalClose').addEventListener('click',   closeCollModal);
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCollModal(); });
+
+            document.getElementById('collModalNew').addEventListener('click', () => {
+                const f = document.getElementById('collNewForm');
+                f.classList.toggle('hidden');
+                if (!f.classList.contains('hidden')) document.getElementById('collNewName').focus();
+            });
+            document.getElementById('collNewCancel').addEventListener('click', () => {
+                document.getElementById('collNewForm').classList.add('hidden');
+                document.getElementById('collNewName').value = '';
+            });
+            document.getElementById('collNewSave').addEventListener('click', async () => {
+                const name = document.getElementById('collNewName').value.trim();
+                if (!name) { document.getElementById('collNewName').focus(); return; }
+                try {
+                    const res = await fetch('api/collections.php?action=create', {
+                        method: 'POST',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({name, recipe_id: collModalRecipeId})
+                    });
+                    if (res.ok) {
+                        document.getElementById('collNewForm').classList.add('hidden');
+                        document.getElementById('collNewName').value = '';
+                        openCollModal(collModalRecipeId); // Refresh list
+                    }
+                } catch(e) { console.error(e); }
+            });
+
+            afterFilter();
         });
     })();
     </script>

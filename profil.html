@@ -122,6 +122,7 @@
                 <button class="tab-btn active" data-tab="infos">Mon profil</button>
                 <button class="tab-btn" data-tab="mes-recettes">Mes recettes</button>
                 <button class="tab-btn" data-tab="favoris">Mes favoris</button>
+                <button class="tab-btn" data-tab="collections">Collections</button>
                 <button class="tab-btn" data-tab="parametres">Paramètres</button>
             </div>
         </div>
@@ -198,6 +199,19 @@
             </div>
         </section>
 
+        <!-- ===== TAB: COLLECTIONS ===== -->
+        <section id="tab-collections" class="tab-pane hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="font-display font-bold text-2xl">Mes collections</h2>
+                <button id="openNewCollModal" class="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Nouvelle collection
+                </button>
+            </div>
+            <div id="collectionsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <p class="text-gray-400 col-span-full text-center py-10">Chargement…</p>
+            </div>
+        </section>
+
         <!-- ===== TAB: PARAMETRES ===== -->
         <section id="tab-parametres" class="tab-pane hidden">
             <div class="grid lg:grid-cols-2 gap-6">
@@ -230,6 +244,35 @@
             </div>
         </section>
     </main>
+
+    <!-- ===== NEW COLLECTION MODAL ===== -->
+    <div id="newCollModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+            <h3 class="font-display font-bold text-xl mb-5">Créer une collection</h3>
+            <div class="space-y-4">
+                <div>
+                    <p class="text-sm font-semibold mb-2 text-gray-700">Emoji</p>
+                    <div class="flex flex-wrap gap-2" id="newCollEmojiPicker">
+                        <!-- filled by JS -->
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold block mb-1 text-gray-700">Nom de la collection</label>
+                    <input id="newCollName" maxlength="120" placeholder="Ex : Recettes de Noël, Repas rapides…"
+                        class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sp-500 text-sm">
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="newCollPublic" checked class="w-4 h-4 accent-sp-500">
+                    <span class="text-sm text-gray-700">Collection publique (visible sur mon profil)</span>
+                </label>
+                <div id="newCollError" class="hidden text-red-600 text-sm p-3 bg-red-50 rounded-xl"></div>
+            </div>
+            <div class="flex gap-3 mt-6 justify-end">
+                <button id="cancelNewColl" class="px-5 py-2 border border-gray-200 rounded-full text-sm font-medium hover:bg-gray-50 transition-colors">Annuler</button>
+                <button id="saveNewColl" class="px-6 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Créer</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== DELETE ACCOUNT MODAL ===== -->
     <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -314,10 +357,11 @@
             history.replaceState(null, '', '#' + name);
             if (name === 'mes-recettes' && !window.__myLoaded) loadMine();
             if (name === 'favoris'      && !window.__favLoaded) loadFavorites();
+            if (name === 'collections'  && !window.__collLoaded) loadCollections();
         }
         document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => activateTab(b.dataset.tab)));
         const initialTab = (location.hash || '').replace('#','');
-        if (['infos','mes-recettes','favoris','parametres'].includes(initialTab)) activateTab(initialTab);
+        if (['infos','mes-recettes','favoris','collections','parametres'].includes(initialTab)) activateTab(initialTab);
 
         // ── Edit profile ────────────────────────────────────
         const inputs = ['fldUsername','fldEmail','fldBio'];
@@ -625,6 +669,103 @@
             } catch {}
         }
 
+        // ── Collections ─────────────────────────────────────
+        const COLL_EMOJIS = ['📚','❤️','⭐','🎄','🎉','🍝','🥗','🍰','🥘','🌿','🍜','🥐','🍷','🏆','💡','🎯'];
+        let selectedEmoji = '📚';
+
+        function buildEmojiPicker(containerId) {
+            const c = document.getElementById(containerId);
+            if (!c) return;
+            c.innerHTML = COLL_EMOJIS.map(e =>
+                `<button type="button" class="emoji-opt w-10 h-10 text-xl rounded-xl border-2 transition-all ${e===selectedEmoji?'border-sp-500 bg-sp-50':'border-gray-200 hover:border-sp-300'}" data-e="${e}">${e}</button>`
+            ).join('');
+            c.querySelectorAll('.emoji-opt').forEach(b => {
+                b.addEventListener('click', () => {
+                    selectedEmoji = b.dataset.e;
+                    c.querySelectorAll('.emoji-opt').forEach(x => {
+                        x.classList.toggle('border-sp-500', x.dataset.e === selectedEmoji);
+                        x.classList.toggle('bg-sp-50', x.dataset.e === selectedEmoji);
+                        x.classList.toggle('border-gray-200', x.dataset.e !== selectedEmoji);
+                    });
+                });
+            });
+        }
+
+        function collectionCard(c) {
+            const cover = c.cover_image || '/assets/recipes/_default.jpg';
+            const count = +c.item_count || 0;
+            return `
+            <a href="collection.html?id=${c.id}" class="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <div class="relative h-36 overflow-hidden bg-sp-50">
+                    <img src="${cover}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+                    <div class="absolute top-3 left-3 text-3xl">${c.emoji || '📚'}</div>
+                    ${!+c.is_public ? '<div class="absolute top-3 right-3 px-2 py-0.5 bg-black/50 text-white text-xs rounded-full">Privée</div>' : ''}
+                </div>
+                <div class="p-4">
+                    <h3 class="font-semibold text-sm group-hover:text-sp-600 transition-colors">${c.name}</h3>
+                    <p class="text-xs text-gray-400 mt-1">${count} recette${count !== 1 ? 's' : ''}</p>
+                </div>
+            </a>`;
+        }
+
+        async function loadCollections() {
+            if (window.__collLoaded) return;
+            window.__collLoaded = true;
+            const box = document.getElementById('collectionsGrid');
+            try {
+                const res  = await fetch(window.SP.apiPath('collections.php?action=mine'), { credentials:'include' });
+                const data = await res.json();
+                const colls = data.collections || [];
+                if (colls.length === 0) {
+                    box.innerHTML = `<div class="col-span-full text-center py-16 text-gray-400">
+                        <div class="text-5xl mb-3">📚</div>
+                        <p class="font-semibold">Aucune collection</p>
+                        <p class="text-sm mt-1">Créez votre première collection pour organiser vos recettes.</p>
+                    </div>`;
+                } else {
+                    box.innerHTML = colls.map(collectionCard).join('');
+                }
+                if (window.lucide) lucide.createIcons();
+            } catch {
+                box.innerHTML = '<p class="text-red-500 col-span-full text-center py-10">Impossible de charger les collections.</p>';
+            }
+        }
+
+        // Open modal
+        document.getElementById('openNewCollModal')?.addEventListener('click', () => {
+            selectedEmoji = '📚';
+            buildEmojiPicker('newCollEmojiPicker');
+            document.getElementById('newCollName').value = '';
+            document.getElementById('newCollPublic').checked = true;
+            document.getElementById('newCollError').classList.add('hidden');
+            document.getElementById('newCollModal').classList.remove('hidden');
+        });
+        document.getElementById('cancelNewColl')?.addEventListener('click', () => {
+            document.getElementById('newCollModal').classList.add('hidden');
+        });
+        document.getElementById('saveNewColl')?.addEventListener('click', async () => {
+            const name  = document.getElementById('newCollName').value.trim();
+            const errEl = document.getElementById('newCollError');
+            errEl.classList.add('hidden');
+            if (!name) { errEl.textContent = 'Le nom est requis.'; errEl.classList.remove('hidden'); return; }
+            try {
+                const res = await fetch(window.SP.apiPath('collections.php?action=create'), {
+                    method:'POST', credentials:'include',
+                    headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({ name, emoji: selectedEmoji, is_public: document.getElementById('newCollPublic').checked })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Erreur');
+                document.getElementById('newCollModal').classList.add('hidden');
+                window.__collLoaded = false;
+                await loadCollections();
+            } catch (e) {
+                errEl.textContent = e.message;
+                errEl.classList.remove('hidden');
+            }
+        });
+
         // ── Init ───────────────────────────────────────────
         async function init() {
             // refresh server-side user (gets bio, preferences, avatar, etc.)
@@ -637,6 +778,16 @@
             const link = document.getElementById('profileLinkPublic');
             if (link && u.username) link.href = 'utilisateur.html?username=' + encodeURIComponent(u.username);
             await loadGlobalStats();
+
+            // Auto-ouvrir l'onglet collections si hash présent
+            if (window.location.hash === '#collections') {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+                document.querySelector('[data-tab="collections"]')?.classList.add('active');
+                document.getElementById('tab-collections')?.classList.remove('hidden');
+                await loadCollections();
+            }
+
             if (window.lucide) lucide.createIcons();
         }
         init();

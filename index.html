@@ -655,6 +655,16 @@
             }
             return s;
         }
+        function getBadge(r) {
+            const tags = (r.tags || []);
+            if (tags.some(t => /végétar/i.test(t)))    return `<span class="px-3 py-1 bg-green-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Végétarien</span>`;
+            if (tags.some(t => /vegan/i.test(t)))       return `<span class="px-3 py-1 bg-green-600/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Vegan</span>`;
+            if (tags.some(t => /sans gluten/i.test(t))) return `<span class="px-3 py-1 bg-blue-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Sans gluten</span>`;
+            if (+r.total_time > 0 && +r.total_time <= 20) return `<span class="px-3 py-1 bg-or-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Rapide</span>`;
+            if (r.difficulty === 'Difficile')            return `<span class="px-3 py-1 bg-sp-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Expert</span>`;
+            return '';
+        }
+
         function buildCard(r, idx) {
             const img    = r.image_url || 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=600';
             const rating = parseFloat(r.rating) || 4.5;
@@ -662,6 +672,7 @@
             const author = r.author_name || 'Équipe S&P';
             const inits  = author.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
             const color  = colorFor(author);
+            const badge  = getBadge(r);
             const authorHTML = r.author_type === 'mijote'
                 ? `<div class="w-8 h-8 rounded-full bg-gradient-to-br from-sp-500 to-sp-600 flex items-center justify-center flex-shrink-0"><span class="text-white font-bold text-xs">SP</span></div><span class="text-sm font-medium">Équipe S&amp;P</span>`
                 : `<div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-xs" style="background:${color}">${inits}</div><span class="text-sm font-medium">${author}</span>`;
@@ -670,6 +681,7 @@
     <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-500">
         <div class="relative aspect-[4/3] overflow-hidden">
             <img src="${img}" alt="${r.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy">
+            ${badge ? `<div class="absolute top-4 left-4">${badge}</div>` : ''}
             <button type="button" onclick="event.stopPropagation();event.preventDefault();window.location.href='connexion.html';"
                 class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300">
                 <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -709,7 +721,16 @@
                 }
                 grid.innerHTML = recipes.map((r, i) => buildCard(r, i)).join('');
                 if (window.AOS) AOS.refreshHard();
-                if (typeof updateAllStats === 'function') updateAllStats(data.recipes);
+                // Update total count directly from API (bypasses DOM card count)
+                const total = data.total || (data.recipes || []).length;
+                document.querySelectorAll('[data-stat="recipeCount"]').forEach(el => { el.textContent = total; });
+                // Update category subcounts
+                const catCounts = {};
+                (data.recipes || []).forEach(r => { catCounts[r.category] = (catCounts[r.category] || 0) + 1; });
+                document.querySelectorAll('[data-cat]').forEach(el => {
+                    const n = catCounts[el.dataset.cat] || 0;
+                    el.textContent = n + ' recette' + (n !== 1 ? 's' : '');
+                });
             } catch (e) {
                 grid.innerHTML = '';
             }

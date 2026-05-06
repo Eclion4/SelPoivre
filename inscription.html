@@ -502,7 +502,7 @@
                         <label class="flex items-start gap-3 cursor-pointer">
                             <div class="relative mt-0.5">
                                 <input type="checkbox" id="acceptCGU" class="sr-only">
-                                <div class="checkbox-custom" id="cguBox" onclick="event.stopPropagation(); toggleCheck('acceptCGU', 'cguBox')"></div>
+                                <div class="checkbox-custom" id="cguBox"></div>
                             </div>
                             <span class="text-sm text-gray-600 leading-relaxed">
                                 J'ai lu et j'accepte les <a href="cgu.html" target="_blank" class="text-sp-600 font-semibold hover:underline">Conditions Générales d'Utilisation</a>
@@ -514,7 +514,7 @@
                         <label class="flex items-start gap-3 cursor-pointer">
                             <div class="relative mt-0.5">
                                 <input type="checkbox" id="acceptPrivacy" class="sr-only">
-                                <div class="checkbox-custom" id="privacyBox" onclick="event.stopPropagation(); toggleCheck('acceptPrivacy', 'privacyBox')"></div>
+                                <div class="checkbox-custom" id="privacyBox"></div>
                             </div>
                             <span class="text-sm text-gray-600 leading-relaxed">
                                 J'accepte la <a href="confidentialite.html" target="_blank" class="text-sp-600 font-semibold hover:underline">Politique de confidentialité</a> et le traitement de mes données personnelles
@@ -526,7 +526,7 @@
                         <label class="flex items-start gap-3 cursor-pointer p-3 bg-sp-50 rounded-xl border border-sp-100">
                             <div class="relative mt-0.5">
                                 <input type="checkbox" id="acceptNewsletter" class="sr-only">
-                                <div class="checkbox-custom" id="newsletterBox" onclick="event.stopPropagation(); toggleCheck('acceptNewsletter', 'newsletterBox')"></div>
+                                <div class="checkbox-custom" id="newsletterBox"></div>
                             </div>
                             <div>
                                 <span class="text-sm font-medium text-gray-700">Recevoir la newsletter Sel &amp; Poivre</span>
@@ -721,29 +721,32 @@
         }
 
         /* ===== CHECKBOXES ===== */
-        function toggleCheck(inputId, boxId) {
-            const input = document.getElementById(inputId);
-            const box = document.getElementById(boxId);
-            input.checked = !input.checked;
+        function syncBox(input, box) {
             if (input.checked) {
-                box.style.background = 'linear-gradient(135deg, #F97316, #EA580C)';
+                box.style.background  = 'linear-gradient(135deg, #F97316, #EA580C)';
                 box.style.borderColor = '#F97316';
                 box.innerHTML = '<svg width="12" height="12" fill="none" stroke="white" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
             } else {
-                box.style.background = '';
+                box.style.background  = '';
                 box.style.borderColor = '';
                 box.innerHTML = '';
             }
         }
 
+        [['acceptCGU','cguBox'],['acceptPrivacy','privacyBox'],['acceptNewsletter','newsletterBox']].forEach(([inputId, boxId]) => {
+            const input = document.getElementById(inputId);
+            const box   = document.getElementById(boxId);
+            input.addEventListener('change', () => syncBox(input, box));
+        });
+
         /* ===== SUBMIT ===== */
-        function isCBChecked(boxId) {
-            return document.getElementById(boxId).innerHTML.trim() !== '';
+        function isCBChecked(inputId) {
+            return document.getElementById(inputId).checked;
         }
 
         async function submitForm() {
-            const cgu     = isCBChecked('cguBox');
-            const privacy = isCBChecked('privacyBox');
+            const cgu     = isCBChecked('acceptCGU');
+            const privacy = isCBChecked('acceptPrivacy');
 
             if (!cgu || !privacy) {
                 const btn = document.getElementById('submitBtn');

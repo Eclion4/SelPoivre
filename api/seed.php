@@ -6,6 +6,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Réservé aux admins connectés (sinon n'importe qui pourrait insérer
+// des recettes en masse dans la BDD).
+requireAdmin();
+
 $recipes = json_decode(file_get_contents('php://input'), true);
 if (!$recipes || !is_array($recipes)) {
     jsonResponse(['error' => 'Données invalides'], 400);

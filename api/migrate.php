@@ -5,6 +5,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405); exit;
 }
 
+// Réservé aux admins connectés (sinon n'importe qui pourrait exécuter
+// des ALTER/UPDATE sur la BDD via un simple POST).
+requireAdmin();
+
 $db = getDB();
 $results = [];
 

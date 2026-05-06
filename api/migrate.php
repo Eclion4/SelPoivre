@@ -11,6 +11,19 @@ $results = [];
 $migrations = [
     'users.preferences'      => "ALTER TABLE users ADD COLUMN IF NOT EXISTS preferences TEXT NULL AFTER bio",
     'steps.section'          => "ALTER TABLE steps ADD COLUMN IF NOT EXISTS section VARCHAR(120) NULL AFTER description",
+    // ── utf8mb4 sur toutes les tables texte (support emoji 4 octets : 🍕📱👨‍🍳…)
+    'utf8mb4.users'          => "ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.recipes'        => "ALTER TABLE recipes CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.ingredients'    => "ALTER TABLE ingredients CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.steps'          => "ALTER TABLE steps CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.recipe_tags'    => "ALTER TABLE recipe_tags CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.comments'       => "ALTER TABLE comments CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.favorites'      => "ALTER TABLE favorites CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.follows'        => "ALTER TABLE follows CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.collections'    => "ALTER TABLE collections CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.collection_items' => "ALTER TABLE collection_items CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.contact_messages' => "ALTER TABLE contact_messages CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    'utf8mb4.newsletter'     => "ALTER TABLE newsletter_subscribers CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
     'recipes.author_type'    => "UPDATE recipes SET author_type = 'mijote' WHERE author_type = 'sel-poivre'",
     'recipes.rating_count'   => "UPDATE recipes SET rating_count = FLOOR(2 + (id % 7)) WHERE status = 'published'",
     'favorites.create'       => "CREATE TABLE IF NOT EXISTS favorites (

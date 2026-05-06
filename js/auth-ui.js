@@ -54,7 +54,12 @@
                 <svg class="w-4 h-4 text-or-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                 Espace admin</a>` : '';
         return `
-<div class="relative js-sp-userwrap">
+<div class="flex items-center gap-3">
+    <a href="${pagePath('publier.html')}" class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold shadow-sm hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="hidden md:inline">Publier</span>
+    </a>
+    <div class="relative js-sp-userwrap-inner">
     <button type="button" class="js-sp-trigger flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-sp-50 transition-all">
         ${avatarBlock(user, 9)}
         <span class="hidden lg:inline text-sm font-medium text-encre max-w-[110px] truncate">${user.username}</span>
@@ -90,6 +95,7 @@
                 Déconnexion
             </button>
         </div>
+    </div>
     </div>
 </div>`.trim();
     }

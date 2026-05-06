@@ -67,17 +67,20 @@ document.addEventListener('DOMContentLoaded', () => {
 const navbar = document.getElementById('navbar');
 let lastScroll = 0;
 
-window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
+// Pages with a light-background hero keep the navbar solid regardless of scroll position
+const navbarAlwaysScrolled = navbar && navbar.hasAttribute('data-always-scrolled');
 
-    if (currentScroll > 80) {
+function updateNavbar() {
+    if (!navbar) return;
+    if (navbarAlwaysScrolled || window.pageYOffset > 80) {
         navbar.classList.add('scrolled');
     } else {
         navbar.classList.remove('scrolled');
     }
+}
 
-    lastScroll = currentScroll;
-});
+window.addEventListener('scroll', () => { updateNavbar(); lastScroll = window.pageYOffset; });
+updateNavbar(); // run immediately so the navbar is correct before first scroll
 
 /* ========== SEARCH TOGGLE ========== */
 const searchToggle = document.getElementById('searchToggle');

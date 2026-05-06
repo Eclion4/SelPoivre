@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Tableau de bord — Admin Sel & Poivre</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        sp: { DEFAULT:'#C4311B', light:'#E3543D', dark:'#A42618' },
+        sidebar: '#1A1A2E',
+        sidebarhover: '#16213E',
+      },
+      fontFamily: { sans:['Inter','system-ui','sans-serif'] }
+    }
+  }
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+  body { font-family: 'Inter', sans-serif; background: #F8F7F4; }
+  .sidebar-link { @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-slate-300 hover:bg-sidebarhover hover:text-white transition-all duration-200 text-sm font-medium; }
+  .sidebar-link.active { @apply bg-sp text-white; }
+  .stat-card { @apply bg-white rounded-2xl p-5 shadow-sm border border-slate-100; }
+  .badge-pending { @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800; }
+  .badge-published { @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800; }
+  .badge-rejected { @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800; }
+  .mini-chart-bar { transition: height 0.6s cubic-bezier(.4,0,.2,1); }
+  #sidebar { transition: transform 0.3s ease; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- Auth guard -->
+<script>
+  if (sessionStorage.getItem('adminAuth') !== 'true') {
+    window.location.href = 'login.html';
+  }
+</script>
+
+<div class="flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="w-64 flex-shrink-0 bg-sidebar flex flex-col overflow-y-auto">
+    <!-- Logo -->
+    <div class="px-5 py-6 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-sp rounded-xl flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 4 6 4 12c0 4 2 7 5 9h6c3-2 5-5 5-9 0-6-4-10-8-10zm0 3c2.2 0 4 2.2 4 5s-1.8 4-4 4-4-1.8-4-4 1.8-5 4-5z"/></svg>
+        </div>
+        <div>
+          <div class="text-white font-bold text-sm">Sel &amp; Poivre Admin</div>
+          <div class="text-slate-400 text-xs">Panneau de contrôle</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <p class="px-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Principal</p>
+      <a href="index.html" class="sidebar-link active">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Tableau de bord
+      </a>
+      <a href="recettes.html" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Recettes
+        <span class="ml-auto bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">3</span>
+      </a>
+      <a href="utilisateurs.html" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Utilisateurs
+      </a>
+
+      <p class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Contenu</p>
+      <a href="#" class="sidebar-link" onclick="return false;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+        Commentaires
+        <span class="ml-auto text-slate-500 text-xs">bientôt</span>
+      </a>
+      <a href="#" class="sidebar-link" onclick="return false;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        Catégories
+        <span class="ml-auto text-slate-500 text-xs">bientôt</span>
+      </a>
+
+      <p class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Système</p>
+      <a href="../index.html" target="_blank" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        Voir le site
+      </a>
+    </nav>
+
+    <!-- Admin user -->
+    <div class="px-4 py-4 border-t border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-sp flex items-center justify-center text-white text-xs font-bold flex-shrink-0">AD</div>
+        <div class="min-w-0">
+          <div class="text-white text-sm font-medium truncate">Admin</div>
+          <div class="text-slate-400 text-xs truncate">admin@seletpoivre.fr</div>
+        </div>
+        <button onclick="logout()" title="Déconnexion" class="ml-auto text-slate-500 hover:text-red-400 transition-colors flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+    <!-- Top bar -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4 flex-shrink-0">
+      <button id="sidebarToggle" class="lg:hidden text-slate-500 hover:text-slate-900">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div>
+        <h1 class="text-lg font-semibold text-slate-900">Tableau de bord</h1>
+        <p class="text-xs text-slate-500" id="dateDisplay"></p>
+      </div>
+      <div class="ml-auto flex items-center gap-3">
+        <button class="relative text-slate-500 hover:text-slate-900 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="absolute -top-1 -right-1 w-4 h-4 bg-sp text-white text-[10px] font-bold rounded-full flex items-center justify-center">3</span>
+        </button>
+        <div class="w-8 h-8 rounded-full bg-sp flex items-center justify-center text-white text-xs font-bold">AD</div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+      <!-- Stats grid -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="stat-card">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Recettes publiées</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1" id="statPublished">40</p>
+              <p class="text-xs text-green-600 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 10l7-7 7 7"/></svg>
+                +8 ce mois
+              </p>
+            </div>
+            <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">En attente</p>
+              <p class="text-3xl font-bold text-amber-600 mt-1" id="statPending">3</p>
+              <p class="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
+                À modérer
+              </p>
+            </div>
+            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+              <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Utilisateurs</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1">—</p>
+              <p class="text-xs text-slate-400 mt-1">Base non active</p>
+            </div>
+            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex items-start justify-between">
+            <div>
+              <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Note moyenne</p>
+              <p class="text-3xl font-bold text-slate-900 mt-1">4.9</p>
+              <p class="text-xs text-yellow-600 mt-1 flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                Toutes recettes
+              </p>
+            </div>
+            <div class="w-10 h-10 bg-yellow-50 rounded-xl flex items-center justify-center">
+              <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini bar chart + pending queue -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- Activity chart -->
+        <div class="stat-card lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-sm font-semibold text-slate-900">Activité — 7 derniers jours</h2>
+              <p class="text-xs text-slate-500">Recettes soumises</p>
+            </div>
+            <span class="badge-published">Actif</span>
+          </div>
+          <div class="flex items-end gap-2 h-28 pb-2" id="chartBars">
+            <!-- Generated by JS -->
+          </div>
+          <div class="flex justify-between text-xs text-slate-400 mt-1" id="chartLabels"></div>
+        </div>
+
+        <!-- Quick stats donut -->
+        <div class="stat-card">
+          <h2 class="text-sm font-semibold text-slate-900 mb-4">Répartition recettes</h2>
+          <div class="flex flex-col gap-3">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-600 font-medium">SEL &amp; POIVRE officiel</span>
+                <span class="text-slate-900 font-semibold">25</span>
+              </div>
+              <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-sp rounded-full" style="width:62.5%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-600 font-medium">Utilisateurs</span>
+                <span class="text-slate-900 font-semibold">15</span>
+              </div>
+              <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full" style="width:37.5%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-600 font-medium">En attente</span>
+                <span class="text-amber-600 font-semibold">3</span>
+              </div>
+              <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-400 rounded-full" style="width:7%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-600 font-medium">Refusées</span>
+                <span class="text-red-600 font-semibold">2</span>
+              </div>
+              <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-red-400 rounded-full" style="width:5%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-100 text-center">
+            <span class="text-2xl font-bold text-slate-900">43</span>
+            <p class="text-xs text-slate-500">recettes au total</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending recipes queue -->
+      <div class="stat-card">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900">Recettes en attente de modération</h2>
+            <p class="text-xs text-slate-500">3 recettes nécessitent votre validation</p>
+          </div>
+          <a href="recettes.html" class="text-xs font-medium text-sp hover:underline flex items-center gap-1">
+            Voir tout
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="space-y-3" id="pendingQueue">
+          <!-- Generated by JS from recipes-data.js -->
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="stat-card">
+        <h2 class="text-sm font-semibold text-slate-900 mb-4">Activité récente</h2>
+        <div class="space-y-4" id="activityFeed">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+<script src="../js/recipes-data.js"></script>
+<script>
+// ── Date display
+const now = new Date();
+document.getElementById('dateDisplay').textContent = now.toLocaleDateString('fr-FR', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+// ── Logout
+function logout() {
+  if (confirm('Se déconnecter de l\'administration ?')) {
+    sessionStorage.removeItem('adminAuth');
+    window.location.href = 'login.html';
+  }
+}
+
+// ── Toast
+function toast(msg, type = 'success') {
+  const t = document.createElement('div');
+  const colors = { success:'bg-green-600', error:'bg-red-600', info:'bg-blue-600' };
+  t.className = `${colors[type]||colors.info} text-white text-sm px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 min-w-[220px] max-w-xs transform transition-all duration-300 translate-x-4 opacity-0`;
+  t.innerHTML = `<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg><span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  requestAnimationFrame(() => { t.classList.remove('translate-x-4','opacity-0'); });
+  setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+// ── Mini bar chart (last 7 days, simulated data)
+const days = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+const today = new Date().getDay();
+const orderedDays = [...days.slice(today), ...days.slice(0, today)];
+const values = [2, 1, 3, 0, 2, 4, 1];
+const max = Math.max(...values);
+const chartBars = document.getElementById('chartBars');
+const chartLabels = document.getElementById('chartLabels');
+
+values.forEach((v, i) => {
+  const pct = max > 0 ? (v / max * 100) : 0;
+  const isToday = i === 6;
+  const bar = document.createElement('div');
+  bar.className = 'flex-1 flex flex-col items-center gap-1';
+  bar.innerHTML = `
+    <span class="text-xs font-semibold ${v>0?'text-slate-700':'text-slate-400'}">${v||''}</span>
+    <div class="w-full flex items-end justify-center" style="height:80px">
+      <div class="mini-chart-bar w-full rounded-t-lg ${isToday ? 'bg-sp' : 'bg-slate-200 hover:bg-sp/60'} cursor-pointer transition-colors" style="height:${Math.max(pct,4)}%"></div>
+    </div>
+  `;
+  chartBars.appendChild(bar);
+});
+
+orderedDays.forEach((d, i) => {
+  const span = document.createElement('span');
+  span.textContent = d;
+  span.className = i === 6 ? 'font-semibold text-sp' : '';
+  chartLabels.appendChild(span);
+});
+
+// ── Pending queue from recipes-data.js
+function renderPendingQueue() {
+  const queue = document.getElementById('pendingQueue');
+  if (typeof PENDING_RECIPES === 'undefined' || PENDING_RECIPES.length === 0) {
+    queue.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Aucune recette en attente</p>';
+    return;
+  }
+  queue.innerHTML = PENDING_RECIPES.map(r => `
+    <div class="flex items-center gap-4 p-3 bg-amber-50 border border-amber-100 rounded-xl hover:bg-amber-100/60 transition-colors" id="pq-${r.id}">
+      <img src="${r.image}" alt="${r.title}" class="w-14 h-14 rounded-lg object-cover flex-shrink-0 bg-slate-200" loading="lazy" onerror="this.src='https://placehold.co/56x56/e2e8f0/94a3b8?text=?'">
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-slate-900 truncate">${r.title}</p>
+        <p class="text-xs text-slate-500">par <strong>${r.author}</strong> · ${r.category} · ${r.prepTime + r.cookTime} min</p>
+        <p class="text-xs text-amber-600 mt-0.5">Soumis il y a ${Math.floor(Math.random()*48)+1}h</p>
+      </div>
+      <div class="flex gap-2 flex-shrink-0">
+        <button onclick="quickAction(${r.id},'approve')" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors">
+          Publier
+        </button>
+        <button onclick="quickAction(${r.id},'reject')" class="px-3 py-1.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 text-xs font-semibold rounded-lg transition-colors">
+          Refuser
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function quickAction(id, action) {
+  const el = document.getElementById(`pq-${id}`);
+  if (!el) return;
+  const r = PENDING_RECIPES.find(x => x.id === id);
+  if (action === 'approve') {
+    toast(`"${r?.title}" publiée avec succès`, 'success');
+  } else {
+    toast(`"${r?.title}" refusée`, 'error');
+  }
+  el.style.opacity = '0';
+  el.style.transform = 'translateX(20px)';
+  el.style.transition = 'all 0.3s ease';
+  setTimeout(() => {
+    el.remove();
+    const remaining = document.querySelectorAll('#pendingQueue > [id^="pq-"]').length;
+    if (remaining === 0) {
+      document.getElementById('pendingQueue').innerHTML = '<div class="text-center py-6 text-slate-400"><svg class="w-10 h-10 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p class="text-sm">Aucune recette en attente !</p></div>';
+    }
+    // Update badge
+    document.querySelectorAll('.badge-pending, [data-pending]').forEach(el => el.textContent = remaining);
+  }, 300);
+}
+
+// ── Activity feed (simulated)
+const activities = [
+  { icon: '📝', text: '<strong>Camille D.</strong> a soumis la recette "Tartiflette crémeuse"', time: 'il y a 2h', color: 'bg-amber-100 text-amber-700' },
+  { icon: '✅', text: '<strong>Admin</strong> a publié "Ratatouille provençale"', time: 'il y a 5h', color: 'bg-green-100 text-green-700' },
+  { icon: '⭐', text: '<strong>Lucas M.</strong> a noté "Bœuf Bourguignon" 5 étoiles', time: 'il y a 8h', color: 'bg-yellow-100 text-yellow-700' },
+  { icon: '👤', text: '<strong>Nouveau compte</strong> : sophie.martin@email.fr', time: 'hier', color: 'bg-blue-100 text-blue-700' },
+  { icon: '🚫', text: '<strong>Admin</strong> a refusé "Spaghetti carbonara (v2)"', time: 'hier', color: 'bg-red-100 text-red-700' },
+  { icon: '📝', text: '<strong>Nina T.</strong> a soumis la recette "Crumble pomme-noisette"', time: 'avant-hier', color: 'bg-amber-100 text-amber-700' },
+];
+
+document.getElementById('activityFeed').innerHTML = activities.map(a => `
+  <div class="flex items-start gap-3">
+    <span class="w-8 h-8 rounded-full ${a.color} flex items-center justify-center text-sm flex-shrink-0">${a.icon}</span>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm text-slate-700">${a.text}</p>
+      <p class="text-xs text-slate-400 mt-0.5">${a.time}</p>
+    </div>
+  </div>
+`).join('');
+
+// ── Init
+document.addEventListener('DOMContentLoaded', () => {
+  renderPendingQueue();
+  // Animate chart bars
+  setTimeout(() => {
+    document.querySelectorAll('.mini-chart-bar').forEach(b => {
+      b.style.height = b.style.height; // trigger reflow
+    });
+  }, 100);
+});
+
+renderPendingQueue();
+</script>
+</body>
+</html>

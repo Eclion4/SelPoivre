@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sel & Poivre — Recettes de cuisine communautaires</title>
+    <meta name="description" content="Sel & Poivre : la plateforme moderne de recettes de cuisine. Partagez, découvrez et cuisinez avec une communauté passionnée.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sp': { 50:'#FEF4F2',100:'#FCDBD5',200:'#F8B4A8',300:'#F0806D',400:'#E3543D',500:'#C4311B',600:'#A42618',700:'#7F1D12',800:'#57130C',900:'#360C07' },
+                        'or': { 50:'#FDF9EF',100:'#FDF3DC',200:'#F9E0A0',300:'#F2C860',400:'#E5A930',500:'#C4892A',600:'#A36E20',700:'#7D5118',800:'#5A3A12',900:'#3B260C' },
+                        'ivoire': '#F8F5EF', 'encre': '#18130F',
+                    },
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'body': ['Inter', 'sans-serif'],
+                        'handwrite': ['Caveat', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- AOS Animations -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-ivoire font-body text-encre overflow-x-hidden">
+
+    <!-- ========== NAVBAR ========== -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Logo -->
+                <a href="index.html" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300">
+                        <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="text-2xl font-display font-bold"><span class="text-sp-500">Sel</span><span class="text-encre"> &amp; Poivre</span></span>
+                </a>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="nav-link active font-medium text-sm tracking-wide uppercase">Accueil</a>
+                    <a href="recettes.html" class="nav-link font-medium text-sm tracking-wide uppercase">Recettes</a>
+                    <a href="recette-detail.html" class="nav-link font-medium text-sm tracking-wide uppercase">Découvrir</a>
+                    <a href="#communaute" class="nav-link font-medium text-sm tracking-wide uppercase">Communauté</a>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="hidden md:flex items-center gap-4">
+                    <button id="searchToggle" class="p-2 rounded-full hover:bg-sp-100 transition-colors">
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                    </button>
+                    <a href="connexion.html" class="p-2 rounded-full hover:bg-sp-100 transition-colors" title="Connectez-vous pour accéder à vos favoris">
+                        <i data-lucide="heart" class="w-5 h-5"></i>
+                    </a>
+                    <a href="connexion.html" class="ml-2 px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all duration-300">
+                        Connexion
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Search Overlay -->
+        <div id="searchOverlay" class="hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl shadow-2xl border-t border-sp-100">
+            <div class="max-w-3xl mx-auto px-4 py-8">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-sp-400"></i>
+                    <input type="text" placeholder="Rechercher une recette, un ingrédient..." class="w-full pl-14 pr-4 py-4 bg-sp-50 rounded-2xl text-lg focus:outline-none focus:ring-2 focus:ring-sp-500 transition-all">
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="text-sm text-gray-500 mr-2">Tendances :</span>
+                    <a href="#" class="px-3 py-1 bg-sp-100 text-sp-700 rounded-full text-sm hover:bg-sp-200 transition-colors">Tiramisu</a>
+                    <a href="#" class="px-3 py-1 bg-or-100 text-or-700 rounded-full text-sm hover:bg-or-200 transition-colors">Risotto</a>
+                    <a href="#" class="px-3 py-1 bg-sp-100 text-sp-700 rounded-full text-sm hover:bg-sp-200 transition-colors">Ratatouille</a>
+                    <a href="#" class="px-3 py-1 bg-or-100 text-or-700 rounded-full text-sm hover:bg-or-200 transition-colors">Crêpes</a>
+                    <a href="#" class="px-3 py-1 bg-sp-100 text-sp-700 rounded-full text-sm hover:bg-sp-200 transition-colors">Poulet rôti</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white/95 backdrop-blur-xl shadow-2xl border-t border-sp-100">
+            <div class="px-4 py-6 space-y-4">
+                <a href="index.html" class="block py-3 px-4 rounded-xl bg-sp-50 text-sp-700 font-medium">Accueil</a>
+                <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
+                <a href="recette-detail.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Découvrir</a>
+                <a href="#communaute" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Communauté</a>
+                <div class="pt-4 border-t border-gray-100">
+                    <a href="connexion.html" class="block w-full text-center px-5 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Connexion</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== HERO ========== -->
+    <section id="hero" class="relative min-h-screen flex items-center overflow-hidden">
+        <!-- Background -->
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1920&q=80" alt="Cuisine" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-r from-encre/80 via-encre/50 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-encre/40 via-transparent to-transparent"></div>
+        </div>
+
+        <!-- Floating elements -->
+        <div class="absolute top-20 right-10 w-72 h-72 bg-sp-500/20 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-20 left-10 w-96 h-96 bg-or-500/10 rounded-full blur-3xl animate-float-delayed"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+            <div class="max-w-2xl">
+                <div data-aos="fade-up" data-aos-delay="100">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white/90 text-sm border border-white/20 mb-6">
+                        <span class="w-2 h-2 bg-or-400 rounded-full animate-pulse"></span>
+                        <span data-stat="recipeCount">—</span> recettes disponibles · Accès gratuit
+                    </span>
+                </div>
+
+                <h1 data-aos="fade-up" data-aos-delay="200" class="text-5xl sm:text-6xl lg:text-7xl font-display font-bold text-white leading-tight">
+                    Cuisinez,
+                    <span class="block text-transparent bg-clip-text bg-gradient-to-r from-sp-300 to-sp-500">Partagez,</span>
+                    <span class="block">Savourez.</span>
+                </h1>
+
+                <p data-aos="fade-up" data-aos-delay="300" class="mt-6 text-lg text-white/80 leading-relaxed max-w-lg">
+                    Rejoignez la communauté Sel &amp; Poivre et découvrez nos recettes authentiques, testées et approuvées. De la cuisine du quotidien aux plats d'exception.
+                </p>
+
+                <div data-aos="fade-up" data-aos-delay="400" class="mt-8 flex flex-col sm:flex-row gap-4">
+                    <a href="recettes.html" class="group px-8 py-4 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-lg hover:shadow-2xl hover:shadow-sp-500/40 transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
+                        Explorer les recettes
+                        <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="#comment-ca-marche" class="px-8 py-4 bg-white/10 backdrop-blur-md text-white rounded-full font-semibold text-lg border border-white/20 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2">
+                        <i data-lucide="play-circle" class="w-5 h-5"></i>
+                        Comment ça marche
+                    </a>
+                </div>
+
+                <!-- Quick Stats -->
+                <div data-aos="fade-up" data-aos-delay="500" class="mt-12 flex gap-8">
+                    <div>
+                        <div class="text-3xl font-bold text-white" data-stat="recipeCount">—</div>
+                        <div class="text-white/60 text-sm">Recettes</div>
+                    </div>
+                    <div class="w-px bg-white/20"></div>
+                    <div>
+                        <div class="text-3xl font-bold text-white" data-stat="memberCount">—</div>
+                        <div class="text-white/60 text-sm">Membres</div>
+                    </div>
+                    <div class="w-px bg-white/20"></div>
+                    <div>
+                        <div class="text-3xl font-bold text-white" data-stat="rating">—</div>
+                        <div class="text-white/60 text-sm">Note moyenne</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/60 animate-bounce-slow">
+            <span class="text-xs tracking-widest uppercase">Défiler</span>
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+        </div>
+    </section>
+
+    <!-- ========== CATEGORIES ========== -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14" data-aos="fade-up">
+                <span class="font-handwrite text-2xl text-sp-500">Explorez</span>
+                <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2">Par catégorie</h2>
+                <p class="mt-2 text-sm text-gray-400"><span data-stat="recipeCount">—</span> recettes disponibles</p>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="0">
+                    <div class="relative overflow-hidden rounded-2xl aspect-square">
+                        <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80" alt="Entrées" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4">
+                            <span class="text-white font-semibold text-lg">Entrées</span>
+                            <span class="block text-white/70 text-sm" data-cat="entrees">—</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="50">
+                    <div class="relative overflow-hidden rounded-2xl aspect-square">
+                        <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80" alt="Plats" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4">
+                            <span class="text-white font-semibold text-lg">Plats</span>
+                            <span class="block text-white/70 text-sm" data-cat="plats">—</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="100">
+                    <div class="relative overflow-hidden rounded-2xl aspect-square">
+                        <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&q=80" alt="Desserts" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4">
+                            <span class="text-white font-semibold text-lg">Desserts</span>
+                            <span class="block text-white/70 text-sm" data-cat="desserts">—</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="150">
+                    <div class="relative overflow-hidden rounded-2xl aspect-square">
+                        <img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&q=80" alt="Apéro" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4">
+                            <span class="text-white font-semibold text-lg">Apéro</span>
+                            <span class="block text-white/70 text-sm" data-cat="apero">—</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="200">
+                    <div class="relative overflow-hidden rounded-2xl aspect-square">
+                        <img src="https://images.unsplash.com/photo-1495214783159-3503fd1b572d?w=400&q=80" alt="Boissons" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4">
+                            <span class="text-white font-semibold text-lg">Boissons</span>
+                            <span class="block text-white/70 text-sm" data-cat="boissons">—</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="recettes.html" class="category-card group" data-aos="fade-up" data-aos-delay="250">
+                    <div class="relative overflow-hidden rounded-2xl aspect-square">
+                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80" alt="Boulangerie" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-encre/70 via-encre/20 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-4">
+                            <span class="text-white font-semibold text-lg">Boulangerie</span>
+                            <span class="block text-white/70 text-sm" data-cat="boulangerie">—</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== TRENDING RECIPES ========== -->
+    <section class="py-20 bg-ivoire">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-end justify-between mb-14" data-aos="fade-up">
+                <div>
+                    <span class="font-handwrite text-2xl text-sp-500">Les plus populaires</span>
+                    <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2">Recettes tendance</h2>
+                </div>
+                <a href="recettes.html" class="hidden sm:flex items-center gap-2 text-sp-600 font-semibold hover:gap-3 transition-all">
+                    Tout voir <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Recipe Card 1 -->
+                <a href="recette-detail.html?slug=risotto-champignons" class="recipe-card group" data-aos="fade-up" data-aos-delay="0">
+                    <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-500">
+                        <div class="relative aspect-[4/3] overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1546549032-9571cd6b27df?w=600&q=80" alt="Risotto aux champignons" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute top-4 left-4 flex gap-2">
+                                <span class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-or-700">Végétarien</span>
+                            </div>
+                            <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.location.href='connexion.html';" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300 group/heart">
+                                <i data-lucide="heart" class="w-5 h-5"></i>
+                            </button>
+                            <div class="absolute bottom-4 left-4 right-4 flex gap-2">
+                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> 35 min
+                                </span>
+                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
+                                    <i data-lucide="chef-hat" class="w-3.5 h-3.5"></i> Facile
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-display font-bold group-hover:text-sp-600 transition-colors">Risotto crémeux aux champignons</h3>
+                            <p class="text-gray-500 text-sm mt-2 line-clamp-2">Un risotto onctueux aux champignons de saison, parmesan et une touche de truffe.</p>
+                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-2">
+                                    <img src="https://i.pravatar.cc/32?img=1" alt="Chef" class="w-8 h-8 rounded-full ring-2 ring-sp-200">
+                                    <span class="text-sm font-medium">Marie L.</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <div class="flex">
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-500 ml-1">(234)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Recipe Card 2 -->
+                <a href="recette-detail.html?slug=pizza-napolitaine" class="recipe-card group" data-aos="fade-up" data-aos-delay="100">
+                    <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-500">
+                        <div class="relative aspect-[4/3] overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80" alt="Pizza maison" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute top-4 left-4 flex gap-2">
+                                <span class="px-3 py-1 bg-sp-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Best-seller</span>
+                            </div>
+                            <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.location.href='connexion.html';" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300">
+                                <i data-lucide="heart" class="w-5 h-5"></i>
+                            </button>
+                            <div class="absolute bottom-4 left-4 right-4 flex gap-2">
+                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> 1h30
+                                </span>
+                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
+                                    <i data-lucide="chef-hat" class="w-3.5 h-3.5"></i> Moyen
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-display font-bold group-hover:text-sp-600 transition-colors">Pizza napolitaine maison</h3>
+                            <p class="text-gray-500 text-sm mt-2 line-clamp-2">Pâte fermentée 48h, sauce tomate San Marzano et mozzarella di bufala.</p>
+                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-2">
+                                    <img src="https://i.pravatar.cc/32?img=3" alt="Chef" class="w-8 h-8 rounded-full ring-2 ring-sp-200">
+                                    <span class="text-sm font-medium">Lucas P.</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <div class="flex">
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-500 ml-1">(512)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Recipe Card 3 -->
+                <a href="recette-detail.html?slug=tiramisu-classique" class="recipe-card group" data-aos="fade-up" data-aos-delay="200">
+                    <div class="relative overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-500">
+                        <div class="relative aspect-[4/3] overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&q=80" alt="Tiramisu" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <div class="absolute top-4 left-4 flex gap-2">
+                                <span class="px-3 py-1 bg-amber-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Coup de coeur</span>
+                            </div>
+                            <button type="button" onclick="event.stopPropagation(); event.preventDefault(); window.location.href='connexion.html';" class="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-sp-500 hover:text-white transition-all duration-300">
+                                <i data-lucide="heart" class="w-5 h-5"></i>
+                            </button>
+                            <div class="absolute bottom-4 left-4 right-4 flex gap-2">
+                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> 25 min
+                                </span>
+                                <span class="px-3 py-1.5 bg-encre/70 backdrop-blur-sm rounded-full text-white text-xs flex items-center gap-1">
+                                    <i data-lucide="chef-hat" class="w-3.5 h-3.5"></i> Facile
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="text-xl font-display font-bold group-hover:text-sp-600 transition-colors">Tiramisu classique italien</h3>
+                            <p class="text-gray-500 text-sm mt-2 line-clamp-2">Le vrai tiramisu à l'italienne : mascarpone, café espresso et cacao amer.</p>
+                            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                                <div class="flex items-center gap-2">
+                                    <img src="https://i.pravatar.cc/32?img=5" alt="Chef" class="w-8 h-8 rounded-full ring-2 ring-sp-200">
+                                    <span class="text-sm font-medium">Sofia R.</span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <div class="flex">
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                        <i data-lucide="star" class="w-4 h-4 text-gray-200"></i>
+                                    </div>
+                                    <span class="text-sm text-gray-500 ml-1">(189)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="mt-10 text-center sm:hidden">
+                <a href="recettes.html" class="inline-flex items-center gap-2 text-sp-600 font-semibold">
+                    Voir toutes les recettes <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== HOW IT WORKS ========== -->
+    <section id="comment-ca-marche" class="py-20 bg-gradient-to-br from-sp-600 via-sp-500 to-amber-500 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="font-handwrite text-2xl text-white/80">Simple comme bonjour</span>
+                <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2 text-white">Comment ça marche</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center" data-aos="fade-up" data-aos-delay="0">
+                    <div class="w-20 h-20 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 transform hover:rotate-6 transition-transform">
+                        <i data-lucide="search" class="w-10 h-10 text-white"></i>
+                    </div>
+                    <div class="font-handwrite text-5xl text-white/30 mb-2">01</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Trouvez l'inspiration</h3>
+                    <p class="text-white/70">Parcourez des milliers de recettes par catégorie, ingrédient ou envie du moment.</p>
+                </div>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="150">
+                    <div class="w-20 h-20 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 transform hover:rotate-6 transition-transform">
+                        <i data-lucide="cooking-pot" class="w-10 h-10 text-white"></i>
+                    </div>
+                    <div class="font-handwrite text-5xl text-white/30 mb-2">02</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Cuisinez pas à pas</h3>
+                    <p class="text-white/70">Suivez les étapes illustrées, ajustez les portions et lancez le timer intégré.</p>
+                </div>
+                <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-20 h-20 mx-auto bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 transform hover:rotate-6 transition-transform">
+                        <i data-lucide="users" class="w-10 h-10 text-white"></i>
+                    </div>
+                    <div class="font-handwrite text-5xl text-white/30 mb-2">03</div>
+                    <h3 class="text-xl font-bold text-white mb-3">Partagez & échangez</h3>
+                    <p class="text-white/70">Publiez vos créations, notez les recettes et discutez avec la communauté.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== SEASONAL / EDITOR'S PICK ========== -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div data-aos="fade-right">
+                    <span class="font-handwrite text-2xl text-or-600">Sélection de saison</span>
+                    <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2">Les saveurs du printemps</h2>
+                    <p class="mt-6 text-gray-600 text-lg leading-relaxed">
+                        Asperges croquantes, fraises parfumées, petits pois fondants... Le printemps regorge de trésors. Découvrez notre sélection de recettes qui célèbrent la saison.
+                    </p>
+                    <div class="mt-8 flex flex-wrap gap-3">
+                        <span class="px-4 py-2 bg-or-50 text-or-700 rounded-full text-sm font-medium border border-or-200">Asperges</span>
+                        <span class="px-4 py-2 bg-red-50 text-red-700 rounded-full text-sm font-medium border border-red-200">Fraises</span>
+                        <span class="px-4 py-2 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-200">Petits pois</span>
+                        <span class="px-4 py-2 bg-purple-50 text-purple-700 rounded-full text-sm font-medium border border-purple-200">Artichaut</span>
+                        <span class="px-4 py-2 bg-yellow-50 text-yellow-700 rounded-full text-sm font-medium border border-yellow-200">Radis</span>
+                    </div>
+                    <a href="recettes.html" class="mt-8 inline-flex items-center gap-2 px-6 py-3 bg-or-600 text-white rounded-full font-semibold hover:bg-or-700 transform hover:-translate-y-0.5 transition-all duration-300">
+                        Voir la sélection
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+                <div class="relative" data-aos="fade-left">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-4">
+                            <div class="rounded-2xl overflow-hidden aspect-[3/4]">
+                                <img src="https://images.unsplash.com/photo-1515516969-d4008cc6241a?w=400&q=80" alt="Asperges" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                            </div>
+                            <div class="rounded-2xl overflow-hidden aspect-square">
+                                <img src="https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&q=80" alt="Fraises" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                            </div>
+                        </div>
+                        <div class="space-y-4 pt-8">
+                            <div class="rounded-2xl overflow-hidden aspect-square">
+                                <img src="https://images.unsplash.com/photo-1592417817098-8fd3d9eb14a5?w=400&q=80" alt="Salade" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                            </div>
+                            <div class="rounded-2xl overflow-hidden aspect-[3/4]">
+                                <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&q=80" alt="Salade composée" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-sp-100 rounded-2xl -z-10"></div>
+                    <div class="absolute -top-6 -right-6 w-32 h-32 bg-or-100 rounded-full -z-10"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== QUICK RECIPES (Swiper) ========== -->
+    <section class="py-20 bg-ivoire">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-end justify-between mb-14" data-aos="fade-up">
+                <div>
+                    <span class="font-handwrite text-2xl text-sp-500">Pas le temps ?</span>
+                    <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2">Prêt en 20 minutes</h2>
+                </div>
+                <div class="hidden sm:flex gap-2">
+                    <button class="swiper-prev w-12 h-12 rounded-full border-2 border-sp-300 text-sp-500 flex items-center justify-center hover:bg-sp-500 hover:text-white hover:border-sp-500 transition-all">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                    <button class="swiper-next w-12 h-12 rounded-full border-2 border-sp-300 text-sp-500 flex items-center justify-center hover:bg-sp-500 hover:text-white hover:border-sp-500 transition-all">
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="swiper quickRecipesSwiper" data-aos="fade-up" data-aos-delay="100">
+                <div class="swiper-wrapper pb-4">
+                    <!-- Slide 1 -->
+                    <div class="swiper-slide">
+                        <a href="recette-detail.html" class="block group">
+                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                                <div class="relative aspect-video overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80" alt="Salade Caesar" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">15 min</span>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Salade César express</h3>
+                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 320 kcal
+                                        <span class="mx-1">·</span>
+                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 2 pers.
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- Slide 2 -->
+                    <div class="swiper-slide">
+                        <a href="recette-detail.html" class="block group">
+                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                                <div class="relative aspect-video overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=500&q=80" alt="Pâtes carbonara" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">20 min</span>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Carbonara authentique</h3>
+                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 580 kcal
+                                        <span class="mx-1">·</span>
+                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 4 pers.
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- Slide 3 -->
+                    <div class="swiper-slide">
+                        <a href="recette-detail.html" class="block group">
+                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                                <div class="relative aspect-video overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1432139509613-5c4255a1d197?w=500&q=80" alt="Tartine avocat" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">10 min</span>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Tartines avocat & oeuf</h3>
+                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 280 kcal
+                                        <span class="mx-1">·</span>
+                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 1 pers.
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- Slide 4 -->
+                    <div class="swiper-slide">
+                        <a href="recette-detail.html" class="block group">
+                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                                <div class="relative aspect-video overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=500&q=80" alt="Wrap poulet" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">15 min</span>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Wrap poulet grillé</h3>
+                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 420 kcal
+                                        <span class="mx-1">·</span>
+                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 2 pers.
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- Slide 5 -->
+                    <div class="swiper-slide">
+                        <a href="recette-detail.html" class="block group">
+                            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                                <div class="relative aspect-video overflow-hidden">
+                                    <img src="https://images.unsplash.com/photo-1525351484163-7529414344d8?w=500&q=80" alt="Smoothie bowl" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <span class="absolute top-3 right-3 px-3 py-1 bg-or-500 text-white text-xs font-bold rounded-full">5 min</span>
+                                </div>
+                                <div class="p-4">
+                                    <h3 class="font-display font-bold text-lg group-hover:text-sp-600 transition-colors">Smoothie bowl tropical</h3>
+                                    <div class="flex items-center gap-2 mt-2 text-sm text-gray-500">
+                                        <i data-lucide="flame" class="w-4 h-4 text-sp-400"></i> 210 kcal
+                                        <span class="mx-1">·</span>
+                                        <i data-lucide="users" class="w-4 h-4 text-sp-400"></i> 1 pers.
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== COMMUNITY ========== -->
+    <section id="communaute" class="py-20 bg-encre text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5">
+            <div class="absolute top-10 left-10 w-80 h-80 bg-sp-500 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 bg-or-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="font-handwrite text-2xl text-sp-400">Ensemble, c'est meilleur</span>
+                <h2 class="text-4xl sm:text-5xl font-display font-bold mt-2">La communauté Sel &amp; Poivre</h2>
+                <p class="mt-4 text-gray-400 max-w-2xl mx-auto text-lg">Des passionnés de cuisine qui partagent, commentent et s'entraident chaque jour.</p>
+            </div>
+
+            <!-- Top Contributors -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-all duration-300" data-aos="fade-up" data-aos-delay="0">
+                    <div class="relative inline-block">
+                        <img src="https://i.pravatar.cc/80?img=12" alt="Chef" class="w-20 h-20 rounded-full ring-4 ring-sp-500/50 mx-auto">
+                        <span class="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full flex items-center justify-center text-sm">👑</span>
+                    </div>
+                    <h3 class="mt-4 text-lg font-bold">Camille Dubois</h3>
+                    <p class="text-gray-400 text-sm">Chef à domicile</p>
+                    <div class="mt-4 flex justify-center gap-4 text-sm">
+                        <span class="text-sp-400 font-semibold">187 recettes</span>
+                        <span class="text-gray-500">·</span>
+                        <span class="text-or-400 font-semibold">2.4k abonnés</span>
+                    </div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
+                    <div class="relative inline-block">
+                        <img src="https://i.pravatar.cc/80?img=33" alt="Chef" class="w-20 h-20 rounded-full ring-4 ring-or-500/50 mx-auto">
+                        <span class="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full flex items-center justify-center text-sm">🥈</span>
+                    </div>
+                    <h3 class="mt-4 text-lg font-bold">Antoine Martin</h3>
+                    <p class="text-gray-400 text-sm">Pâtissier passionné</p>
+                    <div class="mt-4 flex justify-center gap-4 text-sm">
+                        <span class="text-sp-400 font-semibold">143 recettes</span>
+                        <span class="text-gray-500">·</span>
+                        <span class="text-or-400 font-semibold">1.8k abonnés</span>
+                    </div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
+                    <div class="relative inline-block">
+                        <img src="https://i.pravatar.cc/80?img=45" alt="Chef" class="w-20 h-20 rounded-full ring-4 ring-amber-500/50 mx-auto">
+                        <span class="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-r from-amber-600 to-amber-700 rounded-full flex items-center justify-center text-sm">🥉</span>
+                    </div>
+                    <h3 class="mt-4 text-lg font-bold">Léa Petit</h3>
+                    <p class="text-gray-400 text-sm">Blogueuse food</p>
+                    <div class="mt-4 flex justify-center gap-4 text-sm">
+                        <span class="text-sp-400 font-semibold">98 recettes</span>
+                        <span class="text-gray-500">·</span>
+                        <span class="text-or-400 font-semibold">1.2k abonnés</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity / Feed -->
+            <div class="max-w-2xl mx-auto space-y-4" data-aos="fade-up">
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 flex items-center gap-4 hover:bg-white/10 transition-all">
+                    <img src="https://i.pravatar.cc/40?img=22" class="w-10 h-10 rounded-full">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm"><strong>Julie M.</strong> a publié <strong class="text-sp-400">Fondant au chocolat</strong></p>
+                        <span class="text-xs text-gray-500">Il y a 5 minutes</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-sm text-gray-400">
+                        <i data-lucide="heart" class="w-4 h-4 text-red-400"></i> 24
+                    </div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 flex items-center gap-4 hover:bg-white/10 transition-all">
+                    <img src="https://i.pravatar.cc/40?img=8" class="w-10 h-10 rounded-full">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm"><strong>Thomas R.</strong> a noté ⭐⭐⭐⭐⭐ <strong class="text-sp-400">Coq au vin</strong></p>
+                        <span class="text-xs text-gray-500">Il y a 12 minutes</span>
+                    </div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 flex items-center gap-4 hover:bg-white/10 transition-all">
+                    <img src="https://i.pravatar.cc/40?img=16" class="w-10 h-10 rounded-full">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm"><strong>Emma B.</strong> a commenté <strong class="text-sp-400">Tarte aux pommes</strong></p>
+                        <span class="text-xs text-gray-500">Il y a 28 minutes</span>
+                    </div>
+                    <div class="flex items-center gap-1 text-sm text-gray-400">
+                        <i data-lucide="message-circle" class="w-4 h-4 text-blue-400"></i> 8
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== NEWSLETTER ========== -->
+    <section class="py-20 bg-ivoire">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-br from-sp-50 to-amber-50 rounded-3xl p-8 sm:p-12 border border-sp-100 relative overflow-hidden" data-aos="fade-up">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-sp-200/30 rounded-full blur-3xl"></div>
+                <div class="relative">
+                    <div class="text-center max-w-xl mx-auto">
+                        <span class="font-handwrite text-2xl text-sp-500">Restez gourmand</span>
+                        <h2 class="text-3xl sm:text-4xl font-display font-bold mt-2">Les recettes de la semaine dans votre boîte mail</h2>
+                        <p class="mt-4 text-gray-600">Recevez chaque vendredi une sélection de recettes de saison, les coups de coeur de la communauté et des astuces de chef.</p>
+                    </div>
+                    <form class="mt-8 flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                        <input type="email" placeholder="votre@email.com" class="flex-1 px-6 py-4 rounded-full bg-white border border-sp-200 focus:outline-none focus:ring-2 focus:ring-sp-500 text-sm">
+                        <button type="submit" class="px-8 py-4 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all duration-300 whitespace-nowrap">
+                            S'abonner
+                        </button>
+                    </form>
+                    <p class="mt-4 text-center text-xs text-gray-400">Pas de spam. Désabonnement en un clic.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="bg-encre text-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-2 md:col-span-1">
+                    <a href="index.html" class="flex items-center gap-2 mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-sp-500 to-sp-600 rounded-xl flex items-center justify-center">
+                            <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <span class="text-lg font-display font-bold">Sel &amp; Poivre</span>
+                    </a>
+                    <p class="text-gray-400 text-sm leading-relaxed">La plateforme de recettes moderne et communautaire. Cuisinez, partagez, savourez.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Explorer</h4>
+                    <ul class="space-y-3">
+                        <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Toutes les recettes</a></li>
+                        <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Recettes rapides</a></li>
+                        <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Recettes végétariennes</a></li>
+                        <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Recettes du monde</a></li>
+                        <li><a href="recettes.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Nouveautés</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Communauté</h4>
+                    <ul class="space-y-3">
+                        <li><a href="inscription.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Publier une recette</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-sm uppercase tracking-wider text-gray-400 mb-4">Informations</h4>
+                    <ul class="space-y-3">
+                        <li><a href="cgu.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">CGU</a></li>
+                        <li><a href="confidentialite.html" class="text-gray-300 hover:text-sp-400 transition-colors text-sm">Confidentialité</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre. Tous droits réservés.</p>
+                <div class="flex items-center gap-2 text-gray-500 text-sm">
+                    <span>Fait avec</span>
+                    <i data-lucide="heart" class="w-4 h-4 text-red-400 fill-red-400"></i>
+                    <span>en France</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="js/recipes-data.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>

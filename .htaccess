@@ -1,0 +1,145 @@
+# ══════════════════════════════════════════════════════════════
+#  Mijote — Apache .htaccess   (o2switch / hébergement mutualisé)
+#  À placer à la racine du site (dossier public_html ou sous-dossier)
+# ══════════════════════════════════════════════════════════════
+
+# ── Moteur de réécriture ──────────────────────────────────────
+Options -Indexes
+Options -MultiViews
+
+RewriteEngine On
+
+# ── HTTPS forcé ──────────────────────────────────────────────
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ── Redirections www → non-www (adapter si besoin) ───────────
+# RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+# RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+# ── Masquer les extensions .html ─────────────────────────────
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [L]
+
+# ── Interdire l'accès au panel admin sans HTTPS ───────────────
+# (le panneau entier est protégé par sessionStorage côté JS,
+#  mais cette règle bloque les bots dès le transport layer)
+RewriteCond %{HTTPS} off
+RewriteCond %{REQUEST_URI} ^/admin/ [NC]
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ══════════════════════════════════════════════════════════════
+#  EN-TÊTES DE SÉCURITÉ HTTP
+# ══════════════════════════════════════════════════════════════
+<IfModule mod_headers.c>
+    # Strict Transport Security — 1 an + sous-domaines
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Empêche le clickjacking
+    Header always set X-Frame-Options "DENY"
+
+    # Empêche le MIME-sniffing
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Contrôle le referrer transmis aux tiers
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Désactive les fonctionnalités non utilisées
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+
+    # Content Security Policy
+    # Adapter 'self' et les domaines CDN utilisés
+    Header always set Content-Security-Policy "\
+default-src 'self'; \
+script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://unpkg.com https://cdn.jsdelivr.net; \
+style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://unpkg.com; \
+font-src 'self' https://fonts.gstatic.com; \
+img-src 'self' data: https://images.unsplash.com https://placehold.co; \
+connect-src 'self'; \
+frame-ancestors 'none';"
+
+    # Supprime la signature du serveur Apache
+    Header always unset X-Powered-By
+    Header always unset Server
+
+    # Cache-control pour les assets statiques
+    <FilesMatch "\.(css|js|woff2?|ttf|svg|ico|png|jpg|jpeg|webp)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Pas de cache pour le HTML
+    <FilesMatch "\.html$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+    </FilesMatch>
+</IfModule>
+
+# ══════════════════════════════════════════════════════════════
+#  PROTECTION DES FICHIERS SENSIBLES
+# ══════════════════════════════════════════════════════════════
+
+# Bloquer l'accès aux fichiers de config, logs, backups
+<FilesMatch "(\.(env|log|sql|bak|tmp|git|DS_Store|htpasswd)|composer\.(json|lock)|package(-lock)?\.json)$">
+    Require all denied
+</FilesMatch>
+
+# Bloquer les dotfiles (sauf .htaccess lui-même)
+<FilesMatch "^\.(?!htaccess)">
+    Require all denied
+</FilesMatch>
+
+# Protéger .htaccess contre la réécriture externe
+<Files .htaccess>
+    Require all denied
+</Files>
+
+# ══════════════════════════════════════════════════════════════
+#  PRÉVENTION DES ATTAQUES COURANTES
+# ══════════════════════════════════════════════════════════════
+<IfModule mod_rewrite.c>
+    # Bloquer les injections SQL évidentes dans l'URL
+    RewriteCond %{QUERY_STRING} (union.*select|select.*from|insert.*into|drop.*table|delete.*from) [NC]
+    RewriteRule .* - [F,L]
+
+    # Bloquer les tentatives de traversée de répertoire
+    RewriteCond %{REQUEST_URI} \.\. [NC]
+    RewriteRule .* - [F,L]
+
+    # Bloquer les User-Agents connus malveillants / scanners
+    RewriteCond %{HTTP_USER_AGENT} (sqlmap|nikto|nessus|masscan|havij|nmap|python-requests/2\.2) [NC]
+    RewriteRule .* - [F,L]
+
+    # Bloquer les requêtes sans User-Agent (bots basiques)
+    RewriteCond %{HTTP_USER_AGENT} ^-?$
+    RewriteRule .* - [F,L]
+</IfModule>
+
+# ══════════════════════════════════════════════════════════════
+#  PAGES D'ERREUR PERSONNALISÉES
+# ══════════════════════════════════════════════════════════════
+ErrorDocument 403 /403.html
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
+
+# ══════════════════════════════════════════════════════════════
+#  COMPRESSION GZIP (gain de performance)
+# ══════════════════════════════════════════════════════════════
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json text/xml application/xml text/plain image/svg+xml
+</IfModule>
+
+# ══════════════════════════════════════════════════════════════
+#  TYPES MIME
+# ══════════════════════════════════════════════════════════════
+<IfModule mod_mime.c>
+    AddType application/javascript .js
+    AddType text/css .css
+    AddType image/svg+xml .svg
+    AddType font/woff2 .woff2
+    AddType font/woff .woff
+    AddType image/webp .webp
+</IfModule>
+
+# ── Fin .htaccess ─────────────────────────────────────────────

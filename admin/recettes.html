@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Recettes — Admin Sel & Poivre</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        sp: { DEFAULT:'#C4311B', light:'#E3543D', dark:'#A42618' },
+        sidebar: '#1A1A2E',
+        sidebarhover: '#16213E',
+      },
+      fontFamily: { sans:['Inter','system-ui','sans-serif'] }
+    }
+  }
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  body { font-family: 'Inter', sans-serif; background: #F8F7F4; }
+  .sidebar-link { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:12px; color:#CBD5E1; font-size:14px; font-weight:500; transition:all .2s; }
+  .sidebar-link:hover { background:#16213E; color:#fff; }
+  .sidebar-link.active { background:#E85D26; color:#fff; }
+  .recipe-row { transition: background 0.15s, box-shadow 0.15s; }
+  .recipe-row:hover { background: #F9FAFB; }
+  .recipe-row.selected { background: #FFF7ED; }
+  .modal-overlay { backdrop-filter: blur(4px); }
+</style>
+</head>
+<body class="min-h-screen">
+
+<script>
+  if (sessionStorage.getItem('adminAuth') !== 'true') window.location.href = 'login.html';
+</script>
+
+<div class="flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 flex-shrink-0 bg-sidebar flex flex-col overflow-y-auto">
+    <div class="px-5 py-6 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-sp rounded-xl flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 4 6 4 12c0 4 2 7 5 9h6c3-2 5-5 5-9 0-6-4-10-8-10zm0 3c2.2 0 4 2.2 4 5s-1.8 4-4 4-4-1.8-4-4 1.8-5 4-5z"/></svg>
+        </div>
+        <div>
+          <div class="text-white font-bold text-sm">Sel &amp; Poivre Admin</div>
+          <div class="text-slate-400 text-xs">Panneau de contrôle</div>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <p class="px-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Principal</p>
+      <a href="index.html" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Tableau de bord
+      </a>
+      <a href="recettes.html" class="sidebar-link active">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Recettes
+        <span class="ml-auto bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full" id="sidebarBadge">3</span>
+      </a>
+      <a href="utilisateurs.html" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Utilisateurs
+      </a>
+      <p class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Contenu</p>
+      <a href="#" class="sidebar-link" onclick="return false;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+        Commentaires <span class="ml-auto text-slate-500 text-xs">bientôt</span>
+      </a>
+      <p class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Système</p>
+      <a href="../index.html" target="_blank" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        Voir le site
+      </a>
+    </nav>
+    <div class="px-4 py-4 border-t border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-sp flex items-center justify-center text-white text-xs font-bold flex-shrink-0">AD</div>
+        <div class="min-w-0">
+          <div class="text-white text-sm font-medium truncate">Admin</div>
+          <div class="text-slate-400 text-xs truncate">admin@seletpoivre.fr</div>
+        </div>
+        <button onclick="logout()" title="Déconnexion" class="ml-auto text-slate-500 hover:text-red-400 transition-colors flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+    <!-- Top bar -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4 flex-shrink-0">
+      <div>
+        <h1 class="text-lg font-semibold text-slate-900">Gestion des recettes</h1>
+        <p class="text-xs text-slate-500" id="recipeCountLabel">Chargement...</p>
+      </div>
+      <div class="ml-auto flex items-center gap-3">
+        <!-- Bulk action bar (hidden until selection) -->
+        <div id="bulkBar" class="hidden items-center gap-2">
+          <span class="text-sm text-slate-600" id="selectedCount">0 sélectionnée(s)</span>
+          <button onclick="bulkAction('approve')" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors">Publier tout</button>
+          <button onclick="bulkAction('reject')" class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg transition-colors">Refuser tout</button>
+          <button onclick="bulkAction('delete')" class="px-3 py-1.5 bg-white border border-red-300 text-red-600 hover:bg-red-50 text-xs font-semibold rounded-lg transition-colors">Supprimer</button>
+        </div>
+        <button onclick="openAddModal()" class="px-4 py-2 bg-sp hover:bg-sp-dark text-white text-sm font-semibold rounded-xl transition-colors flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+          Ajouter
+        </button>
+      </div>
+    </header>
+
+    <!-- Filters & search -->
+    <div class="bg-white border-b border-slate-200 px-6 py-3 flex flex-wrap items-center gap-3">
+      <div class="relative flex-1 min-w-[200px] max-w-xs">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Rechercher une recette..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-sp focus:ring-2 focus:ring-sp/20 transition-all" oninput="filterRecipes()">
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="setFilter('all')" id="filter-all" class="filter-btn active-filter px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-sp text-white">Tout</button>
+        <button onclick="setFilter('pending')" id="filter-pending" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">En attente <span id="count-pending" class="ml-1 bg-amber-500 text-white px-1.5 py-0.5 rounded-full text-[10px]">3</span></button>
+        <button onclick="setFilter('published')" id="filter-published" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">Publiées</button>
+        <button onclick="setFilter('rejected')" id="filter-rejected" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">Refusées</button>
+        <button onclick="setFilter('mijote')" id="filter-mijote" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">S&amp;P</button>
+      </div>
+      <div class="ml-auto">
+        <select id="sortSelect" onchange="filterRecipes()" class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-600 focus:outline-none focus:border-sp">
+          <option value="newest">Plus récent</option>
+          <option value="oldest">Plus ancien</option>
+          <option value="rating">Meilleure note</option>
+          <option value="title">A → Z</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table content -->
+    <main class="flex-1 overflow-y-auto">
+      <div id="recipeTableWrapper" class="min-w-full">
+
+        <!-- Pending section -->
+        <div id="section-pending" class="px-6 py-3">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">En attente de modération</h2>
+            <span id="section-pending-count" class="text-xs text-amber-600 font-bold">3</span>
+          </div>
+          <div id="pending-list" class="bg-white rounded-2xl border border-amber-100 overflow-hidden shadow-sm"></div>
+        </div>
+
+        <!-- Published section -->
+        <div id="section-published" class="px-6 py-3">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-2 h-2 rounded-full bg-green-500"></div>
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Recettes publiées</h2>
+            <span id="section-published-count" class="text-xs text-green-600 font-bold">40</span>
+          </div>
+          <div id="published-list" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm"></div>
+        </div>
+
+      </div>
+
+      <div id="emptyState" class="hidden flex-col items-center justify-center py-20 text-slate-400">
+        <svg class="w-16 h-16 mb-4 opacity-30" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <p class="text-sm font-medium">Aucune recette trouvée</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Recipe detail modal -->
+<div id="recipeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" id="recipeModalContent">
+    <div class="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+      <h2 class="text-base font-semibold text-slate-900" id="modalTitle">Recette</h2>
+      <div class="flex items-center gap-2">
+        <span id="modalBadge" class="badge-pending text-xs px-2 py-1 rounded-full font-medium"></span>
+        <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="p-6" id="modalBody"></div>
+    <div id="modalActions" class="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4 flex gap-3"></div>
+  </div>
+</div>
+
+<!-- Add recipe modal -->
+<div id="addModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-overlay bg-black/50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl">
+    <div class="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+      <h2 class="text-base font-semibold text-slate-900">Ajouter une recette SEL &amp; POIVRE</h2>
+      <button onclick="document.getElementById('addModal').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-700">
+        <strong>Note :</strong> En mode démo, les modifications ne sont pas persistées. Cette fonctionnalité nécessite un backend (PHP/MySQL disponible sur o2switch).
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2">
+          <label class="block text-xs font-medium text-slate-700 mb-1">Titre de la recette</label>
+          <input type="text" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp focus:ring-2 focus:ring-sp/20" placeholder="Ex: Tarte Tatin classique">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Catégorie</label>
+          <select class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp bg-white">
+            <option>entrées</option><option>plats</option><option>desserts</option><option>soupes</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Auteur</label>
+          <input type="text" value="SEL & POIVRE" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Temps prép. (min)</label>
+          <input type="number" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp" placeholder="20">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-1">Temps cuisson (min)</label>
+          <input type="number" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp" placeholder="45">
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-medium text-slate-700 mb-1">URL image (Unsplash, etc.)</label>
+          <input type="url" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-sp" placeholder="https://images.unsplash.com/...">
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-slate-200 px-6 py-4 flex gap-3 justify-end">
+      <button onclick="document.getElementById('addModal').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Annuler</button>
+      <button onclick="toast('Fonctionnalité disponible avec backend o2switch', 'info'); document.getElementById(\'addModal\').classList.add(\'hidden\')" class="px-4 py-2 bg-sp text-white text-sm font-semibold rounded-xl hover:bg-sp-dark transition-colors">Créer la recette</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toastContainer" class="fixed top-4 right-4 z-[100] space-y-2"></div>
+
+<script src="../js/recipes-data.js"></script>
+<script>
+let currentFilter = 'all';
+let selectedIds = new Set();
+let localStatuses = {}; // track in-session status changes
+
+function logout() {
+  if (confirm('Se déconnecter ?')) {
+    sessionStorage.removeItem('adminAuth');
+    window.location.href = 'login.html';
+  }
+}
+
+function toast(msg, type = 'success') {
+  const t = document.createElement('div');
+  const colors = { success:'bg-green-600', error:'bg-red-600', info:'bg-blue-600', warn:'bg-amber-600' };
+  t.className = `${colors[type]||colors.info} text-white text-sm px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 min-w-[220px] max-w-xs transform transition-all duration-300 translate-x-4 opacity-0`;
+  const icon = type === 'error' ? 'M6 18L18 6M6 6l12 12' : type === 'warn' ? 'M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z' : 'M5 13l4 4L19 7';
+  t.innerHTML = `<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="${icon}"/></svg><span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  requestAnimationFrame(() => t.classList.remove('translate-x-4','opacity-0'));
+  setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.remove(), 300); }, 4000);
+}
+
+function getStatus(r) {
+  return localStatuses[r.id] ?? r.status;
+}
+
+function badgeHtml(status) {
+  const map = {
+    pending: '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">En attente</span>',
+    published: '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Publiée</span>',
+    rejected: '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Refusée</span>',
+  };
+  return map[status] || '';
+}
+
+function difficultyColor(d) {
+  return d === 'facile' ? 'text-green-700' : d === 'intermédiaire' ? 'text-amber-700' : 'text-red-700';
+}
+
+function renderRow(r) {
+  const status = getStatus(r);
+  const checked = selectedIds.has(r.id);
+  const isMijote = r.authorType === 'mijote';
+  return `
+  <div class="recipe-row border-b border-slate-100 last:border-0 px-4 py-3 flex items-center gap-4 ${checked ? 'selected' : ''}" id="row-${r.id}">
+    <input type="checkbox" class="recipe-check w-4 h-4 rounded accent-sp flex-shrink-0 cursor-pointer" data-id="${r.id}" ${checked ? 'checked' : ''} onchange="toggleSelect(${r.id}, this.checked)">
+    <img src="${r.image}" alt="${r.title}" class="w-12 h-12 rounded-xl object-cover flex-shrink-0 bg-slate-200 cursor-pointer" onclick="openModal(${r.id})" loading="lazy" onerror="this.src='https://placehold.co/48x48/e2e8f0/94a3b8?text=?'">
+    <div class="flex-1 min-w-0 cursor-pointer" onclick="openModal(${r.id})">
+      <div class="flex items-center gap-2 flex-wrap">
+        <p class="text-sm font-semibold text-slate-900 truncate">${r.title}</p>
+        ${isMijote ? '<span class="text-[10px] font-bold bg-sp/10 text-sp px-1.5 py-0.5 rounded uppercase tracking-wide">S&amp;P</span>' : ''}
+      </div>
+      <p class="text-xs text-slate-500 mt-0.5">par <strong>${r.author}</strong> · ${r.category} · ${r.prepTime + r.cookTime} min · <span class="${difficultyColor(r.difficulty)}">${r.difficulty}</span></p>
+    </div>
+    <div class="hidden md:flex items-center gap-1 flex-shrink-0">
+      <svg class="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span class="text-xs font-medium text-slate-700">${r.rating}</span>
+      <span class="text-xs text-slate-400">(${r.ratingCount})</span>
+    </div>
+    <div class="flex-shrink-0">${badgeHtml(status)}</div>
+    <div class="flex items-center gap-1 flex-shrink-0">
+      ${status === 'pending' ? `
+        <button onclick="changeStatus(${r.id},'published')" title="Publier" class="w-8 h-8 flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+        </button>
+        <button onclick="changeStatus(${r.id},'rejected')" title="Refuser" class="w-8 h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      ` : status === 'rejected' ? `
+        <button onclick="changeStatus(${r.id},'published')" title="Republier" class="w-8 h-8 flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+      ` : `
+        <button onclick="changeStatus(${r.id},'pending')" title="Dépublier" class="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-amber-50 text-slate-400 hover:text-amber-600 rounded-lg transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+        </button>
+      `}
+      <button onclick="deleteRecipe(${r.id})" title="Supprimer" class="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+      </button>
+    </div>
+  </div>`;
+}
+
+function getFilteredRecipes() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const sort = document.getElementById('sortSelect').value;
+
+  let list = RECIPES_DB.filter(r => {
+    const status = getStatus(r);
+    if (currentFilter === 'pending' && status !== 'pending') return false;
+    if (currentFilter === 'published' && status !== 'published') return false;
+    if (currentFilter === 'rejected' && status !== 'rejected') return false;
+    if (currentFilter === 'mijote' && r.authorType !== 'mijote') return false;
+    if (q && !r.title.toLowerCase().includes(q) && !r.author.toLowerCase().includes(q) && !r.category.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  list.sort((a, b) => {
+    if (sort === 'rating') return b.rating - a.rating;
+    if (sort === 'title') return a.title.localeCompare(b.title, 'fr');
+    if (sort === 'oldest') return a.id - b.id;
+    return b.id - a.id;
+  });
+
+  return list;
+}
+
+function filterRecipes() {
+  const filtered = getFilteredRecipes();
+  const pendingList = document.getElementById('pending-list');
+  const publishedList = document.getElementById('published-list');
+
+  const pending = filtered.filter(r => getStatus(r) === 'pending');
+  const others = filtered.filter(r => getStatus(r) !== 'pending');
+
+  const showSections = currentFilter === 'all';
+
+  document.getElementById('section-pending').style.display = (showSections && pending.length) ? '' : 'none';
+  document.getElementById('section-published').style.display = (showSections && others.length) ? '' : 'none';
+
+  if (!showSections) {
+    // Render in single list under published section
+    document.getElementById('section-published').style.display = filtered.length ? '' : 'none';
+    document.getElementById('section-published').querySelector('h2').textContent =
+      currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1);
+    publishedList.innerHTML = filtered.length ? filtered.map(renderRow).join('') : '';
+    pendingList.innerHTML = '';
+    document.getElementById('section-pending').style.display = 'none';
+  } else {
+    pendingList.innerHTML = pending.length ? pending.map(renderRow).join('') : '<p class="px-6 py-4 text-sm text-slate-400">Aucune recette en attente</p>';
+    publishedList.innerHTML = others.length ? others.map(renderRow).join('') : '<p class="px-6 py-4 text-sm text-slate-400">Aucune recette publiée</p>';
+  }
+
+  document.getElementById('section-pending-count').textContent = pending.length;
+  document.getElementById('section-published-count').textContent = others.length;
+  document.getElementById('recipeCountLabel').textContent = `${filtered.length} recette${filtered.length>1?'s':''} · ${pending.length} en attente`;
+  document.getElementById('emptyState').style.display = filtered.length ? 'none' : 'flex';
+
+  // Update pending badge counts
+  const totalPending = RECIPES_DB.filter(r => getStatus(r) === 'pending').length;
+  document.getElementById('sidebarBadge').textContent = totalPending;
+  document.getElementById('count-pending').textContent = totalPending;
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.remove('bg-sp','text-white','active-filter');
+    b.classList.add('bg-slate-100','text-slate-600');
+  });
+  const active = document.getElementById(`filter-${f}`);
+  active.classList.add('bg-sp','text-white','active-filter');
+  active.classList.remove('bg-slate-100','text-slate-600');
+  filterRecipes();
+}
+
+function changeStatus(id, newStatus) {
+  const r = RECIPES_DB.find(x => x.id === id);
+  if (!r) return;
+  localStatuses[id] = newStatus;
+  const labels = { published: 'publiée', rejected: 'refusée', pending: 'mise en attente' };
+  toast(`"${r.title}" ${labels[newStatus]}`, newStatus === 'published' ? 'success' : newStatus === 'rejected' ? 'error' : 'info');
+  filterRecipes();
+}
+
+function deleteRecipe(id) {
+  const r = RECIPES_DB.find(x => x.id === id);
+  if (!r) return;
+  if (!confirm(`Supprimer "${r.title}" ?\n\nEn mode démo, cela ne persiste pas au rechargement.`)) return;
+  const row = document.getElementById(`row-${id}`);
+  if (row) { row.style.opacity = '0'; row.style.transform = 'translateX(20px)'; row.style.transition = 'all 0.3s'; setTimeout(() => { row.remove(); filterRecipes(); }, 300); }
+  toast(`"${r.title}" supprimée (session uniquement)`, 'error');
+}
+
+function toggleSelect(id, checked) {
+  if (checked) selectedIds.add(id); else selectedIds.delete(id);
+  const row = document.getElementById(`row-${id}`);
+  if (row) row.classList.toggle('selected', checked);
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  document.getElementById('selectedCount').textContent = `${selectedIds.size} sélectionnée(s)`;
+  if (selectedIds.size > 0) { bar.classList.remove('hidden'); bar.classList.add('flex'); }
+  else { bar.classList.add('hidden'); bar.classList.remove('flex'); }
+}
+
+function bulkAction(action) {
+  if (selectedIds.size === 0) return;
+  const map = { approve: 'published', reject: 'rejected', delete: null };
+  const ids = [...selectedIds];
+  if (action === 'delete') {
+    if (!confirm(`Supprimer ${ids.length} recette(s) ?`)) return;
+    ids.forEach(id => { const row = document.getElementById(`row-${id}`); if (row) row.remove(); });
+    toast(`${ids.length} recette(s) supprimée(s)`, 'error');
+  } else {
+    ids.forEach(id => { localStatuses[id] = map[action]; });
+    toast(`${ids.length} recette(s) ${action === 'approve' ? 'publiées' : 'refusées'}`, action === 'approve' ? 'success' : 'error');
+  }
+  selectedIds.clear();
+  updateBulkBar();
+  filterRecipes();
+}
+
+function openModal(id) {
+  const r = RECIPES_DB.find(x => x.id === id);
+  if (!r) return;
+  const status = getStatus(r);
+  document.getElementById('modalTitle').textContent = r.title;
+  const b = document.getElementById('modalBadge');
+  b.textContent = status === 'pending' ? 'En attente' : status === 'published' ? 'Publiée' : 'Refusée';
+  b.className = `text-xs px-2 py-1 rounded-full font-medium ${status==='pending'?'bg-amber-100 text-amber-800':status==='published'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}`;
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="flex gap-4 mb-5">
+      <img src="${r.image}" alt="${r.title}" class="w-24 h-24 rounded-xl object-cover flex-shrink-0 bg-slate-200" onerror="this.src='https://placehold.co/96x96/e2e8f0/94a3b8?text=?'">
+      <div>
+        <p class="text-sm text-slate-600 mb-1">par <strong>${r.author}</strong>${r.authorType==='mijote'?' <span class="text-[10px] font-bold bg-sp/10 text-sp px-1.5 py-0.5 rounded uppercase">S&amp;P</span>':''}</p>
+        <div class="flex flex-wrap gap-2 text-xs text-slate-500">
+          <span class="bg-slate-100 px-2 py-1 rounded-lg">📂 ${r.category}</span>
+          <span class="bg-slate-100 px-2 py-1 rounded-lg">⏱ ${r.prepTime + r.cookTime} min</span>
+          <span class="bg-slate-100 px-2 py-1 rounded-lg">👤 ${r.servings} pers.</span>
+          <span class="bg-slate-100 px-2 py-1 rounded-lg">🔥 ${r.calories} kcal</span>
+          <span class="bg-slate-100 px-2 py-1 rounded-lg ${difficultyColor(r.difficulty)}">${r.difficulty}</span>
+        </div>
+        <div class="flex items-center gap-1 mt-2">
+          ${[1,2,3,4,5].map(i=>`<svg class="w-4 h-4 ${i<=Math.round(r.rating)?'text-yellow-500 fill-yellow-500':'text-slate-300 fill-slate-300'}" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`).join('')}
+          <span class="text-sm font-semibold text-slate-700 ml-1">${r.rating}</span>
+          <span class="text-xs text-slate-400">(${r.ratingCount} avis)</span>
+        </div>
+      </div>
+    </div>
+    ${r.description ? `<p class="text-sm text-slate-600 mb-4 leading-relaxed">${r.description}</p>` : ''}
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-slate-50 rounded-xl p-3">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Infos</p>
+        <ul class="text-xs text-slate-700 space-y-1">
+          <li>ID : <strong>#${r.id}</strong></li>
+          <li>Slug : <code class="bg-slate-200 px-1 rounded text-[11px]">${r.slug}</code></li>
+          <li>Calories : <strong>${r.calories} kcal</strong></li>
+          <li>Régimes : ${r.tags?.join(', ') || '—'}</li>
+        </ul>
+      </div>
+      <div class="bg-slate-50 rounded-xl p-3">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Engagement</p>
+        <ul class="text-xs text-slate-700 space-y-1">
+          <li>Note : <strong>${r.rating} / 5</strong></li>
+          <li>Avis : <strong>${r.ratingCount.toLocaleString('fr-FR')}</strong></li>
+          <li>Auteur type : <strong>${r.authorType}</strong></li>
+          <li>Statut actuel : <strong>${getStatus(r)}</strong></li>
+        </ul>
+      </div>
+    </div>
+  `;
+
+  const actions = document.getElementById('modalActions');
+  if (status === 'pending') {
+    actions.innerHTML = `
+      <button onclick="changeStatus(${r.id},'rejected'); closeModal()" class="flex-1 px-4 py-2.5 bg-white border border-red-300 text-red-600 font-semibold text-sm rounded-xl hover:bg-red-50 transition-colors">Refuser</button>
+      <button onclick="changeStatus(${r.id},'published'); closeModal()" class="flex-1 px-4 py-2.5 bg-green-600 text-white font-semibold text-sm rounded-xl hover:bg-green-700 transition-colors">Publier la recette</button>
+    `;
+  } else if (status === 'rejected') {
+    actions.innerHTML = `
+      <button onclick="deleteRecipe(${r.id}); closeModal()" class="px-4 py-2.5 bg-white border border-red-300 text-red-600 font-semibold text-sm rounded-xl hover:bg-red-50 transition-colors">Supprimer</button>
+      <button onclick="changeStatus(${r.id},'published'); closeModal()" class="flex-1 px-4 py-2.5 bg-green-600 text-white font-semibold text-sm rounded-xl hover:bg-green-700 transition-colors">Republier</button>
+    `;
+  } else {
+    actions.innerHTML = `
+      <button onclick="deleteRecipe(${r.id}); closeModal()" class="px-4 py-2.5 bg-white border border-red-300 text-red-600 font-semibold text-sm rounded-xl hover:bg-red-50 transition-colors">Supprimer</button>
+      <button onclick="changeStatus(${r.id},'pending'); closeModal()" class="px-4 py-2.5 bg-amber-500 text-white font-semibold text-sm rounded-xl hover:bg-amber-600 transition-colors">Dépublier</button>
+      <button onclick="closeModal()" class="flex-1 px-4 py-2.5 bg-slate-100 text-slate-700 font-semibold text-sm rounded-xl hover:bg-slate-200 transition-colors">Fermer</button>
+    `;
+  }
+
+  document.getElementById('recipeModal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('recipeModal').classList.add('hidden');
+}
+
+function openAddModal() {
+  document.getElementById('addModal').classList.remove('hidden');
+}
+
+// Close modals on overlay click
+document.getElementById('recipeModal').addEventListener('click', e => { if (e.target === document.getElementById('recipeModal')) closeModal(); });
+document.getElementById('addModal').addEventListener('click', e => { if (e.target === document.getElementById('addModal')) document.getElementById('addModal').classList.add('hidden'); });
+
+// Keyboard
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); document.getElementById('addModal').classList.add('hidden'); } });
+
+// Init
+filterRecipes();
+</script>
+</body>
+</html>

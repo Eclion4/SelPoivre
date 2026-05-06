@@ -28,6 +28,9 @@ jobs:
           protocol: ftps
           port: 21
           server-dir: ./
+          log-level: verbose
           exclude: |
             **/.git*
             **/.git*/**
+            **/node_modules/**
+            **/.DS_Store

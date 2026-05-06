@@ -31,9 +31,10 @@ function handleRegister() {
     $s->execute([$email, $username]);
     if ($s->fetch()) jsonResponse(['error' => 'Email ou pseudo déjà utilisé'], 409);
 
-    $hash = password_hash($password, PASSWORD_DEFAULT);
-    $s = $db->prepare('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)');
-    $s->execute([$username, $email, $hash]);
+    $hash  = password_hash($password, PASSWORD_DEFAULT);
+    $prefs = isset($d['preferences']) ? json_encode($d['preferences'], JSON_UNESCAPED_UNICODE) : null;
+    $s = $db->prepare('INSERT INTO users (username, email, password_hash, preferences) VALUES (?, ?, ?, ?)');
+    $s->execute([$username, $email, $hash, $prefs]);
     $id = $db->lastInsertId();
 
     $_SESSION['user_id']   = $id;

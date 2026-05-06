@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Import recettes — Sel & Poivre</title>
+    <style>
+        body { font-family: sans-serif; max-width: 500px; margin: 80px auto; text-align: center; }
+        button { padding: 14px 32px; background: #C4311B; color: white; border: none;
+                 border-radius: 8px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #A42618; }
+        #result { margin-top: 20px; font-size: 15px; }
+    </style>
+</head>
+<body>
+    <h2>Import des recettes en base de données</h2>
+    <p>Cliquez pour importer les <strong>25 recettes</strong> de <code>recipes-data.js</code> vers MySQL.</p>
+    <button onclick="importRecipes()">Lancer l'import</button>
+    <div id="result"></div>
+
+    <script src="js/recipes-data.js"></script>
+    <script>
+    async function importRecipes() {
+        document.getElementById('result').textContent = 'Import en cours...';
+        try {
+            const res = await fetch('api/seed.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(RECIPES_DB)
+            });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('result').innerHTML =
+                    `✅ Import terminé — <strong>${data.inserted} recettes importées</strong>, ${data.skipped} ignorées (déjà présentes).`;
+            } else {
+                document.getElementById('result').textContent = 'Erreur : ' + (data.error || 'inconnue');
+            }
+        } catch (e) {
+            document.getElementById('result').textContent = 'Erreur réseau : ' + e.message;
+        }
+    }
+    </script>
+</body>
+</html>

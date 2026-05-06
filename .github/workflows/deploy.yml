@@ -62,3 +62,8 @@ jobs:
             **/.git*/**
             **/node_modules/**
             **/.DS_Store
+            **/package.json
+            **/package-lock.json
+            **/tailwind.config.js
+            **/css/input.css
+            **/migrate-tailwind.js

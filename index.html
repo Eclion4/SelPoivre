@@ -619,7 +619,7 @@
                     grid.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10">Aucune recette disponible.</p>';
                 } else {
                     grid.innerHTML = trending.map((r, i) => buildCard(r, i)).join('');
-                    if (window.AOS) AOS.refreshHard();
+                    if (window.AOS) AOS.refresh();
                 }
 
                 // Quick recipes (≤ 20 min): up to 8
@@ -655,7 +655,7 @@
                     document.querySelectorAll('[data-stat="rating"]').forEach(el     => { el.textContent = rating.toFixed(1); });
                 } catch {}
             } catch (e) {
-                grid.innerHTML = '';
+                grid.closest('section')?.classList.add('hidden');
             }
         });
 

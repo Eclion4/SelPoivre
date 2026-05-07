@@ -25,27 +25,28 @@
     const style = document.createElement('style');
     style.textContent = `
         #sp-consent{position:fixed;bottom:0;left:0;right:0;z-index:9999;
-            padding:14px 20px;
-            background:rgba(20,15,10,.96);
-            -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
-            border-top:1px solid rgba(255,255,255,.07);
+            padding:16px 24px;
+            background:#18130F;
+            border-top:3px solid #C4311B;
+            box-shadow:0 -4px 24px rgba(0,0,0,.35);
             display:flex;align-items:center;justify-content:space-between;
             gap:16px;flex-wrap:wrap;
             transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);
             font-family:'Inter',sans-serif;}
         #sp-consent.show{transform:translateY(0);}
-        #sp-consent p{margin:0;font-size:.8125rem;color:rgba(255,255,255,.7);line-height:1.5;flex:1;min-width:200px;}
+        #sp-consent p{margin:0;font-size:.875rem;color:rgba(255,255,255,.85);line-height:1.6;flex:1;min-width:200px;}
         #sp-consent a{color:#C4892A;text-decoration:underline;}
-        #sp-consent-wrap{display:flex;gap:8px;flex-shrink:0;}
-        #sp-consent-accept{padding:8px 18px;border-radius:9999px;background:#C4311B;color:white;
-            font-size:.8125rem;font-weight:700;border:none;cursor:pointer;transition:background .15s;white-space:nowrap;}
+        #sp-consent-wrap{display:flex;gap:10px;flex-shrink:0;}
+        #sp-consent-accept{padding:10px 22px;border-radius:9999px;background:#C4311B;color:white;
+            font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:background .15s;white-space:nowrap;}
         #sp-consent-accept:hover{background:#a82818;}
-        #sp-consent-deny{padding:8px 16px;border-radius:9999px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);
-            font-size:.8125rem;font-weight:600;border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:all .15s;white-space:nowrap;}
-        #sp-consent-deny:hover{background:rgba(255,255,255,.13);color:white;}
-        @media(max-width:640px){
-            #sp-consent{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));}
-            #sp-consent p{font-size:.75rem;}
+        #sp-consent-deny{padding:10px 18px;border-radius:9999px;background:transparent;color:rgba(255,255,255,.55);
+            font-size:.875rem;font-weight:600;border:1.5px solid rgba(255,255,255,.2);cursor:pointer;transition:all .15s;white-space:nowrap;}
+        #sp-consent-deny:hover{border-color:rgba(255,255,255,.5);color:rgba(255,255,255,.85);}
+        @media(max-width:767px){
+            #sp-consent{bottom:calc(64px + env(safe-area-inset-bottom,0px));border-radius:16px 16px 0 0;padding:18px 20px 20px;}
+            #sp-consent-wrap{width:100%;flex-direction:row;}
+            #sp-consent-accept,#sp-consent-deny{flex:1;text-align:center;}
         }`;
     document.head.appendChild(style);
 

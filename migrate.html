@@ -2,31 +2,78 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Migration BDD — Sel & Poivre</title>
+    <title>Migration BDD — Mijote</title>
     <style>
-        body { font-family: sans-serif; max-width: 500px; margin: 80px auto; text-align: center; }
-        button { padding: 14px 32px; background: #C4311B; color: white; border: none;
-                 border-radius: 8px; font-size: 16px; cursor: pointer; }
-        #result { margin-top: 20px; font-size: 15px; }
+        *{box-sizing:border-box}
+        body{font-family:sans-serif;max-width:600px;margin:60px auto;padding:0 16px;background:#fafaf9;color:#18130F}
+        h2{font-size:1.4rem;margin-bottom:4px}
+        p{color:#6B7280;margin-bottom:20px}
+        label{display:block;font-size:.875rem;font-weight:600;margin-bottom:6px;text-align:left}
+        input[type=password]{width:100%;padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;font-size:.9rem;margin-bottom:14px}
+        button{padding:13px 32px;background:#C4311B;color:white;border:none;border-radius:8px;font-size:.95rem;cursor:pointer;width:100%}
+        button:hover{background:#a82816}
+        button:disabled{opacity:.6;cursor:not-allowed}
+        #result{margin-top:20px;font-size:.85rem;text-align:left;line-height:1.7}
+        .r-ok{color:#15803d}.r-skip{color:#9CA3AF}.r-err{color:#DC2626;font-weight:600}
+        .summary{margin-top:12px;padding:10px 14px;border-radius:8px;font-size:.875rem;font-weight:600}
+        .summary.ok{background:#dcfce7;color:#15803d}
+        .summary.err{background:#fee2e2;color:#DC2626}
+        #error-box{background:#fee2e2;color:#DC2626;padding:12px 14px;border-radius:8px;font-weight:600;margin-top:16px}
     </style>
 </head>
 <body>
-    <h2>Migration base de données</h2>
-    <p>Ajoute la colonne <code>preferences</code> à la table <code>users</code>.</p>
-    <button onclick="runMigration()">Lancer la migration</button>
+    <h2>🗄️ Migration base de données</h2>
+    <p>Applique toutes les migrations en attente (idempotent — sans danger si déjà effectuées).</p>
+
+    <label for="migKey">Clé de migration (MIGRATION_KEY) — laisser vide si non configurée</label>
+    <input type="password" id="migKey" placeholder="Clé secrète…" autocomplete="off">
+
+    <button id="runBtn" onclick="runMigration()">Lancer la migration</button>
     <div id="result"></div>
+
     <script>
     async function runMigration() {
-        document.getElementById('result').textContent = 'Migration en cours...';
+        const btn = document.getElementById('runBtn');
+        const out = document.getElementById('result');
+        btn.disabled = true;
+        out.innerHTML = '<span style="color:#6B7280">⏳ Migration en cours…</span>';
+
+        const key = document.getElementById('migKey').value.trim();
+        const body = key ? JSON.stringify({ migration_key: key }) : undefined;
+
         try {
-            const res = await fetch('api/migrate.php', { method: 'POST' });
+            const res  = await fetch('api/migrate.php', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body
+            });
             const data = await res.json();
-            document.getElementById('result').innerHTML = data.results
-                .map(r => `${r.status === 'ok' ? '✅' : '❌'} <strong>${r.migration}</strong>${r.message ? ' — ' + r.message : ''}`)
-                .join('<br>');
+
+            // Erreur côté serveur (auth, clé invalide, etc.)
+            if (data.error || !data.results) {
+                out.innerHTML = `<div id="error-box">❌ ${data.error || 'Réponse inattendue du serveur (vérifiez que vous êtes connecté en admin).'}</div>`;
+                btn.disabled = false;
+                return;
+            }
+
+            let ok = 0, skip = 0, err = 0;
+            const lines = data.results.map(r => {
+                if (r.status === 'ok')      { ok++;   return `<div class="r-ok">✅ <strong>${r.migration}</strong></div>`; }
+                if (r.status === 'skipped') { skip++; return `<div class="r-skip">⏭ ${r.migration} — ${r.message||'déjà appliqué'}</div>`; }
+                err++;
+                return `<div class="r-err">❌ <strong>${r.migration}</strong> — ${r.message}</div>`;
+            }).join('');
+
+            const cls = err ? 'err' : 'ok';
+            const summary = `<div class="summary ${cls}">
+                ${ok} appliquée(s) · ${skip} ignorée(s) · ${err} erreur(s)
+            </div>`;
+            out.innerHTML = lines + summary;
         } catch (e) {
-            document.getElementById('result').textContent = 'Erreur : ' + e.message;
+            out.innerHTML = `<div id="error-box">❌ Erreur réseau : ${e.message}</div>`;
         }
+        btn.disabled = false;
     }
     </script>
 </body>

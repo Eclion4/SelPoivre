@@ -464,7 +464,7 @@
                     ${avatarMarkup}
                     <div class="min-w-0"><p class="text-sm font-semibold hover:underline truncate">${escape(authorName)}</p><p class="text-xs text-gray-500">Membre · ${r.created_at ? fmtDate(r.created_at) : ''}</p></div>
                 </a>
-                <button id="followAuthorBtn" class="hidden ml-4 px-4 py-1.5 border-2 border-sp-500 text-sp-600 rounded-full text-xs font-semibold hover:bg-sp-500 hover:text-white transition-all flex-shrink-0">Suivre</button>`;
+                <button id="followAuthorBtn" class="hidden ml-4 px-4 py-1.5 border-2 border-sp-500 text-sp-600 rounded-full text-xs font-semibold hover:bg-sp-500 hover:text-white transition-all flex-shrink-0">+ Suivre</button>`;
         }
 
         // Stats
@@ -521,7 +521,7 @@
                 btn.classList.add('bg-sp-500', 'text-white');
                 btn.classList.remove('border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
             } else {
-                btn.textContent = 'Suivre';
+                btn.textContent = '+ Suivre';
                 btn.classList.remove('bg-sp-500', 'text-white');
                 btn.classList.add('border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
             }

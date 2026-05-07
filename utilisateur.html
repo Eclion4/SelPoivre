@@ -102,7 +102,7 @@
             </div>
             <div class="flex-shrink-0">
                 <button id="followBtn" class="hidden px-6 py-3 bg-sp-500 text-white rounded-full font-semibold text-sm hover:bg-sp-600 transition-all">
-                    <span id="followLabel">Suivre</span>
+                    <span id="followLabel">+ Suivre</span>
                 </button>
                 <a id="editProfileLink" href="profil.html" class="hidden px-6 py-3 border-2 border-gray-200 text-gray-600 rounded-full font-semibold text-sm hover:bg-gray-50 transition-colors">Modifier mon profil</a>
             </div>
@@ -212,7 +212,7 @@
         } else {
             followBtn.classList.remove('hidden');
             followBtn.onclick = () => window.location.href = 'connexion.html';
-            document.getElementById('followLabel').textContent = 'Suivre';
+            document.getElementById('followLabel').textContent = '+ Suivre';
         }
 
         // Recipes
@@ -241,7 +241,7 @@
         } else {
             btn.classList.add('bg-sp-500', 'hover:bg-sp-600', 'text-white');
             btn.classList.remove('bg-white', 'border-2', 'border-gray-200', 'text-gray-700', 'hover:bg-gray-50');
-            lbl.textContent = 'Suivre';
+            lbl.textContent = '+ Suivre';
         }
     }
 

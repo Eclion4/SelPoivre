@@ -54,7 +54,7 @@ AOS.init({
     easing: 'ease-out-cubic',
     once: true,
     offset: 60,
-    disable: window.innerWidth < 768 ? 'phone' : false
+    disable: () => window.innerWidth < 768
 });
 
 /* ========== LUCIDE ICONS ========== */

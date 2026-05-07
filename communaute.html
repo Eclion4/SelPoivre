@@ -198,7 +198,7 @@
         const showFollow = p.author_id && !isOwn && p.author_name !== 'Équipe Sel & Poivre';
         const followingNow = !!p.is_following;
         const followBtnHTML = showFollow
-            ? `<button class="js-follow-author flex-shrink-0 px-3 py-1 text-xs font-semibold rounded-full transition-all ${followingNow ? 'bg-sp-500 text-white' : 'border-2 border-sp-500 text-sp-600 hover:bg-sp-500 hover:text-white'}" data-author-id="${p.author_id}" data-following="${followingNow ? '1' : '0'}">${followingNow ? 'Abonné ✓' : 'Suivre'}</button>`
+            ? `<button class="js-follow-author flex-shrink-0 px-3 py-1 text-xs font-semibold rounded-full transition-all ${followingNow ? 'bg-sp-500 text-white' : 'border-2 border-sp-500 text-sp-600 hover:bg-sp-500 hover:text-white'}" data-author-id="${p.author_id}" data-following="${followingNow ? '1' : '0'}">${followingNow ? 'Abonné ✓' : '+ Suivre'}</button>`
             : '';
 
         const img = p.image_url || '/assets/recipes/_default.jpg';
@@ -369,7 +369,7 @@
                         followBtn.classList.remove('border-2', 'border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
                         followBtn.dataset.following = '1';
                     } else {
-                        followBtn.textContent = 'Suivre';
+                        followBtn.textContent = '+ Suivre';
                         followBtn.classList.remove('bg-sp-500', 'text-white');
                         followBtn.classList.add('border-2', 'border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
                         followBtn.dataset.following = '0';
@@ -465,7 +465,7 @@
         const followBtnHTML = isSelf ? ''
             : u.is_following
                 ? `<button class="js-member-follow mt-3 w-full py-1.5 bg-sp-500 text-white rounded-full text-xs font-semibold transition-all" data-uid="${u.id}" data-following="1">Abonné ✓</button>`
-                : `<button class="js-member-follow mt-3 w-full py-1.5 border-2 border-sp-500 text-sp-600 rounded-full text-xs font-semibold hover:bg-sp-500 hover:text-white transition-all" data-uid="${u.id}" data-following="0">Suivre</button>`;
+                : `<button class="js-member-follow mt-3 w-full py-1.5 border-2 border-sp-500 text-sp-600 rounded-full text-xs font-semibold hover:bg-sp-500 hover:text-white transition-all" data-uid="${u.id}" data-following="0">+ Suivre</button>`;
         return `
         <div class="bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
             <a href="utilisateur.html?username=${encodeURIComponent(u.username)}" class="block hover:opacity-80 transition-opacity">
@@ -522,7 +522,7 @@
                             btn.className = 'js-member-follow js-wired-follow mt-3 w-full py-1.5 bg-sp-500 text-white rounded-full text-xs font-semibold transition-all';
                             btn.dataset.following = '1';
                         } else {
-                            btn.textContent = 'Suivre';
+                            btn.textContent = '+ Suivre';
                             btn.className = 'js-member-follow js-wired-follow mt-3 w-full py-1.5 border-2 border-sp-500 text-sp-600 rounded-full text-xs font-semibold hover:bg-sp-500 hover:text-white transition-all';
                             btn.dataset.following = '0';
                         }

@@ -21,56 +21,76 @@
     if (stored === 'granted') { loadGA(); return; }
     if (stored === 'denied')  { return; }
 
-    // ── Bannière ──────────────────────────────────────────────────────────────
+    // ── Popup ─────────────────────────────────────────────────────────────────
     const style = document.createElement('style');
     style.textContent = `
-        #sp-consent{position:fixed;bottom:0;left:0;right:0;z-index:9999;
-            padding:16px 24px;
-            background:#18130F;
-            border-top:3px solid #C4311B;
-            box-shadow:0 -4px 24px rgba(0,0,0,.35);
-            display:flex;align-items:center;justify-content:space-between;
-            gap:16px;flex-wrap:wrap;
-            transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);
+        #sp-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.45);
+            opacity:0;transition:opacity .3s ease;pointer-events:none;}
+        #sp-overlay.show{opacity:1;pointer-events:auto;}
+        #sp-consent{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+            z-index:9999;width:min(460px,calc(100vw - 32px));
+            background:#18130F;border-radius:20px;
+            border:1px solid rgba(196,49,27,.35);
+            box-shadow:0 8px 40px rgba(0,0,0,.5);
+            padding:28px 28px 24px;
+            opacity:0;transition:opacity .35s ease, transform .35s cubic-bezier(.16,1,.3,1);
             font-family:'Inter',sans-serif;}
-        #sp-consent.show{transform:translateY(0);}
-        #sp-consent p{margin:0;font-size:.875rem;color:rgba(255,255,255,.85);line-height:1.6;flex:1;min-width:200px;}
+        #sp-consent.show{opacity:1;transform:translateX(-50%) translateY(0);}
+        #sp-consent-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+        #sp-consent-title{font-size:1rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;}
+        #sp-consent-close{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.4);
+            font-size:1.25rem;line-height:1;padding:2px;transition:color .15s;}
+        #sp-consent-close:hover{color:rgba(255,255,255,.8);}
+        #sp-consent p{margin:0 0 22px;font-size:.875rem;color:rgba(255,255,255,.65);line-height:1.6;}
         #sp-consent a{color:#C4892A;text-decoration:underline;}
-        #sp-consent-wrap{display:flex;gap:10px;flex-shrink:0;}
-        #sp-consent-accept{padding:10px 22px;border-radius:9999px;background:#C4311B;color:white;
-            font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:background .15s;white-space:nowrap;}
+        #sp-consent-wrap{display:flex;gap:10px;}
+        #sp-consent-accept{flex:1;padding:11px 0;border-radius:9999px;background:#C4311B;color:white;
+            font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:background .15s;}
         #sp-consent-accept:hover{background:#a82818;}
-        #sp-consent-deny{padding:10px 18px;border-radius:9999px;background:transparent;color:rgba(255,255,255,.55);
-            font-size:.875rem;font-weight:600;border:1.5px solid rgba(255,255,255,.2);cursor:pointer;transition:all .15s;white-space:nowrap;}
-        #sp-consent-deny:hover{border-color:rgba(255,255,255,.5);color:rgba(255,255,255,.85);}
+        #sp-consent-deny{flex:1;padding:11px 0;border-radius:9999px;background:transparent;
+            color:rgba(255,255,255,.55);font-size:.875rem;font-weight:600;
+            border:1.5px solid rgba(255,255,255,.2);cursor:pointer;transition:all .15s;}
+        #sp-consent-deny:hover{border-color:rgba(255,255,255,.45);color:rgba(255,255,255,.85);}
         @media(max-width:767px){
-            #sp-consent{bottom:calc(64px + env(safe-area-inset-bottom,0px));border-radius:16px 16px 0 0;padding:18px 20px 20px;}
-            #sp-consent-wrap{width:100%;flex-direction:row;}
-            #sp-consent-accept,#sp-consent-deny{flex:1;text-align:center;}
+            #sp-consent{bottom:calc(80px + env(safe-area-inset-bottom,0px));}
         }`;
     document.head.appendChild(style);
 
-    const banner = document.createElement('div');
-    banner.id = 'sp-consent';
-    banner.innerHTML = `
-        <p>🍪 Nous utilisons des cookies analytiques pour améliorer votre expérience.
+    const overlay = document.createElement('div');
+    overlay.id = 'sp-overlay';
+    document.body.appendChild(overlay);
+
+    const popup = document.createElement('div');
+    popup.id = 'sp-consent';
+    popup.innerHTML = `
+        <div id="sp-consent-header">
+            <span id="sp-consent-title">🍪 Cookies &amp; confidentialité</span>
+            <button id="sp-consent-close" aria-label="Ignorer">✕</button>
+        </div>
+        <p>Nous utilisons des cookies analytiques pour comprendre comment vous utilisez le site et l'améliorer.
            <a href="/confidentialite.html">En savoir plus</a></p>
         <div id="sp-consent-wrap">
             <button id="sp-consent-deny">Refuser</button>
             <button id="sp-consent-accept">Accepter</button>
         </div>`;
-    document.body.appendChild(banner);
+    document.body.appendChild(popup);
 
-    // Slide in après le paint
-    requestAnimationFrame(() => requestAnimationFrame(() => banner.classList.add('show')));
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        popup.classList.add('show');
+        overlay.classList.add('show');
+    }));
 
     function dismiss(choice) {
         localStorage.setItem(KEY, choice);
-        banner.style.transform = 'translateY(100%)';
-        setTimeout(() => banner.remove(), 400);
+        popup.style.opacity = '0';
+        popup.style.transform = 'translateX(-50%) translateY(10px)';
+        overlay.style.opacity = '0';
+        setTimeout(() => { popup.remove(); overlay.remove(); }, 350);
         if (choice === 'granted') loadGA();
     }
 
     document.getElementById('sp-consent-accept').addEventListener('click', () => dismiss('granted'));
     document.getElementById('sp-consent-deny').addEventListener('click',   () => dismiss('denied'));
+    document.getElementById('sp-consent-close').addEventListener('click',  () => dismiss('denied'));
+    overlay.addEventListener('click', () => dismiss('denied'));
 })();

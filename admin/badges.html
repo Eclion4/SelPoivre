@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Badges — Admin Sel & Poivre</title>
+<link rel="stylesheet" href="../css/sp.css">
+<style>
+  body { font-family: 'Inter', sans-serif; background: #F8F7F4; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  .sidebar-link { display:flex; align-items:center; gap:12px; padding:10px 16px; border-radius:12px; color:#cbd5e1; transition:all .2s; font-size:0.875rem; font-weight:500; }
+  .sidebar-link:hover { background:#16213E; color:white; }
+  .sidebar-link.active { background:#C4311B; color:white; }
+  .stat-card { background:white; border-radius:16px; padding:20px; box-shadow:0 1px 2px rgba(0,0,0,0.04); border:1px solid #f1f5f9; }
+  #sidebar { transition: transform 0.3s ease; }
+  @media (max-width: 1023px) { #sidebar { position:fixed; top:0; left:0; bottom:0; z-index:50; transform:translateX(-100%); } #sidebar.open { transform:translateX(0); } }
+
+  .card { background:white; border-radius:16px; border:1px solid #e2e8f0; }
+  .table-row { display:grid; align-items:center; border-bottom:1px solid #f1f5f9; }
+  .table-row:last-child { border-bottom:none; }
+  .btn-sm { padding:5px 12px; border-radius:8px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .15s; border:none; }
+  .btn-red    { background:#FEE2E2; color:#991B1B; }
+  .btn-red:hover { background:#FECACA; }
+  .btn-gold   { background:#FEF3C7; color:#92400E; }
+  .btn-gold:hover { background:#FDE68A; }
+  .btn-green  { background:#D1FAE5; color:#065F46; }
+  .btn-green:hover { background:#A7F3D0; }
+  .btn-primary { background:#C4311B; color:white; padding:8px 18px; border-radius:10px; font-size:.875rem; font-weight:600; border:none; cursor:pointer; transition:all .15s; }
+  .btn-primary:hover { background:#a82818; }
+  .btn-secondary { background:#F1F5F9; color:#475569; padding:8px 18px; border-radius:10px; font-size:.875rem; font-weight:600; border:none; cursor:pointer; transition:all .15s; }
+  .btn-secondary:hover { background:#E2E8F0; }
+  input, select, textarea { width:100%; padding:8px 12px; border:1.5px solid #E2E8F0; border-radius:10px; font-size:.875rem; outline:none; background:white; transition:border .15s; }
+  input:focus, select:focus, textarea:focus { border-color:#C4311B; }
+  label { font-size:.75rem; font-weight:600; color:#64748B; display:block; margin-bottom:4px; }
+  .toast { position:fixed; bottom:24px; right:24px; z-index:999; padding:12px 20px; border-radius:12px; font-size:.875rem; font-weight:600; color:white; transform:translateY(80px); opacity:0; transition:all .3s; pointer-events:none; }
+  .toast.show { transform:translateY(0); opacity:1; }
+  .toast.ok  { background:#065F46; }
+  .toast.err { background:#991B1B; }
+  .badge-preview { width:44px; height:44px; background:#FEF3C7; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; }
+  .section-title { font-size:1rem; font-weight:700; color:#0F172A; }
+  .tag-manual { display:inline-block; padding:2px 8px; border-radius:6px; font-size:.7rem; font-weight:700; background:#FEE2E2; color:#991B1B; }
+  .tag-auto   { display:inline-block; padding:2px 8px; border-radius:6px; font-size:.7rem; font-weight:700; background:#EDE9FE; color:#5B21B6; }
+  .empty-state { text-align:center; padding:40px; color:#94A3B8; font-size:.875rem; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- Auth guard -->
+<script>
+  (function () {
+    const stored = localStorage.getItem('sp_user');
+    const user = stored ? JSON.parse(stored) : null;
+    if (!user || user.role !== 'admin') window.location.href = 'login.html';
+  })();
+</script>
+
+<div class="flex h-screen overflow-hidden">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="w-64 flex-shrink-0 bg-sidebar flex flex-col overflow-y-auto">
+    <div class="px-5 py-6 border-b border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-sp rounded-xl flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 4 6 4 12c0 4 2 7 5 9h6c3-2 5-5 5-9 0-6-4-10-8-10zm0 3c2.2 0 4 2.2 4 5s-1.8 4-4 4-4-1.8-4-4 1.8-5 4-5z"/></svg>
+        </div>
+        <div>
+          <div class="text-white font-bold text-sm">Sel &amp; Poivre Admin</div>
+          <div class="text-slate-400 text-xs">Panneau de contrôle</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <p class="px-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Principal</p>
+      <a href="index.html" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Tableau de bord
+      </a>
+      <a href="recettes.html" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+        Recettes
+      </a>
+      <a href="utilisateurs.html" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Utilisateurs
+      </a>
+      <a href="badges.html" class="sidebar-link active">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        Badges
+      </a>
+
+      <p class="px-4 pt-4 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Système</p>
+      <a href="../index.html" target="_blank" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        Voir le site
+      </a>
+      <a href="../index.html" class="sidebar-link">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+        Quitter l'admin
+      </a>
+    </nav>
+
+    <div class="px-4 py-4 border-t border-white/10">
+      <div class="flex items-center gap-3">
+        <div id="adminAvatar" class="w-8 h-8 rounded-full bg-sp flex items-center justify-center text-white text-xs font-bold flex-shrink-0">A</div>
+        <div class="min-w-0">
+          <div id="adminName" class="text-white text-sm font-medium truncate">Admin</div>
+          <div id="adminEmail" class="text-slate-400 text-xs truncate">—</div>
+        </div>
+        <button onclick="adminLogout()" title="Déconnexion" class="ml-auto text-slate-500 hover:text-red-400 transition-colors flex-shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-4 flex-shrink-0">
+      <button id="sidebarToggle" class="lg:hidden text-slate-500 hover:text-slate-900">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div>
+        <h1 class="text-lg font-semibold text-slate-900">Gestion des badges</h1>
+        <p class="text-xs text-slate-500">Créer, modifier et attribuer des badges aux utilisateurs</p>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-6 space-y-6">
+
+      <!-- ─── Section 1: Badge definitions ─────────────────────────────── -->
+      <div class="card">
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div>
+            <h2 class="section-title">Définitions de badges</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Tous les badges disponibles sur la plateforme</p>
+          </div>
+          <button onclick="openCreateModal()" class="btn-primary flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Nouveau badge
+          </button>
+        </div>
+        <div id="defsTable">
+          <p class="empty-state">Chargement…</p>
+        </div>
+      </div>
+
+      <!-- ─── Section 2: Award badge ────────────────────────────────────── -->
+      <div class="card px-6 py-5">
+        <h2 class="section-title mb-4">Attribuer un badge</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label>Rechercher un utilisateur</label>
+            <div class="relative">
+              <input id="awardSearch" type="text" placeholder="Pseudo ou email…" autocomplete="off">
+              <div id="awardSuggestions" class="absolute z-10 w-full bg-white border border-slate-200 rounded-xl mt-1 shadow-lg hidden max-h-48 overflow-y-auto"></div>
+            </div>
+            <input id="awardUserId" type="hidden">
+            <p id="awardUserName" class="text-xs text-slate-500 mt-1 h-4"></p>
+          </div>
+          <div>
+            <label>Badge à attribuer</label>
+            <select id="awardSlug">
+              <option value="">Choisir un badge…</option>
+            </select>
+          </div>
+          <div>
+            <label>Note (optionnel)</label>
+            <input id="awardNote" type="text" placeholder="Raison de l'attribution…">
+          </div>
+        </div>
+        <div class="flex justify-end mt-4">
+          <button onclick="awardBadge()" class="btn-primary">Attribuer ✓</button>
+        </div>
+      </div>
+
+      <!-- ─── Section 3: Awarded badges list ───────────────────────────── -->
+      <div class="card">
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div>
+            <h2 class="section-title">Badges attribués manuellement</h2>
+            <p class="text-xs text-slate-500 mt-0.5">200 dernières attributions</p>
+          </div>
+          <button onclick="loadAwarded()" class="btn-secondary text-sm flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            Actualiser
+          </button>
+        </div>
+        <div id="awardedTable">
+          <p class="empty-state">Chargement…</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ─── Modal: Create / Edit badge definition ─────────────────────────────── -->
+<div id="modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h3 id="modalTitle" class="font-bold text-lg text-slate-900">Nouveau badge</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+    </div>
+    <input id="modalId" type="hidden" value="">
+    <div class="space-y-4">
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label>Emoji</label>
+          <input id="modalEmoji" type="text" placeholder="🏅" maxlength="4">
+        </div>
+        <div class="col-span-2">
+          <label>Slug (identifiant)</label>
+          <input id="modalSlug" type="text" placeholder="mon_badge" pattern="[a-z0-9_]+">
+          <p class="text-xs text-slate-400 mt-0.5">Lettres minuscules, chiffres, underscore</p>
+        </div>
+      </div>
+      <div>
+        <label>Nom du badge</label>
+        <input id="modalLabel" type="text" placeholder="Super Chef">
+      </div>
+      <div>
+        <label>Description</label>
+        <input id="modalDesc" type="text" placeholder="Publier 50 recettes…">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label>Ordre d'affichage</label>
+          <input id="modalSort" type="number" value="99" min="0">
+        </div>
+        <div id="modalActiveWrap">
+          <label>Statut</label>
+          <select id="modalActive">
+            <option value="1">Actif</option>
+            <option value="0">Inactif</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="modalPreviewRow" class="flex items-center gap-3 mt-4 p-3 bg-slate-50 rounded-xl">
+      <div class="badge-preview" id="modalPreviewEmoji">🏅</div>
+      <div>
+        <div id="modalPreviewLabel" class="font-bold text-slate-800 text-sm">Nom</div>
+        <div id="modalPreviewDesc" class="text-xs text-slate-500">Description</div>
+      </div>
+    </div>
+    <div class="flex gap-3 mt-5 justify-end">
+      <button onclick="closeModal()" class="btn-secondary">Annuler</button>
+      <button onclick="saveDefinition()" class="btn-primary" id="modalSaveBtn">Créer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script>
+const API = '../api/badges.php';
+
+// ─── Auth ──────────────────────────────────────────────────────────────────
+const sp = JSON.parse(localStorage.getItem('sp_user') || '{}');
+document.getElementById('adminName').textContent  = sp.username  || 'Admin';
+document.getElementById('adminEmail').textContent = sp.email     || '—';
+document.getElementById('adminAvatar').textContent = (sp.username||'A')[0].toUpperCase();
+function adminLogout() { localStorage.removeItem('sp_user'); location.href = 'login.html'; }
+
+// ─── Sidebar toggle ────────────────────────────────────────────────────────
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+// ─── Toast helper ──────────────────────────────────────────────────────────
+function toast(msg, ok = true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (ok ? 'ok' : 'err');
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── API helpers ───────────────────────────────────────────────────────────
+async function apiFetch(url, opts = {}) {
+  const r = await fetch(url, { credentials: 'include', ...opts });
+  return r.json();
+}
+function authPost(body) {
+  return { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+}
+
+// ─── Badge definitions list ────────────────────────────────────────────────
+let defs = [];
+async function loadDefs() {
+  const data = await apiFetch(`${API}?action=definitions`);
+  defs = data.badges || [];
+  renderDefs();
+  populateAwardSlug();
+}
+
+function renderDefs() {
+  const el = document.getElementById('defsTable');
+  if (!defs.length) { el.innerHTML = '<p class="empty-state">Aucun badge défini.</p>'; return; }
+  el.innerHTML = `
+    <div class="px-6 py-2 grid text-xs font-semibold text-slate-500 uppercase tracking-wide border-b border-slate-100" style="grid-template-columns:44px 1fr 1fr 60px 70px 110px">
+      <span></span><span>Nom / Slug</span><span>Description</span><span class="text-center">Ordre</span><span class="text-center">Statut</span><span></span>
+    </div>
+    ${defs.map(d => `
+    <div class="table-row px-6 py-3" style="grid-template-columns:44px 1fr 1fr 60px 70px 110px">
+      <div class="badge-preview text-xl">${d.emoji||'🏅'}</div>
+      <div>
+        <div class="font-semibold text-slate-800 text-sm">${esc(d.label)}</div>
+        <div class="text-xs text-slate-400 font-mono">${esc(d.slug)}</div>
+      </div>
+      <div class="text-sm text-slate-600 truncate pr-4">${esc(d.description||'')}</div>
+      <div class="text-center text-sm text-slate-500">${d.sort_order}</div>
+      <div class="text-center">
+        ${d.is_active ? '<span class="badge-published text-xs">Actif</span>' : '<span class="badge-rejected text-xs">Inactif</span>'}
+      </div>
+      <div class="flex gap-2 justify-end">
+        <button class="btn-sm btn-gold" onclick="openEditModal(${d.id})">Modifier</button>
+      </div>
+    </div>`).join('')}`;
+}
+
+function populateAwardSlug() {
+  const sel = document.getElementById('awardSlug');
+  sel.innerHTML = '<option value="">Choisir un badge…</option>';
+  defs.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.slug;
+    opt.textContent = `${d.emoji||''} ${d.label}`;
+    sel.appendChild(opt);
+  });
+}
+
+// ─── User search for award ─────────────────────────────────────────────────
+let searchTimer;
+document.getElementById('awardSearch').addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  const q = this.value.trim();
+  if (q.length < 2) { hideSuggestions(); return; }
+  searchTimer = setTimeout(() => searchUsers(q), 300);
+});
+
+async function searchUsers(q) {
+  const data = await apiFetch(`../api/users.php?action=search&q=${encodeURIComponent(q)}`).catch(() => ({}));
+  const users = data.users || [];
+  const box = document.getElementById('awardSuggestions');
+  if (!users.length) { hideSuggestions(); return; }
+  box.innerHTML = users.map(u => `
+    <div class="px-4 py-2 hover:bg-slate-50 cursor-pointer flex items-center gap-2 text-sm"
+         onclick="selectUser(${u.id}, '${esc(u.username)}')">
+      <span class="font-medium">${esc(u.username)}</span>
+      <span class="text-slate-400 text-xs">${esc(u.email||'')}</span>
+    </div>`).join('');
+  box.classList.remove('hidden');
+}
+
+function selectUser(id, name) {
+  document.getElementById('awardUserId').value   = id;
+  document.getElementById('awardSearch').value   = name;
+  document.getElementById('awardUserName').textContent = `ID: ${id}`;
+  hideSuggestions();
+}
+function hideSuggestions() {
+  document.getElementById('awardSuggestions').classList.add('hidden');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#awardSearch') && !e.target.closest('#awardSuggestions')) hideSuggestions();
+});
+
+// ─── Award badge ───────────────────────────────────────────────────────────
+async function awardBadge() {
+  const userId = parseInt(document.getElementById('awardUserId').value);
+  const slug   = document.getElementById('awardSlug').value;
+  const note   = document.getElementById('awardNote').value.trim();
+  if (!userId) { toast('Sélectionnez un utilisateur', false); return; }
+  if (!slug)   { toast('Sélectionnez un badge', false); return; }
+  const data = await apiFetch(API, authPost({ action:'award', user_id:userId, badge_slug:slug, note }));
+  if (data.error) { toast(data.error, false); return; }
+  toast('Badge attribué ✓');
+  document.getElementById('awardSearch').value = '';
+  document.getElementById('awardUserId').value = '';
+  document.getElementById('awardUserName').textContent = '';
+  document.getElementById('awardSlug').value = '';
+  document.getElementById('awardNote').value = '';
+  loadAwarded();
+}
+
+// ─── Awarded badges table ──────────────────────────────────────────────────
+async function loadAwarded() {
+  document.getElementById('awardedTable').innerHTML = '<p class="empty-state">Chargement…</p>';
+  const data = await apiFetch(`${API}?action=all`);
+  const badges = data.badges || [];
+  if (!badges.length) {
+    document.getElementById('awardedTable').innerHTML = '<p class="empty-state">Aucun badge attribué manuellement.</p>';
+    return;
+  }
+  document.getElementById('awardedTable').innerHTML = `
+    <div class="px-6 py-2 grid text-xs font-semibold text-slate-500 uppercase tracking-wide border-b border-slate-100" style="grid-template-columns:1fr 1fr 1fr 1fr 80px">
+      <span>Utilisateur</span><span>Badge</span><span>Note</span><span>Date</span><span></span>
+    </div>
+    ${badges.map(b => `
+    <div class="table-row px-6 py-3" style="grid-template-columns:1fr 1fr 1fr 1fr 80px">
+      <div class="font-medium text-slate-800 text-sm">${esc(b.username)}</div>
+      <div class="flex items-center gap-2 text-sm">
+        <span>${b.emoji||'🏅'}</span>
+        <span class="font-medium">${esc(b.label||b.badge_slug)}</span>
+      </div>
+      <div class="text-sm text-slate-500 truncate">${esc(b.note||'—')}</div>
+      <div class="text-xs text-slate-400">${new Date(b.awarded_at).toLocaleDateString('fr-FR')}</div>
+      <div class="flex justify-end">
+        <button class="btn-sm btn-red" onclick="revokeBadge(${b.id}, '${esc(b.username)}', '${esc(b.label||b.badge_slug)}')">Retirer</button>
+      </div>
+    </div>`).join('')}`;
+}
+
+async function revokeBadge(id, user, badge) {
+  if (!confirm(`Retirer le badge « ${badge} » à ${user} ?`)) return;
+  const data = await apiFetch(API, authPost({ action:'revoke', id }));
+  if (data.error) { toast(data.error, false); return; }
+  toast('Badge retiré');
+  loadAwarded();
+}
+
+// ─── Modal: Create / Edit ──────────────────────────────────────────────────
+function openCreateModal() {
+  document.getElementById('modalTitle').textContent    = 'Nouveau badge';
+  document.getElementById('modalSaveBtn').textContent  = 'Créer';
+  document.getElementById('modalId').value             = '';
+  document.getElementById('modalEmoji').value          = '🏅';
+  document.getElementById('modalSlug').value           = '';
+  document.getElementById('modalSlug').disabled        = false;
+  document.getElementById('modalLabel').value          = '';
+  document.getElementById('modalDesc').value           = '';
+  document.getElementById('modalSort').value           = '99';
+  document.getElementById('modalActive').value         = '1';
+  document.getElementById('modalActiveWrap').style.display = 'none';
+  updatePreview();
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function openEditModal(id) {
+  const d = defs.find(x => x.id == id);
+  if (!d) return;
+  document.getElementById('modalTitle').textContent    = 'Modifier le badge';
+  document.getElementById('modalSaveBtn').textContent  = 'Enregistrer';
+  document.getElementById('modalId').value             = d.id;
+  document.getElementById('modalEmoji').value          = d.emoji  || '🏅';
+  document.getElementById('modalSlug').value           = d.slug;
+  document.getElementById('modalSlug').disabled        = true;
+  document.getElementById('modalLabel').value          = d.label;
+  document.getElementById('modalDesc').value           = d.description || '';
+  document.getElementById('modalSort').value           = d.sort_order;
+  document.getElementById('modalActive').value         = d.is_active ? '1' : '0';
+  document.getElementById('modalActiveWrap').style.display = '';
+  updatePreview();
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+['modalEmoji','modalLabel','modalDesc'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updatePreview);
+});
+
+function updatePreview() {
+  document.getElementById('modalPreviewEmoji').textContent = document.getElementById('modalEmoji').value || '🏅';
+  document.getElementById('modalPreviewLabel').textContent = document.getElementById('modalLabel').value || 'Nom';
+  document.getElementById('modalPreviewDesc').textContent  = document.getElementById('modalDesc').value  || 'Description';
+}
+
+async function saveDefinition() {
+  const id    = document.getElementById('modalId').value;
+  const emoji = document.getElementById('modalEmoji').value.trim();
+  const slug  = document.getElementById('modalSlug').value.trim();
+  const label = document.getElementById('modalLabel').value.trim();
+  const desc  = document.getElementById('modalDesc').value.trim();
+  const sort  = parseInt(document.getElementById('modalSort').value) || 99;
+  const active= parseInt(document.getElementById('modalActive').value);
+
+  if (!label) { toast('Le nom est requis', false); return; }
+
+  let data;
+  if (id) {
+    data = await apiFetch(API, authPost({ action:'update', id:parseInt(id), emoji, label, description:desc, sort_order:sort, is_active:active }));
+  } else {
+    if (!slug) { toast('Le slug est requis', false); return; }
+    data = await apiFetch(API, authPost({ action:'create', slug, emoji, label, description:desc, sort_order:sort }));
+  }
+
+  if (data.error) { toast(data.error, false); return; }
+  toast(id ? 'Badge mis à jour ✓' : 'Badge créé ✓');
+  closeModal();
+  loadDefs();
+}
+
+// ─── Escape helper ─────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// CSS classes reuse from admin/index.html
+document.head.insertAdjacentHTML('beforeend', `<style>
+.badge-published{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:9999px;font-size:.75rem;font-weight:600;background:#D1FAE5;color:#065F46;}
+.badge-rejected{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:9999px;font-size:.75rem;font-weight:600;background:#FEE2E2;color:#991B1B;}
+</style>`);
+
+// ─── Init ──────────────────────────────────────────────────────────────────
+loadDefs();
+loadAwarded();
+</script>
+</body>
+</html>

@@ -185,6 +185,42 @@ $migrations = [
     'seo.title.brioche'      => "UPDATE recipes SET title='Brioche Maison Moelleuse — Recette Facile au Beurre'         WHERE slug='brioche-maison'",
     'seo.title.shakshuka'    => "UPDATE recipes SET title='Shakshuka — Recette d\\'Œufs Pochés en Sauce Tomate Épicée'   WHERE slug='shakshuka-israelien'",
 
+    // ── Badges ───────────────────────────────────────────────────────────────
+    'badge_definitions.create' => "CREATE TABLE IF NOT EXISTS badge_definitions (
+        id         INT AUTO_INCREMENT PRIMARY KEY,
+        slug       VARCHAR(60) NOT NULL,
+        emoji      VARCHAR(10) NOT NULL DEFAULT '🏅',
+        label      VARCHAR(80) NOT NULL,
+        description VARCHAR(255) NULL,
+        sort_order  TINYINT UNSIGNED DEFAULT 99,
+        is_active   TINYINT(1) DEFAULT 1,
+        created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_slug (slug)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    'badge_definitions.seed' => "INSERT IGNORE INTO badge_definitions (slug, emoji, label, description, sort_order) VALUES
+        ('apprenti',   '🌱', 'Apprenti',       'Publier votre 1re recette',  1),
+        ('cuisinier',  '🍳', 'Cuisinier',      'Publier 5 recettes',          2),
+        ('chef',       '👨‍🍳','Chef',            'Publier 10 recettes',         3),
+        ('grand_chef', '⭐', 'Grand Chef',     'Publier 20 recettes',         4),
+        ('connaisseur','❤️', 'Connaisseur',    '20 recettes en favoris',      5),
+        ('populaire',  '👥', 'Populaire',      'Obtenir 10 abonnés',          6),
+        ('influenceur','🌟', 'Influenceur',    'Obtenir 50 abonnés',          7),
+        ('pionnier',   '🚀', 'Pionnier',       'Badge spécial — membre fondateur', 10),
+        ('coup_coeur', '💛', 'Coup de cœur',   'Sélectionné par l''équipe',   11)",
+
+    'user_badges.create' => "CREATE TABLE IF NOT EXISTS user_badges (
+        id            INT AUTO_INCREMENT PRIMARY KEY,
+        user_id       INT NOT NULL,
+        badge_slug    VARCHAR(60) NOT NULL,
+        awarded_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        awarded_by_id INT NULL,
+        note          VARCHAR(255) NULL,
+        UNIQUE KEY uq_user_badge (user_id, badge_slug),
+        INDEX idx_user (user_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
     // ── Notifications ─────────────────────────────────────────────────────────
     'notifications.create' => "CREATE TABLE IF NOT EXISTS notifications (
         id INT AUTO_INCREMENT PRIMARY KEY,

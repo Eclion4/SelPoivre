@@ -30,6 +30,19 @@
     <style>
         body { background:#F8F5EF; font-family:'Inter',sans-serif; color:#18130F; }
         .recipe-mini-card { background:#fff; border-radius:14px; overflow:hidden; border:1px solid #E5E7EB; transition:all .2s; }
+        #userBadges { display:flex; flex-wrap:wrap; gap:10px; }
+        .badge-card { display:flex; flex-direction:column; align-items:center; gap:4px; padding:12px 10px; background:#fff; border:1.5px solid #E5E7EB; border-radius:14px; width:88px; text-align:center; transition:all .2s; }
+        .badge-card.earned { border-color:#C4892A; background:linear-gradient(160deg,#FFFBF0,#FFF8E8); box-shadow:0 2px 8px rgba(196,137,42,.12); }
+        .badge-card.locked { opacity:.6; filter:grayscale(.5); }
+        .badge-card.locked:hover { opacity:.85; filter:none; }
+        .badge-card.manual { border-color:#C4311B; background:linear-gradient(160deg,#FFF5F4,#FFF0EE); box-shadow:0 2px 8px rgba(196,49,27,.12); }
+        .badge-emoji { font-size:1.75rem; line-height:1; }
+        .badge-label { font-size:.7rem; font-weight:700; color:#18130F; line-height:1.2; }
+        .badge-desc  { font-size:.63rem; color:#A89880; line-height:1.2; }
+        .badge-check { font-size:.63rem; font-weight:700; color:#C4892A; }
+        .badge-prog-wrap { width:100%; height:4px; background:#E5E7EB; border-radius:9px; overflow:hidden; margin-top:2px; }
+        .badge-prog-bar  { height:100%; background:linear-gradient(to right,#C4892A,#E8B84B); border-radius:9px; }
+        .badge-count { font-size:.62rem; color:#A89880; }
         .recipe-mini-card:hover { box-shadow:0 8px 20px rgba(0,0,0,0.06); transform:translateY(-2px); }
         .sp-bnav{display:block;position:fixed;bottom:0;left:0;right:0;z-index:9900;background:#F8F5EF;border-top:1px solid rgba(196,137,42,.2);box-shadow:0 -4px 20px rgba(24,19,15,.08);padding-bottom:env(safe-area-inset-bottom,0px);}
         @media(min-width:768px){.sp-bnav{display:none!important;}}
@@ -184,23 +197,42 @@
         </a>`;
     }
 
-    const BADGES = [
-        { emoji:'🌱', label:'Apprenti',    desc:'1re recette publiée',    cond:(r,f)=>r>=1 },
-        { emoji:'🍳', label:'Cuisinier',   desc:'5 recettes publiées',    cond:(r,f)=>r>=5 },
-        { emoji:'👨‍🍳',label:'Chef',         desc:'10 recettes publiées',   cond:(r,f)=>r>=10 },
-        { emoji:'⭐', label:'Grand Chef',  desc:'20 recettes publiées',   cond:(r,f)=>r>=20 },
-        { emoji:'👥', label:'Populaire',   desc:'10 abonnés',             cond:(r,f)=>f>=10 },
-        { emoji:'🌟', label:'Influenceur', desc:'50 abonnés',             cond:(r,f)=>f>=50 },
+    const BADGE_DEFS = [
+        { id:'apprenti',    emoji:'🌱', label:'Apprenti',       desc:'Publier 1 recette',       type:'recipes',   threshold:1  },
+        { id:'cuisinier',   emoji:'🍳', label:'Cuisinier',      desc:'Publier 5 recettes',      type:'recipes',   threshold:5  },
+        { id:'chef',        emoji:'👨‍🍳', label:'Chef',           desc:'Publier 10 recettes',     type:'recipes',   threshold:10 },
+        { id:'grand_chef',  emoji:'⭐', label:'Grand Chef',     desc:'Publier 20 recettes',     type:'recipes',   threshold:20 },
+        { id:'populaire',   emoji:'👥', label:'Populaire',      desc:'Obtenir 10 abonnés',      type:'followers', threshold:10 },
+        { id:'influenceur', emoji:'🌟', label:'Influenceur',    desc:'Obtenir 50 abonnés',      type:'followers', threshold:50 },
     ];
-    function renderBadges(recipes, followers) {
-        const earned = BADGES.filter(b => b.cond(recipes, followers));
-        if (!earned.length) return;
+    function renderBadges(recipes, followers, manualBadges) {
+        const stats = { recipes, followers };
         const box = document.getElementById('userBadges');
-        box.innerHTML = earned.map(b =>
-            `<span title="${b.desc}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm font-medium cursor-default hover:shadow-sm transition-shadow">
-                <span>${b.emoji}</span><span class="text-gray-700">${b.label}</span>
-            </span>`
-        ).join('');
+        let html = BADGE_DEFS.map(b => {
+            const cur = stats[b.type] || 0;
+            const earned = cur >= b.threshold;
+            const pct = Math.min(100, Math.round(cur / b.threshold * 100));
+            return `<div class="badge-card ${earned ? 'earned' : 'locked'}" title="${b.desc}">
+                <div class="badge-emoji">${b.emoji}</div>
+                <div class="badge-label">${b.label}</div>
+                <div class="badge-desc">${b.desc}</div>
+                ${earned
+                    ? `<div class="badge-check">✓ Débloqué</div>`
+                    : `<div class="badge-prog-wrap"><div class="badge-prog-bar" style="width:${pct}%"></div></div>
+                       <div class="badge-count">${cur} / ${b.threshold}</div>`}
+            </div>`;
+        }).join('');
+        if (manualBadges && manualBadges.length) {
+            html += manualBadges.map(b =>
+                `<div class="badge-card manual" title="${b.note || 'Badge spécial'}">
+                    <div class="badge-emoji">${b.emoji || '🏅'}</div>
+                    <div class="badge-label">${b.label}</div>
+                    <div class="badge-desc">${b.note || 'Badge spécial'}</div>
+                    <div class="badge-check" style="color:#C4311B">✓ Spécial</div>
+                </div>`
+            ).join('');
+        }
+        box.innerHTML = html;
         box.classList.remove('hidden');
     }
 
@@ -233,7 +265,9 @@
         document.getElementById('recipeCount').textContent    = p.recipe_count;
         document.getElementById('followerCount').textContent  = p.follower_count;
         document.getElementById('followingCount').textContent = p.following_count;
-        renderBadges(p.recipe_count || 0, p.follower_count || 0);
+        fetch((window.SP ? window.SP.apiPath('badges.php') : 'api/badges.php') + '?action=user&user_id=' + p.id, { credentials:'include' })
+            .then(r => r.json()).then(d => renderBadges(p.recipe_count||0, p.follower_count||0, d.badges||[]))
+            .catch(() => renderBadges(p.recipe_count||0, p.follower_count||0, []));
 
         // Buttons: follow vs edit-self
         const u = window.SP && window.SP.user;

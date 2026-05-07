@@ -10,6 +10,7 @@ switch ("$method:$action") {
     case 'GET:list':         listUsers();           break;
     case 'GET:single':       singleUser($id);       break;
     case 'GET:profile':      publicProfile();       break;
+    case 'GET:search':       searchUsers();         break;
     case 'POST:role':        updateRole($id);       break;
     case 'POST:toggle_active': toggleActive($id);   break;
     case 'DELETE:delete':    deleteUser($id);       break;
@@ -162,6 +163,18 @@ function toggleActive($id) {
     $new = $u['is_active'] ? 0 : 1;
     $db->prepare('UPDATE users SET is_active = ? WHERE id = ?')->execute([$new, $id]);
     jsonResponse(['success' => true, 'is_active' => (bool)$new]);
+}
+
+/* ── Recherche admin d'utilisateurs (pour attribution de badges) ── */
+function searchUsers() {
+    requireAdmin();
+    $q  = trim($_GET['q'] ?? '');
+    if ($q === '') { jsonResponse(['users' => []]); return; }
+    $db = getDB();
+    $safe = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $q);
+    $s = $db->prepare("SELECT id, username, email FROM users WHERE username LIKE ? OR email LIKE ? ORDER BY username LIMIT 10");
+    $s->execute(['%' . $safe . '%', '%' . $safe . '%']);
+    jsonResponse(['users' => $s->fetchAll()]);
 }
 
 function deleteUser($id) {

@@ -67,12 +67,40 @@
         @media(min-width:768px){#cookingTimer{bottom:2rem;right:1.5rem;}}
         /* Print */
         @media print{
-            #navbar,footer,.sp-bnav,#printBtn,#shareWrapper,#favBtn,#portionsMinus,#portionsPlus,#commentsSection,#similarSection,#statusBanner{display:none!important;}
-            body{background:white!important;padding:0!important;font-size:12pt;}
+            #navbar,footer,.sp-bnav,#printBtn,#shareWrapper,#favBtn,
+            #portionsMinus,#portionsPlus,#commentsSection,#similarSection,
+            #statusBanner,#cookingTimer,#authorBlock button,
+            .sp-bnav-pub,#backToTop,a[href="recettes.html"]{display:none!important;}
+            body{background:white!important;padding:0!important;font-size:9.5pt;line-height:1.35;}
             #recipeContent{display:block!important;}
-            .step-card::before{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-            section{page-break-inside:avoid;}
-            @page{margin:15mm;}
+            /* Compact hero */
+            section.pt-24{padding-top:6mm!important;padding-bottom:4mm!important;}
+            .bg-gradient-to-b{background:white!important;}
+            .lg\:grid-cols-2{grid-template-columns:1fr 1fr!important;gap:8mm!important;align-items:start;}
+            /* Hero image: petite, pas écrasée */
+            .lg\:grid-cols-2 > div:last-child img{max-height:160px!important;width:100%!important;object-fit:cover;border-radius:6px;}
+            /* Stats bar compact */
+            .grid.grid-cols-4{grid-template-columns:repeat(4,1fr)!important;gap:3px!important;}
+            .grid.grid-cols-4 > div{padding:4px 6px!important;}
+            .grid.grid-cols-4 svg{display:none!important;}
+            .grid.grid-cols-4 p{font-size:8pt!important;margin:0!important;}
+            /* Actions hidden */
+            .flex.flex-wrap.gap-3{display:none!important;}
+            /* Portions: show count only */
+            #portionsSection .flex{gap:0!important;}
+            /* Ingredients 2 colonnes */
+            #ingredientsList{columns:2;column-gap:6mm;}
+            .ingredient-item{break-inside:avoid;padding:2px 0!important;border:none!important;}
+            .ing-emoji{display:none!important;}
+            .checkbox{display:none!important;}
+            /* Steps compact */
+            .step-card{padding-left:30px!important;margin-bottom:4px!important;}
+            .step-card::before{-webkit-print-color-adjust:exact;print-color-adjust:exact;width:24px!important;height:24px!important;font-size:10px!important;top:0!important;}
+            .step-card::after{display:none!important;}
+            .step-card p{font-size:9pt!important;line-height:1.3!important;}
+            /* Sections layout */
+            .lg\:col-span-2,.col-span-2,.md\:col-span-2{page-break-inside:avoid;}
+            @page{margin:12mm;size:A4;}
         }
     </style>
 </head>
@@ -1049,6 +1077,21 @@
     init();
 
     // ── Cooking Timer ─────────────────────────────────────────────
+    // Inject widget into DOM before attaching listeners
+    document.body.insertAdjacentHTML('beforeend', `
+        <div id="cookingTimer" class="hidden">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-semibold">⏱ Minuterie</span>
+                <button id="timerClose" class="text-white/50 hover:text-white text-xl leading-none" aria-label="Fermer">×</button>
+            </div>
+            <div id="timerDisplay" class="text-4xl font-bold text-center font-mono tracking-wider py-2">00:00</div>
+            <p id="timerLabel" class="text-xs text-center mb-3 truncate" style="color:rgba(255,255,255,.5)"></p>
+            <div class="flex gap-2">
+                <button id="timerToggle" class="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors text-white" style="background:#C4311B">Démarrer</button>
+                <button id="timerReset" class="px-3 py-2 rounded-xl text-sm font-semibold text-white transition-colors" style="background:rgba(255,255,255,.12)">↺</button>
+            </div>
+        </div>`);
+
     function parseTimerMins(raw) {
         const hm = raw.match(/(\d+)\s*h(?:eure?s?)?\s*(\d+)/i);
         if (hm) return parseInt(hm[1]) * 60 + parseInt(hm[2]);
@@ -1120,19 +1163,7 @@
 })();
 </script>
 
-<!-- ===== COOKING TIMER WIDGET ===== -->
-<div id="cookingTimer" class="hidden">
-    <div class="flex items-center justify-between mb-3">
-        <span class="text-sm font-semibold">⏱ Minuterie</span>
-        <button id="timerClose" class="text-white/50 hover:text-white text-xl leading-none">×</button>
-    </div>
-    <div id="timerDisplay" class="text-4xl font-bold text-center font-mono tracking-wider py-2">00:00</div>
-    <p id="timerLabel" class="text-xs text-center mb-3 truncate" style="color:rgba(255,255,255,.5)"></p>
-    <div class="flex gap-2">
-        <button id="timerToggle" class="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors text-white" style="background:#C4311B">Démarrer</button>
-        <button id="timerReset" class="px-3 py-2 rounded-xl text-sm font-semibold text-white transition-colors" style="background:rgba(255,255,255,.12)">↺</button>
-    </div>
-</div>
+
 <script>
 (function(){
     const form = document.getElementById('newsletterForm');

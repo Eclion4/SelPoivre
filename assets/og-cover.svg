@@ -1,0 +1,57 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Fond ivoire -->
+  <rect width="1200" height="630" fill="#F8F5EF"/>
+
+  <!-- Bande rouge gauche -->
+  <rect x="0" y="0" width="10" height="630" fill="#C4311B"/>
+
+  <!-- Grand cercle déco haut-droite -->
+  <circle cx="1080" cy="0" r="280" fill="#C4311B" fill-opacity="0.07"/>
+
+  <!-- Petit cercle déco bas-gauche -->
+  <circle cx="80" cy="630" r="160" fill="#C4892A" fill-opacity="0.08"/>
+
+  <!-- Badge logo — même style que le site (carré arrondi rouge + icône utensils Lucide) -->
+  <rect x="88" y="168" width="96" height="96" rx="22" fill="#C4311B"/>
+  <g transform="translate(112,192) scale(2)" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Lucide utensils : fourchette gauche -->
+    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+    <path d="M7 2v20"/>
+    <!-- Lucide utensils : couteau droit -->
+    <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3z"/>
+    <path d="M21 15v7"/>
+  </g>
+
+  <!-- Nom du site -->
+  <text x="205" y="248" font-family="Georgia, serif" font-size="90" font-weight="700" fill="#C4311B">Sel</text>
+  <text x="360" y="248" font-family="Georgia, serif" font-size="90" font-weight="700" fill="#18130F"> &amp; Poivre</text>
+
+  <!-- Trait séparateur -->
+  <rect x="88" y="272" width="500" height="3" rx="2" fill="#C4311B" fill-opacity="0.25"/>
+
+  <!-- Tagline -->
+  <text x="88" y="334" font-family="Georgia, serif" font-size="40" font-style="italic" fill="#6B4C35">Cuisinez, Partagez, Savourez.</text>
+
+  <!-- Description -->
+  <text x="88" y="394" font-family="Arial, sans-serif" font-size="26" fill="#5A4030">Découvrez et partagez des recettes authentiques</text>
+  <text x="88" y="430" font-family="Arial, sans-serif" font-size="26" fill="#5A4030">avec une communauté de passionnés.</text>
+
+  <!-- URL -->
+  <text x="1110" y="596" font-family="Arial, sans-serif" font-size="22" fill="#A89880" text-anchor="end">sel-poivre.com</text>
+
+  <!-- Grille de points déco -->
+  <circle cx="860" cy="80"  r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="900" cy="80"  r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="940" cy="80"  r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="980" cy="80"  r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="860" cy="120" r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="900" cy="120" r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="940" cy="120" r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="980" cy="120" r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="860" cy="160" r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="900" cy="160" r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="940" cy="160" r="5" fill="#C4311B" fill-opacity="0.15"/>
+  <circle cx="980" cy="160" r="5" fill="#C4311B" fill-opacity="0.15"/>
+
+</svg>

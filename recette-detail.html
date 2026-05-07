@@ -667,7 +667,7 @@
         const ratingVal = parseFloat(r.rating || 0);
         const ratingCnt = realisticCount(r.rating_count);
         document.getElementById('statRating').innerHTML = ratingVal > 0 ? `${ratingVal.toFixed(1)} <span class="text-xs text-gray-400">(${ratingCnt})</span>` : '<span class="text-xs text-gray-400">Aucun avis</span>';
-        document.getElementById('statViews').textContent = fmtViews(r.views);
+        const svEl = document.getElementById('statViews'); if (svEl) svEl.textContent = fmtViews(r.views);
 
         // Edit link if owner or admin
         const u = window.SP && window.SP.user;

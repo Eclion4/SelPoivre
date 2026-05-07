@@ -27,8 +27,9 @@ function listMembers() {
     $where  = ['u.is_active = 1'];
     $params = [];
     if ($search !== '') {
+        $safeSrch = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
         $where[] = 'u.username LIKE ?';
-        $params[] = '%' . $search . '%';
+        $params[] = '%' . $safeSrch . '%';
     }
     $whereSql = implode(' AND ', $where);
 

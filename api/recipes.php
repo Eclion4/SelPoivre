@@ -98,9 +98,11 @@ function getList() {
         $params[] = $category;
     }
     if ($search) {
+        // Échappement des wildcards LIKE (_ et %) pour éviter les requêtes parasites
+        $safeSrch = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search);
         $where[] = '(r.title LIKE ? OR r.description LIKE ?)';
-        $params[] = "%$search%";
-        $params[] = "%$search%";
+        $params[] = "%$safeSrch%";
+        $params[] = "%$safeSrch%";
     }
 
     $orderBy = match($sort) {

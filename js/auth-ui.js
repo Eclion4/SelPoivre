@@ -401,7 +401,7 @@
             : item('connexion.html', loginF, loginO, 'Connexion', isActive('connexion.html'));
 
         const html = `
-        <nav class="js-sp-bottomnav md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe sp-bnav">
+        <nav class="js-sp-bottomnav sp-bnav">
             <div class="sp-bnav-row">
                 ${item('index.html', homeF, homeO, 'Accueil', isActive('index.html'))}
                 ${item('recettes.html', recF, recO, 'Recettes', isActive('recettes.html'))}
@@ -411,11 +411,20 @@
             </div>
         </nav>
         <style>
+            /* ── Positionnement 100% self-contained, aucune dépendance Tailwind ── */
             .sp-bnav {
+                display: block;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 9900;
                 background: #fff;
                 border-top: 1px solid #f3f4f6;
                 box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+                padding-bottom: env(safe-area-inset-bottom, 0px);
             }
+            @media (min-width: 768px) { .sp-bnav { display: none !important; } }
             .sp-bnav-row {
                 display: flex;
                 align-items: stretch;
@@ -430,12 +439,15 @@
                 justify-content: center;
                 gap: 3px;
                 flex: 1;
+                min-width: 0;
                 padding: 10px 2px 8px;
                 color: #9ca3af;
                 text-decoration: none;
+                -webkit-tap-highlight-color: transparent;
                 transition: color 0.15s;
             }
-            .sp-bnav-item:hover { color: #C4311B; }
+            .sp-bnav-item:hover,
+            .sp-bnav-item:focus { color: #C4311B; outline: none; }
             .sp-bnav-item--active { color: #A42618; }
             .sp-bnav-bar {
                 position: absolute;
@@ -451,6 +463,10 @@
                 font-size: 10px;
                 line-height: 1;
                 font-weight: 500;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
             }
             .sp-bnav-item--active .sp-bnav-label { font-weight: 600; }
             .sp-bnav-center {
@@ -458,28 +474,29 @@
                 align-items: center;
                 justify-content: center;
                 flex: 1;
+                min-width: 0;
             }
             .sp-bnav-pub {
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
-                width: 58px;
-                height: 58px;
-                margin-top: -22px;
-                background: linear-gradient(135deg, #C4311B, #8B1E0F);
+                width: 56px;
+                height: 56px;
+                margin-top: -20px;
+                background: linear-gradient(135deg, #C4311B 0%, #8B1E0F 100%);
                 color: #fff;
-                border-radius: 9999px;
+                border-radius: 50%;
                 outline: 3px solid #fff;
-                box-shadow: 0 6px 20px rgba(196,49,27,0.45);
+                box-shadow: 0 6px 18px rgba(196,49,27,0.5);
                 transition: transform 0.15s, box-shadow 0.15s;
                 text-decoration: none;
+                -webkit-tap-highlight-color: transparent;
             }
-            .sp-bnav-pub:active { transform: scale(0.93); box-shadow: 0 3px 10px rgba(196,49,27,0.35); }
-            @supports (padding: env(safe-area-inset-bottom)) {
-                .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+            .sp-bnav-pub:active { transform: scale(0.92); box-shadow: 0 3px 8px rgba(196,49,27,0.35); }
+            @media (max-width: 767.98px) {
+                body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important; }
             }
-            @media (max-width: 767.98px) { body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); } }
         </style>`;
         document.body.insertAdjacentHTML('beforeend', html);
     }

@@ -49,6 +49,17 @@ function initAvatars() {
 }
 
 /* ========== INITIALIZE AOS ========== */
+// Sur mobile, le CSS AOS (CDN) applique des transforms/opacity à tous les [data-aos]
+// même quand le JS est désactivé → éléments invisibles / grands blancs.
+// On injecte un reset CSS pour rendre tous ces éléments visibles immédiatement sur mobile.
+(function () {
+    if (window.innerWidth < 768) {
+        var s = document.createElement('style');
+        s.textContent = '[data-aos],[data-aos][class]{opacity:1!important;transform:none!important;transition:none!important;}';
+        document.head.appendChild(s);
+    }
+})();
+
 AOS.init({
     duration: 800,
     easing: 'ease-out-cubic',

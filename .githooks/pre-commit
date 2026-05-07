@@ -1,0 +1,3 @@
+#!/bin/sh
+npm run build:css
+git add css/sp.css

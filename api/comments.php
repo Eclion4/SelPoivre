@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'notifications.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
@@ -54,6 +55,21 @@ function addComment() {
     $commentId = $db->lastInsertId();
 
     if ($rating !== null) recomputeRating($db, $recipeId);
+
+    // Notify recipe author
+    $ra = $db->prepare("SELECT author_id, title FROM recipes WHERE id = ?");
+    $ra->execute([$recipeId]);
+    $recipe = $ra->fetch();
+    if ($recipe && $recipe['author_id']) {
+        $commenter = $db->prepare("SELECT username FROM users WHERE id = ?");
+        $commenter->execute([$_SESSION['user_id']]);
+        $uName = $commenter->fetchColumn() ?: 'Quelqu\'un';
+        $type  = $rating ? 'like' : 'comment';
+        $msg   = $rating
+            ? "$uName a noté votre recette « {$recipe['title']} » : $rating/5"
+            : "$uName a commenté votre recette « {$recipe['title']} »";
+        createNotification($db, (int)$recipe['author_id'], $type, (int)$_SESSION['user_id'], $recipeId, $msg);
+    }
 
     $s = $db->prepare("SELECT c.id, c.content, c.rating, c.created_at,
                               c.user_id, u.username, u.avatar

@@ -6,6 +6,7 @@ $action = $_GET['action'] ?? '';
 $id     = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
 switch ("$method:$action") {
+    case 'GET:members':      listMembers();         break;
     case 'GET:list':         listUsers();           break;
     case 'GET:single':       singleUser($id);       break;
     case 'GET:profile':      publicProfile();       break;
@@ -13,6 +14,47 @@ switch ("$method:$action") {
     case 'POST:toggle_active': toggleActive($id);   break;
     case 'DELETE:delete':    deleteUser($id);       break;
     default: jsonResponse(['error' => 'Route inconnue'], 404);
+}
+
+/* ── Liste publique des membres (pour l'onglet Communauté) ── */
+function listMembers() {
+    $db       = getDB();
+    $viewerId = (int)($_SESSION['user_id'] ?? 0);
+    $limit    = max(1, min(50, (int)($_GET['limit']  ?? 24)));
+    $offset   = max(0,         (int)($_GET['offset'] ?? 0));
+    $search   = trim($_GET['q'] ?? '');
+
+    $where  = ['u.is_active = 1'];
+    $params = [];
+    if ($search !== '') {
+        $where[] = 'u.username LIKE ?';
+        $params[] = '%' . $search . '%';
+    }
+    $whereSql = implode(' AND ', $where);
+
+    $followSelect = $viewerId
+        ? "(SELECT 1 FROM follows fw WHERE fw.follower_id = $viewerId AND fw.followed_id = u.id) AS is_following"
+        : "0 AS is_following";
+
+    $s = $db->prepare("
+        SELECT u.id, u.username, u.avatar, u.bio,
+               (SELECT COUNT(*) FROM recipes   WHERE author_id  = u.id AND status='published') AS recipe_count,
+               (SELECT COUNT(*) FROM follows   WHERE followed_id = u.id)                        AS follower_count,
+               $followSelect
+        FROM users u
+        WHERE $whereSql
+        ORDER BY recipe_count DESC, u.created_at DESC
+        LIMIT $limit OFFSET $offset");
+    $s->execute($params);
+    $users = $s->fetchAll();
+
+    foreach ($users as &$u) {
+        $u['recipe_count']   = (int)$u['recipe_count'];
+        $u['follower_count'] = (int)$u['follower_count'];
+        $u['is_following']   = (bool)$u['is_following'];
+        $u['is_self']        = $viewerId && ($viewerId === (int)$u['id']);
+    }
+    jsonResponse(['users' => $users]);
 }
 
 /* ── Profil public par username (pas d'auth requise) ─── */

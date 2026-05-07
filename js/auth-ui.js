@@ -48,6 +48,73 @@
         return `<div class="w-${size} h-${size} rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0" style="background:${color}">${inits}</div>`;
     }
 
+    // ── Notifications bell ──────────────────────────────────────────────────
+    function relTimeShort(iso) {
+        try {
+            const d = (Date.now() - new Date(iso).getTime()) / 1000;
+            if (d < 60) return 'à l\'instant';
+            if (d < 3600) return Math.floor(d/60) + ' min';
+            if (d < 86400) return Math.floor(d/3600) + ' h';
+            return Math.floor(d/86400) + ' j';
+        } catch { return ''; }
+    }
+    function notifIcon(type) {
+        if (type === 'follow')  return `<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>`;
+        if (type === 'like')    return `<svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+        return `<svg class="w-4 h-4 text-sp-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`;
+    }
+    async function loadNotifications(bellWrap) {
+        try {
+            const res  = await fetch(apiPath('notifications.php?action=list'), { credentials: 'include' });
+            const data = await res.json();
+            const badge = bellWrap.querySelector('.js-notif-badge');
+            const list  = bellWrap.querySelector('.js-notif-list');
+            const count = data.unread_count || 0;
+            if (badge) {
+                badge.textContent = count > 9 ? '9+' : count;
+                badge.classList.toggle('hidden', count === 0);
+            }
+            if (list) {
+                const notifs = data.notifications || [];
+                if (notifs.length === 0) {
+                    list.innerHTML = '<p class="text-center text-gray-400 text-xs py-6">Aucune notification</p>';
+                } else {
+                    list.innerHTML = notifs.map(n => `
+                        <div class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer js-notif-item ${n.is_read ? '' : 'bg-sp-50/60'}" data-id="${n.id}" data-slug="${n.recipe_slug || ''}">
+                            <div class="mt-0.5 flex-shrink-0">${notifIcon(n.type)}</div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs text-encre leading-snug">${n.message || ''}</p>
+                                <p class="text-[10px] text-gray-400 mt-0.5">${relTimeShort(n.created_at)}</p>
+                            </div>
+                            ${!n.is_read ? '<div class="w-2 h-2 rounded-full bg-sp-500 flex-shrink-0 mt-1"></div>' : ''}
+                        </div>`).join('');
+                    list.querySelectorAll('.js-notif-item').forEach(item => {
+                        item.addEventListener('click', async () => {
+                            const id = item.dataset.id;
+                            const slug = item.dataset.slug;
+                            fetch(apiPath('notifications.php?action=read'), { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id:+id}) });
+                            item.classList.remove('bg-sp-50/60');
+                            item.querySelector('.w-2.h-2.rounded-full')?.remove();
+                            if (slug) window.location.href = pagePath('recette-detail.html') + '?slug=' + slug;
+                        });
+                    });
+                }
+                // Mark all read button
+                const markAllBtn = bellWrap.querySelector('.js-notif-mark-all');
+                if (markAllBtn && count > 0) {
+                    markAllBtn.classList.remove('hidden');
+                    markAllBtn.onclick = async () => {
+                        await fetch(apiPath('notifications.php?action=read'), { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({}) });
+                        badge.textContent = '0'; badge.classList.add('hidden');
+                        markAllBtn.classList.add('hidden');
+                        list.querySelectorAll('.bg-sp-50\\/60').forEach(el => el.classList.remove('bg-sp-50/60'));
+                        list.querySelectorAll('.w-2.h-2.rounded-full').forEach(el => el.remove());
+                    };
+                }
+            }
+        } catch(e) { /* noop */ }
+    }
+
     function buildDesktopMenu(user) {
         const adminLink = user.role === 'admin'
             ? `<a href="${pagePath('admin/index.html')}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-encre hover:bg-sp-50 transition-colors">
@@ -59,6 +126,20 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         <span class="hidden md:inline">Publier</span>
     </a>
+    <!-- Bell -->
+    <div class="relative js-bell-wrap hidden">
+        <button type="button" class="js-bell-trigger relative p-2 rounded-full hover:bg-sp-50 transition-colors" aria-label="Notifications">
+            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span class="js-notif-badge hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-sp-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+        </button>
+        <div class="js-bell-dropdown hidden absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                <p class="text-sm font-semibold text-encre">Notifications</p>
+                <button class="js-notif-mark-all hidden text-xs text-sp-600 font-medium hover:underline">Tout marquer lu</button>
+            </div>
+            <div class="js-notif-list max-h-80 overflow-y-auto divide-y divide-gray-50"></div>
+        </div>
+    </div>
     <div class="relative js-sp-userwrap-inner">
     <button type="button" class="js-sp-trigger flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-sp-50 transition-all">
         ${avatarBlock(user, 9)}
@@ -136,6 +217,25 @@
         newEl.querySelectorAll('.js-sp-logout').forEach(b => {
             b.addEventListener('click', () => window.SP.logout());
         });
+        // Bell dropdown
+        const bellWrap    = newEl.querySelector('.js-bell-wrap');
+        const bellTrigger = newEl.querySelector('.js-bell-trigger');
+        const bellDrop    = newEl.querySelector('.js-bell-dropdown');
+        if (bellWrap && bellTrigger && bellDrop) {
+            bellWrap.classList.remove('hidden');
+            loadNotifications(bellWrap);
+            bellTrigger.addEventListener('click', e => {
+                e.stopPropagation();
+                const opening = bellDrop.classList.toggle('hidden') === false;
+                if (opening) loadNotifications(bellWrap);
+                dropdown?.classList.add('hidden');
+            });
+            document.addEventListener('click', e => {
+                if (!bellWrap.contains(e.target)) bellDrop.classList.add('hidden');
+            });
+            // Refresh badge every 60s while page is open
+            setInterval(() => loadNotifications(bellWrap), 60000);
+        }
     }
 
     function injectHTML(html) {

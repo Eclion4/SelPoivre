@@ -40,10 +40,14 @@ function listPosts() {
     $favSelect = $userId
         ? "(SELECT 1 FROM favorites f WHERE f.recipe_id = r.id AND f.user_id = " . (int)$userId . ") AS is_favorited,"
         : "0 AS is_favorited,";
+    $followSelect = $userId
+        ? "(SELECT 1 FROM follows fw WHERE fw.follower_id = " . (int)$userId . " AND fw.followed_id = r.author_id) AS is_following,"
+        : "0 AS is_following,";
 
     $sql = "SELECT r.id, r.slug, r.title, r.description, r.image_url, r.created_at,
                    r.author_id, r.category, r.total_time, r.difficulty, r.rating,
                    $favSelect
+                   $followSelect
                    CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS author_type,
                    CASE WHEN r.author_id IS NULL THEN 'Sel & Poivre'
                         ELSE COALESCE(u.username, 'Sel & Poivre')
@@ -65,6 +69,7 @@ function listPosts() {
         $p['like_count']    = (int)$p['like_count'];
         $p['comment_count'] = (int)$p['comment_count'];
         $p['is_favorited']  = (bool)($p['is_favorited'] ?? false);
+        $p['is_following']  = (bool)($p['is_following'] ?? false);
         $p['comments_preview'] = [];
     }
     unset($p);

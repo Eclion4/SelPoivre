@@ -63,6 +63,7 @@
             <div class="hidden md:flex items-center gap-8">
                 <a href="index.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Accueil</a>
                 <a href="recettes.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Recettes</a>
+                <a href="communaute.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Communauté</a>
             </div>
             <div class="hidden md:flex items-center gap-4">
                 <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
@@ -76,6 +77,7 @@
         <div class="px-4 py-6 space-y-4">
             <a href="index.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Accueil</a>
             <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
+            <a href="communaute.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Communauté</a>
             <a href="connexion.html" class="block w-full text-center px-5 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Connexion</a>
         </div>
     </div>
@@ -254,6 +256,14 @@
             <div id="commentsList" class="space-y-5">
                 <p class="text-gray-400 text-center py-8">Aucun avis pour le moment. Soyez le premier !</p>
             </div>
+        </div>
+    </section>
+
+    <!-- RECETTES SIMILAIRES -->
+    <section id="similarSection" class="hidden py-12 bg-ivoire border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl font-display font-bold mb-6">Vous aimerez aussi</h2>
+            <div id="similarGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"></div>
         </div>
     </section>
 
@@ -450,10 +460,11 @@
                 ? `<img src="${r.author_avatar}" alt="" class="w-10 h-10 rounded-full object-cover flex-shrink-0">`
                 : `<div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style="background:${colorFor(authorName)}">${initials(authorName)}</div>`;
             authorBlock.innerHTML = `
-                <a href="${link}" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <a href="${link}" class="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1 min-w-0">
                     ${avatarMarkup}
-                    <div><p class="text-sm font-semibold hover:underline">${escape(authorName)}</p><p class="text-xs text-gray-500">Membre · ${r.created_at ? fmtDate(r.created_at) : ''}</p></div>
-                </a>`;
+                    <div class="min-w-0"><p class="text-sm font-semibold hover:underline truncate">${escape(authorName)}</p><p class="text-xs text-gray-500">Membre · ${r.created_at ? fmtDate(r.created_at) : ''}</p></div>
+                </a>
+                <button id="followAuthorBtn" class="hidden ml-4 px-4 py-1.5 border-2 border-sp-500 text-sp-600 rounded-full text-xs font-semibold hover:bg-sp-500 hover:text-white transition-all flex-shrink-0">Suivre</button>`;
         }
 
         // Stats
@@ -472,6 +483,48 @@
             const fromAdmin = /\/admin\//.test(document.referrer || '');
             link.href = 'publier.html?slug=' + encodeURIComponent(r.slug) + (fromAdmin ? '&from=admin' : '');
             link.classList.remove('hidden');
+        }
+
+        // Follow author button (only for user-authored recipes, not self)
+        const followAuthorBtn = document.getElementById('followAuthorBtn');
+        if (followAuthorBtn && r.author_id && r.author_type !== 'mijote') {
+            const isOwn = u && String(u.id) === String(r.author_id);
+            if (!isOwn) {
+                followAuthorBtn.classList.remove('hidden');
+                // Load follow status if logged in
+                if (u) {
+                    fetch(window.SP.apiPath('follows.php?action=check&user_id=' + r.author_id), { credentials: 'include' })
+                        .then(res => res.json())
+                        .then(data => { if (data.following) applyFollowingStyle(followAuthorBtn, true); })
+                        .catch(() => {});
+                }
+                followAuthorBtn.addEventListener('click', async () => {
+                    if (!window.SP.user) { window.location.href = window.SP.pagePath('connexion.html'); return; }
+                    followAuthorBtn.disabled = true;
+                    try {
+                        const res = await fetch(window.SP.apiPath('follows.php?action=toggle'), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ user_id: r.author_id })
+                        });
+                        const d = await res.json();
+                        applyFollowingStyle(followAuthorBtn, d.following);
+                    } catch(e) { /* noop */ }
+                    followAuthorBtn.disabled = false;
+                });
+            }
+        }
+        function applyFollowingStyle(btn, following) {
+            if (following) {
+                btn.textContent = 'Abonné ✓';
+                btn.classList.add('bg-sp-500', 'text-white');
+                btn.classList.remove('border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
+            } else {
+                btn.textContent = 'Suivre';
+                btn.classList.remove('bg-sp-500', 'text-white');
+                btn.classList.add('border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
+            }
         }
 
         // Ingredients
@@ -900,6 +953,35 @@
         if (u) renderRatingInput();
     }
 
+    // ── Recettes similaires ──────────────────────────────────────
+    function similarCard(r) {
+        const img = r.image_url || '/assets/recipes/_default.jpg';
+        return `
+        <a href="recette-detail.html?slug=${r.slug}" class="group block">
+            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                <div class="aspect-[4/3] overflow-hidden">
+                    <img src="${img}" alt="${escape(r.title)}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-3">
+                    <h3 class="font-display font-bold text-sm leading-snug group-hover:text-sp-600 transition-colors line-clamp-2">${escape(r.title)}</h3>
+                    <p class="text-xs text-gray-400 mt-1 capitalize">${r.category || ''} · ${r.difficulty || 'Facile'}</p>
+                </div>
+            </div>
+        </a>`;
+    }
+    async function loadSimilar(recipe) {
+        try {
+            const params = new URLSearchParams({ action: 'list', limit: 4, status: 'published' });
+            if (recipe.category) params.set('category', recipe.category);
+            const res  = await fetch(window.SP.apiPath('recipes.php?' + params.toString()), { credentials: 'include' });
+            const data = await res.json();
+            const others = (data.recipes || []).filter(r => r.slug !== recipe.slug).slice(0, 4);
+            if (others.length === 0) return;
+            document.getElementById('similarGrid').innerHTML = others.map(similarCard).join('');
+            document.getElementById('similarSection').classList.remove('hidden');
+        } catch(e) { /* noop */ }
+    }
+
     // ── Init ────────────────────────────────────────────────────
     async function init() {
         const slug = new URLSearchParams(window.location.search).get('slug');
@@ -912,6 +994,7 @@
             renderRecipe(data);
             setupCommentBox();
             await loadComments(data.id);
+            loadSimilar(data);          // async, non-bloquant
         } catch (e) {
             showError(e.message);
         }

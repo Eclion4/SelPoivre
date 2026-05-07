@@ -93,6 +93,7 @@ function getList() {
         ? "(SELECT 1 FROM favorites f WHERE f.recipe_id = r.id AND f.user_id = " . (int)$userId . ") AS is_favorited,"
         : "0 AS is_favorited,";
 
+    $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 100;
     $sql = "SELECT r.id, r.slug, r.title, r.description, r.category,
                    r.prep_time, r.cook_time, r.total_time, r.servings,
                    r.difficulty, r.rating, r.rating_count, r.image_url,
@@ -106,7 +107,8 @@ function getList() {
             FROM recipes r
             LEFT JOIN users u ON r.author_id = u.id
             WHERE " . implode(' AND ', $where) . "
-            ORDER BY $orderBy";
+            ORDER BY $orderBy
+            LIMIT $limit";
 
     $s = $db->prepare($sql);
     $s->execute($params);

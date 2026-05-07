@@ -179,6 +179,20 @@ $migrations = [
     'seo.title.crumble'      => "UPDATE recipes SET title='Crumble Pommes Noisettes — Recette Gourmande et Facile'      WHERE slug='crumble-pomme-noisette'",
     'seo.title.brioche'      => "UPDATE recipes SET title='Brioche Maison Moelleuse — Recette Facile au Beurre'         WHERE slug='brioche-maison'",
     'seo.title.shakshuka'    => "UPDATE recipes SET title='Shakshuka — Recette d\\'Œufs Pochés en Sauce Tomate Épicée'   WHERE slug='shakshuka-israelien'",
+
+    // ── Notifications ─────────────────────────────────────────────────────────
+    'notifications.create' => "CREATE TABLE IF NOT EXISTS notifications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id  INT NOT NULL,
+        type     ENUM('comment','follow','like') NOT NULL,
+        actor_id INT NULL,
+        recipe_id INT NULL,
+        message  VARCHAR(255) NOT NULL,
+        is_read  TINYINT(1) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user_unread (user_id, is_read),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 ];
 
 foreach ($migrations as $name => $sql) {

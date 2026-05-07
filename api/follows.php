@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'notifications.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
@@ -34,6 +35,11 @@ function toggleFollow() {
     } else {
         $db->prepare('INSERT INTO follows (follower_id, followed_id) VALUES (?, ?)')
            ->execute([$_SESSION['user_id'], $targetId]);
+        // Notify the followed user
+        $fn = $db->prepare("SELECT username FROM users WHERE id = ?");
+        $fn->execute([$_SESSION['user_id']]);
+        $followerName = $fn->fetchColumn() ?: 'Quelqu\'un';
+        createNotification($db, $targetId, 'follow', (int)$_SESSION['user_id'], null, "$followerName a commencé à vous suivre");
         jsonResponse(['success' => true, 'following' => true]);
     }
 }

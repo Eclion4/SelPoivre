@@ -89,8 +89,9 @@
         <p class="text-gray-500 text-sm mt-1">Le fil des recettes, avis et découvertes de la communauté Sel &amp; Poivre.</p>
 
         <div class="mt-5 flex items-center gap-2 flex-wrap">
-            <button id="tabAll" class="scope-tab active" data-scope="all">Tout</button>
-            <button id="tabMe"  class="scope-tab hidden" data-scope="me">Mes abonnements</button>
+            <button id="tabAll"     class="scope-tab active" data-scope="all">Tout</button>
+            <button id="tabMe"      class="scope-tab hidden" data-scope="me">Mes abonnements</button>
+            <button id="tabMembers" class="scope-tab" data-scope="members">Membres</button>
             <a id="publishCta" href="publier.html" class="hidden ml-auto inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm hover:shadow-lg transition-all">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 Publier
@@ -101,6 +102,20 @@
     <!-- Feed -->
     <div id="feedList" class="space-y-6">
         <p class="text-gray-400 text-center py-16">Chargement…</p>
+    </div>
+
+    <!-- Members section -->
+    <div id="membersSection" class="hidden px-4 sm:px-0">
+        <div class="mb-4">
+            <input id="membersSearch" type="search" placeholder="Rechercher un membre…"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sp-500 bg-white">
+        </div>
+        <div id="membersGrid" class="grid grid-cols-2 gap-3"></div>
+        <div id="membersLoading" class="text-center py-12 text-gray-400 text-sm">Chargement…</div>
+        <div id="membersEmpty" class="hidden text-center py-12 text-gray-400 text-sm">Aucun membre trouvé.</div>
+        <div id="membersMoreBox" class="hidden text-center mt-6">
+            <button id="membersMoreBtn" class="px-6 py-2.5 bg-white border-2 border-gray-200 rounded-full font-semibold text-sm hover:bg-gray-50 transition-colors">Voir plus</button>
+        </div>
     </div>
 
     <!-- Empty state -->
@@ -163,20 +178,28 @@
     function postCard(p) {
         const aLink = userLink(p.author_name);
         const authorBlock = aLink
-            ? `<a href="${aLink}" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            ? `<a href="${aLink}" class="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1 min-w-0">
                   ${avatarHTML(p.author_name, p.author_avatar)}
                   <div class="min-w-0">
                       <p class="font-semibold text-sm truncate">${escape(p.author_name)}</p>
                       <p class="text-xs text-gray-400">${relativeTime(p.created_at)} · <span class="capitalize">${escape(p.category || '')}</span></p>
                   </div>
               </a>`
-            : `<div class="flex items-center gap-3">
+            : `<div class="flex items-center gap-3 flex-1 min-w-0">
                   ${avatarHTML(p.author_name, p.author_avatar)}
                   <div class="min-w-0">
                       <p class="font-semibold text-sm truncate">${escape(p.author_name)}</p>
                       <p class="text-xs text-gray-400">${relativeTime(p.created_at)} · <span class="capitalize">${escape(p.category || '')}</span></p>
                   </div>
               </div>`;
+
+        // Suivre button: only for user-authored recipes, not own posts
+        const isOwn = window.SP.user && String(window.SP.user.id) === String(p.author_id);
+        const showFollow = p.author_id && !isOwn && p.author_name !== 'Équipe Sel & Poivre';
+        const followingNow = !!p.is_following;
+        const followBtnHTML = showFollow
+            ? `<button class="js-follow-author flex-shrink-0 px-3 py-1 text-xs font-semibold rounded-full transition-all ${followingNow ? 'bg-sp-500 text-white' : 'border-2 border-sp-500 text-sp-600 hover:bg-sp-500 hover:text-white'}" data-author-id="${p.author_id}" data-following="${followingNow ? '1' : '0'}">${followingNow ? 'Abonné ✓' : 'Suivre'}</button>`
+            : '';
 
         const img = p.image_url || '/assets/recipes/_default.jpg';
         const heartFilled = p.is_favorited;
@@ -193,9 +216,9 @@
 
         return `
         <article class="post-card" data-recipe-id="${p.id}" data-slug="${p.slug}">
-            <header class="flex items-center justify-between px-4 sm:px-5 py-3">
+            <header class="flex items-center gap-3 px-4 sm:px-5 py-3">
                 ${authorBlock}
-                <a href="recette-detail.html?slug=${p.slug}" class="text-xs text-sp-600 font-semibold hover:underline">Voir la recette</a>
+                ${followBtnHTML}
             </header>
 
             <a href="recette-detail.html?slug=${p.slug}" class="block">
@@ -324,6 +347,45 @@
             } catch (e) { /* noop */ }
         });
 
+        // Follow author
+        const followBtn = card.querySelector('.js-follow-author');
+        if (followBtn) {
+            followBtn.addEventListener('click', async (e) => {
+                e.preventDefault(); e.stopPropagation();
+                if (!window.SP.user) { window.location.href = 'connexion.html'; return; }
+                const authorId = +followBtn.dataset.authorId;
+                followBtn.disabled = true;
+                try {
+                    const res = await fetch(window.SP.apiPath('follows.php?action=toggle'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ user_id: authorId })
+                    });
+                    const d = await res.json();
+                    if (d.following) {
+                        followBtn.textContent = 'Abonné ✓';
+                        followBtn.classList.add('bg-sp-500', 'text-white');
+                        followBtn.classList.remove('border-2', 'border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
+                        followBtn.dataset.following = '1';
+                    } else {
+                        followBtn.textContent = 'Suivre';
+                        followBtn.classList.remove('bg-sp-500', 'text-white');
+                        followBtn.classList.add('border-2', 'border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
+                        followBtn.dataset.following = '0';
+                    }
+                    // Sync all cards from same author on the page
+                    document.querySelectorAll(`.js-follow-author[data-author-id="${authorId}"]`).forEach(b => {
+                        if (b === followBtn) return;
+                        b.textContent = followBtn.textContent;
+                        b.className = followBtn.className;
+                        b.dataset.following = followBtn.dataset.following;
+                    });
+                } catch(e) { /* noop */ }
+                followBtn.disabled = false;
+            });
+        }
+
         // Share
         card.querySelector('.js-share').addEventListener('click', async () => {
             const url = location.origin + '/recette-detail.html?slug=' + slug;
@@ -390,20 +452,132 @@
         });
     }
 
+    // ── Membres tab ──────────────────────────────────────────────────────────
+    let membersOffset = 0;
+    const MEMBERS_PAGE = 24;
+    let membersSearchTimer = null;
+
+    function memberCard(u) {
+        const av = u.avatar
+            ? `<img src="${u.avatar}" alt="" class="w-16 h-16 rounded-full object-cover mx-auto mb-3">`
+            : `<div class="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mb-3" style="background:${colorFor(u.username)}">${initials(u.username)}</div>`;
+        const isSelf = window.SP.user && window.SP.user.id == u.id;
+        const followBtnHTML = isSelf ? ''
+            : u.is_following
+                ? `<button class="js-member-follow mt-3 w-full py-1.5 bg-sp-500 text-white rounded-full text-xs font-semibold transition-all" data-uid="${u.id}" data-following="1">Abonné ✓</button>`
+                : `<button class="js-member-follow mt-3 w-full py-1.5 border-2 border-sp-500 text-sp-600 rounded-full text-xs font-semibold hover:bg-sp-500 hover:text-white transition-all" data-uid="${u.id}" data-following="0">Suivre</button>`;
+        return `
+        <div class="bg-white rounded-2xl p-4 text-center shadow-sm hover:shadow-md transition-shadow">
+            <a href="utilisateur.html?username=${encodeURIComponent(u.username)}" class="block hover:opacity-80 transition-opacity">
+                ${av}
+                <p class="font-semibold text-sm truncate">${escape(u.username)}</p>
+                <p class="text-xs text-gray-400 mt-0.5">${u.recipe_count} recette${u.recipe_count !== 1 ? 's' : ''} · ${u.follower_count} abonn${u.follower_count !== 1 ? 'és' : 'é'}</p>
+                ${u.bio ? `<p class="text-xs text-gray-500 mt-1 line-clamp-2">${escape(u.bio)}</p>` : ''}
+            </a>
+            ${followBtnHTML}
+        </div>`;
+    }
+
+    async function loadMembers(append = false) {
+        const grid    = document.getElementById('membersGrid');
+        const loading = document.getElementById('membersLoading');
+        const empty   = document.getElementById('membersEmpty');
+        const moreBox = document.getElementById('membersMoreBox');
+        const q       = document.getElementById('membersSearch').value.trim();
+
+        if (!append) {
+            membersOffset = 0;
+            grid.innerHTML = '';
+            loading.classList.remove('hidden');
+            empty.classList.add('hidden');
+            moreBox.classList.add('hidden');
+        }
+
+        try {
+            const url = window.SP.apiPath(`users.php?action=members&limit=${MEMBERS_PAGE}&offset=${membersOffset}`) + (q ? '&q=' + encodeURIComponent(q) : '');
+            const res  = await fetch(url, { credentials: 'include' });
+            const data = await res.json();
+            loading.classList.add('hidden');
+            const users = data.users || [];
+            if (!append && users.length === 0) { empty.classList.remove('hidden'); return; }
+            grid.insertAdjacentHTML('beforeend', users.map(memberCard).join(''));
+            membersOffset += users.length;
+            if (users.length === MEMBERS_PAGE) moreBox.classList.remove('hidden');
+            else moreBox.classList.add('hidden');
+            // Wire follow buttons
+            grid.querySelectorAll('.js-member-follow:not(.js-wired-follow)').forEach(btn => {
+                btn.classList.add('js-wired-follow');
+                btn.addEventListener('click', async () => {
+                    if (!window.SP.user) { window.location.href = 'connexion.html'; return; }
+                    btn.disabled = true;
+                    try {
+                        const r = await fetch(window.SP.apiPath('follows.php?action=toggle'), {
+                            method: 'POST', credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ user_id: +btn.dataset.uid })
+                        });
+                        const d = await r.json();
+                        if (d.following) {
+                            btn.textContent = 'Abonné ✓';
+                            btn.className = 'js-member-follow js-wired-follow mt-3 w-full py-1.5 bg-sp-500 text-white rounded-full text-xs font-semibold transition-all';
+                            btn.dataset.following = '1';
+                        } else {
+                            btn.textContent = 'Suivre';
+                            btn.className = 'js-member-follow js-wired-follow mt-3 w-full py-1.5 border-2 border-sp-500 text-sp-600 rounded-full text-xs font-semibold hover:bg-sp-500 hover:text-white transition-all';
+                            btn.dataset.following = '0';
+                        }
+                    } catch(e) { /* noop */ }
+                    btn.disabled = false;
+                });
+            });
+            if (window.lucide) lucide.createIcons();
+        } catch(e) {
+            loading.classList.add('hidden');
+            empty.textContent = 'Impossible de charger les membres.';
+            empty.classList.remove('hidden');
+        }
+    }
+
+    function switchToFeed() {
+        document.getElementById('feedList').classList.remove('hidden');
+        document.getElementById('membersSection').classList.add('hidden');
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('loadMoreBox').classList.add('hidden');
+    }
+    function switchToMembers() {
+        document.getElementById('feedList').classList.add('hidden');
+        document.getElementById('membersSection').classList.remove('hidden');
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('loadMoreBox').classList.add('hidden');
+        if (membersOffset === 0) loadMembers(false);
+    }
+
     // Tabs
     document.getElementById('tabAll').addEventListener('click', () => {
         currentScope = 'all';
+        document.querySelectorAll('.scope-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('tabAll').classList.add('active');
-        document.getElementById('tabMe').classList.remove('active');
+        switchToFeed();
         loadFeed(false);
     });
     document.getElementById('tabMe').addEventListener('click', () => {
         currentScope = 'me';
+        document.querySelectorAll('.scope-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('tabMe').classList.add('active');
-        document.getElementById('tabAll').classList.remove('active');
+        switchToFeed();
         loadFeed(false);
     });
+    document.getElementById('tabMembers').addEventListener('click', () => {
+        document.querySelectorAll('.scope-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tabMembers').classList.add('active');
+        switchToMembers();
+    });
 
+    document.getElementById('membersSearch').addEventListener('input', () => {
+        clearTimeout(membersSearchTimer);
+        membersSearchTimer = setTimeout(() => loadMembers(false), 350);
+    });
+    document.getElementById('membersMoreBtn').addEventListener('click', () => loadMembers(true));
     document.getElementById('loadMoreBtn').addEventListener('click', () => loadFeed(true));
 
     // Mobile menu toggle

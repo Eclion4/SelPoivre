@@ -1,6 +1,10 @@
 <?php
 /**
- * Sel & Poivre — Sitemap XML dynamique
+ * Sitemap dynamique — Sel & Poivre
+ * Accessible à : https://sel-poivre.com/sitemap.php
+ * Déclaré dans robots.txt : Sitemap: https://sel-poivre.com/sitemap.php
+ *
+ * Pages statiques + toutes recettes publiées + profils membres
  * Accessible via /sitemap.xml (rewrite .htaccess) ou directement /sitemap.php
  */
 require_once __DIR__ . '/api/config.php';
@@ -12,11 +16,12 @@ $now    = gmdate('Y-m-d');
 
 // Pages statiques
 $staticPages = [
-    ['loc' => '/',            'changefreq' => 'daily',   'priority' => '1.0'],
-    ['loc' => '/recettes',    'changefreq' => 'daily',   'priority' => '0.9'],
-    ['loc' => '/communaute',  'changefreq' => 'daily',   'priority' => '0.7'],
-    ['loc' => '/contact',     'changefreq' => 'monthly', 'priority' => '0.3'],
-    ['loc' => '/cgu',         'changefreq' => 'yearly',  'priority' => '0.1'],
+    ['loc' => '/',              'changefreq' => 'daily',   'priority' => '1.0'],
+    ['loc' => '/recettes',      'changefreq' => 'daily',   'priority' => '0.9'],
+    ['loc' => '/communaute',    'changefreq' => 'daily',   'priority' => '0.7'],
+    ['loc' => '/a-propos',      'changefreq' => 'monthly', 'priority' => '0.5'],
+    ['loc' => '/contact',       'changefreq' => 'monthly', 'priority' => '0.3'],
+    ['loc' => '/cgu',           'changefreq' => 'yearly',  'priority' => '0.1'],
     ['loc' => '/confidentialite', 'changefreq' => 'yearly', 'priority' => '0.1'],
 ];
 

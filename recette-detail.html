@@ -62,9 +62,31 @@
         /* Timer chip */
         .timer-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;background:#FEF2F0;color:#C4311B;border:1px solid rgba(196,49,27,.25);border-radius:9999px;font-size:.8125rem;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit;vertical-align:middle;line-height:1.6;}
         .timer-chip:hover,.timer-chip:focus{background:#C4311B;color:white;border-color:#C4311B;outline:none;}
-        /* Cooking timer widget */
-        #cookingTimer{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));right:1rem;z-index:1000;background:#18130F;color:white;border-radius:1.25rem;padding:1.25rem;width:220px;box-shadow:0 20px 60px rgba(0,0,0,.4);transition:opacity .2s;}
-        @media(min-width:768px){#cookingTimer{bottom:2rem;right:1.5rem;}}
+        /* Timer FAB */
+        #timerFab{position:fixed;bottom:calc(76px + env(safe-area-inset-bottom,0px));right:1rem;z-index:900;display:flex;align-items:center;gap:8px;padding:11px 18px;background:#18130F;color:white;border:1px solid rgba(255,255,255,.10);border-radius:9999px;font-size:.8125rem;font-weight:600;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.32),0 2px 8px rgba(0,0,0,.18);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;letter-spacing:.01em;font-family:inherit;}
+        #timerFab:hover{transform:scale(1.04);box-shadow:0 12px 40px rgba(0,0,0,.38);}
+        #timerFab:active{transform:scale(.96);}
+        #timerFab .fab-dot{width:8px;height:8px;border-radius:50%;background:#C4311B;flex-shrink:0;}
+        @media(min-width:768px){#timerFab{bottom:2rem;right:1.5rem;}}
+        /* Cooking timer widget — Apple style */
+        #cookingTimer{position:fixed;bottom:calc(140px + env(safe-area-inset-bottom,0px));right:1rem;z-index:1000;background:rgba(20,15,10,.88);-webkit-backdrop-filter:blur(40px) saturate(1.8);backdrop-filter:blur(40px) saturate(1.8);color:white;border-radius:28px;padding:24px 24px 20px;width:288px;box-shadow:0 40px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.07);transition:opacity .25s,transform .35s cubic-bezier(.34,1.56,.64,1);transform-origin:bottom right;}
+        #cookingTimer.hidden{opacity:0;transform:scale(.82) translateY(24px);pointer-events:none;}
+        #cookingTimer:not(.hidden){opacity:1;transform:scale(1) translateY(0);}
+        @media(min-width:768px){#cookingTimer{bottom:5.5rem;right:1.5rem;}}
+        /* Ring */
+        #timerRingTrack{stroke:rgba(255,255,255,.08);}
+        #timerRingProg{stroke:#C4311B;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s;}
+        /* Time input */
+        .timer-time-input{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:14px;color:white;font-size:2rem;font-weight:700;text-align:center;width:72px;padding:6px 4px;font-variant-numeric:tabular-nums;outline:none;-moz-appearance:textfield;}
+        .timer-time-input::-webkit-inner-spin-button,.timer-time-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+        .timer-time-input:focus{border-color:rgba(196,49,27,.6);background:rgba(196,49,27,.08);}
+        /* Buttons */
+        #timerToggle{flex:1;padding:10px;border-radius:14px;font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;background:#C4311B;color:white;letter-spacing:.01em;}
+        #timerToggle:active{transform:scale(.95);}
+        #timerReset{width:44px;height:44px;border-radius:14px;border:none;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.10);color:white;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        #timerReset:active{transform:scale(.92);}
+        #timerReset:hover{background:rgba(255,255,255,.16);}
+        #timerToggle:hover{background:#a82818;}
         /* Print */
         @media print{
             #navbar,footer,.sp-bnav,#printBtn,#shareWrapper,#favBtn,
@@ -1077,18 +1099,50 @@
     init();
 
     // ── Cooking Timer ─────────────────────────────────────────────
-    // Inject widget into DOM before attaching listeners
+    const RING_R = 72, RING_CIRC = +(2 * Math.PI * RING_R).toFixed(2);
     document.body.insertAdjacentHTML('beforeend', `
-        <div id="cookingTimer" class="hidden">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-sm font-semibold">⏱ Minuterie</span>
-                <button id="timerClose" class="text-white/50 hover:text-white text-xl leading-none" aria-label="Fermer">×</button>
+        <button id="timerFab" aria-label="Ouvrir la minuterie">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9.5 3h5M12 3v2"/>
+            </svg>
+            Minuterie
+            <span class="fab-dot" id="fabDot" style="display:none"></span>
+        </button>
+        <div id="cookingTimer" class="hidden" role="dialog" aria-label="Minuterie">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <span style="font-size:.8125rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45)">Minuterie</span>
+                <button id="timerClose" style="background:rgba(255,255,255,.10);border:none;color:rgba(255,255,255,.7);cursor:pointer;width:28px;height:28px;border-radius:50%;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background .15s" aria-label="Fermer">×</button>
             </div>
-            <div id="timerDisplay" class="text-4xl font-bold text-center font-mono tracking-wider py-2">00:00</div>
-            <p id="timerLabel" class="text-xs text-center mb-3 truncate" style="color:rgba(255,255,255,.5)"></p>
-            <div class="flex gap-2">
-                <button id="timerToggle" class="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors text-white" style="background:#C4311B">Démarrer</button>
-                <button id="timerReset" class="px-3 py-2 rounded-xl text-sm font-semibold text-white transition-colors" style="background:rgba(255,255,255,.12)">↺</button>
+
+            <div style="display:flex;justify-content:center;margin-bottom:18px;position:relative">
+                <svg width="180" height="180" viewBox="0 0 180 180" style="transform:rotate(-90deg)">
+                    <circle id="timerRingTrack" cx="90" cy="90" r="${RING_R}" fill="none" stroke-width="6"/>
+                    <circle id="timerRingProg"  cx="90" cy="90" r="${RING_R}" fill="none" stroke-width="6"
+                            stroke-dasharray="${RING_CIRC}" stroke-dashoffset="${RING_CIRC}"/>
+                </svg>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+                    <div id="timerDisplay" style="font-size:2.6rem;font-weight:700;letter-spacing:.04em;font-variant-numeric:tabular-nums;line-height:1">00:00</div>
+                    <p id="timerLabel" style="font-size:.7rem;color:rgba(255,255,255,.4);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center"></p>
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                    <label style="font-size:.65rem;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase">min</label>
+                    <input id="timerInputMin" class="timer-time-input" type="number" min="0" max="99" value="05" inputmode="numeric">
+                </div>
+                <span style="font-size:1.75rem;font-weight:300;color:rgba(255,255,255,.3);padding-bottom:14px">:</span>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                    <label style="font-size:.65rem;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase">sec</label>
+                    <input id="timerInputSec" class="timer-time-input" type="number" min="0" max="59" value="00" inputmode="numeric">
+                </div>
+            </div>
+
+            <div style="display:flex;gap:8px">
+                <button id="timerToggle">Démarrer</button>
+                <button id="timerReset" title="Réinitialiser">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                </button>
             </div>
         </div>`);
 
@@ -1105,60 +1159,114 @@
     }
     function linkTimers(text) {
         const re = /\b\d+\s*(?:h(?:eure?s?)?(?:\s*\d+\s*(?:min(?:ute?s?)?)?)?|min(?:ute?s?)?|heures?)\b/gi;
-        return text.replace(re, m => {
-            const mins = parseTimerMins(m);
-            if (mins < 1 || mins > 720) return m;
-            return `<button class="timer-chip" data-mins="${mins}" data-label="${m.replace(/"/g,'&quot;')}">⏱ ${m}</button>`;
+        return text.replace(re, raw => {
+            const mins = parseTimerMins(raw);
+            if (mins < 1 || mins > 720) return raw;
+            return `<button class="timer-chip" data-mins="${mins}" data-label="${raw.replace(/"/g,'&quot;')}">⏱ ${raw}</button>`;
         });
     }
 
     let timerSecs = 0, timerOrigSecs = 0, timerRunning = false, timerIv = null;
+
+    function pad2(n) { return String(n).padStart(2,'0'); }
+
+    function setRing(pct) {
+        document.getElementById('timerRingProg').style.strokeDashoffset = RING_CIRC * (1 - Math.max(0, Math.min(1, pct)));
+    }
     function updateTimerDisplay() {
-        const m = String(Math.floor(timerSecs / 60)).padStart(2,'0');
-        const s = String(timerSecs % 60).padStart(2,'0');
-        document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+        const m = Math.floor(timerSecs / 60), s = timerSecs % 60;
+        document.getElementById('timerDisplay').textContent = `${pad2(m)}:${pad2(s)}`;
+        setRing(timerOrigSecs > 0 ? timerSecs / timerOrigSecs : 0);
     }
-    function startCookingTimer(mins, label) {
-        clearInterval(timerIv); timerRunning = false;
-        timerSecs = timerOrigSecs = mins * 60;
+    function syncInputsFromSecs(secs) {
+        document.getElementById('timerInputMin').value = pad2(Math.floor(secs / 60));
+        document.getElementById('timerInputSec').value = pad2(secs % 60);
+    }
+    function secsFromInputs() {
+        return Math.min(99,Math.max(0,+document.getElementById('timerInputMin').value||0)) * 60
+             + Math.min(59,Math.max(0,+document.getElementById('timerInputSec').value||0));
+    }
+
+    function openTimer(secs, label) {
+        timerSecs = timerOrigSecs = secs;
         document.getElementById('timerLabel').textContent = label || '';
-        const tb = document.getElementById('timerToggle');
-        tb.textContent = 'Démarrer'; tb.style.background = '#C4311B';
+        syncInputsFromSecs(secs);
         updateTimerDisplay();
+        document.getElementById('timerRingProg').style.stroke = '#C4311B';
         document.getElementById('cookingTimer').classList.remove('hidden');
+        document.getElementById('fabDot').style.display = 'inline-block';
     }
+    function stopTimer() {
+        clearInterval(timerIv); timerRunning = false;
+        document.getElementById('timerToggle').textContent = 'Démarrer';
+        document.getElementById('timerToggle').style.background = '#C4311B';
+    }
+
+    // FAB
+    document.getElementById('timerFab').addEventListener('click', () => {
+        const t = document.getElementById('cookingTimer');
+        if (t.classList.contains('hidden')) {
+            if (timerOrigSecs === 0) openTimer(secsFromInputs(), '');
+            else t.classList.remove('hidden');
+        } else {
+            t.classList.add('hidden');
+        }
+    });
+
+    // Inputs: update secs when not running
+    ['timerInputMin','timerInputSec'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+            if (timerRunning) return;
+            timerSecs = timerOrigSecs = secsFromInputs();
+            updateTimerDisplay();
+        });
+        document.getElementById(id).addEventListener('focus', function(){ this.select(); });
+    });
+
     document.getElementById('timerToggle').addEventListener('click', () => {
-        if (timerSecs <= 0) { timerSecs = timerOrigSecs; updateTimerDisplay(); return; }
+        if (!timerRunning && timerSecs === 0) {
+            timerSecs = timerOrigSecs = secsFromInputs();
+            if (!timerSecs) return;
+        }
         timerRunning = !timerRunning;
         const tb = document.getElementById('timerToggle');
-        tb.textContent = timerRunning ? 'Pause' : 'Reprendre';
-        tb.style.background = timerRunning ? '#6B7280' : '#C4311B';
         if (timerRunning) {
+            tb.textContent = 'Pause';
+            tb.style.background = 'rgba(255,255,255,.12)';
             timerIv = setInterval(() => {
                 timerSecs--;
                 updateTimerDisplay();
                 if (timerSecs <= 0) {
                     clearInterval(timerIv); timerRunning = false;
                     document.getElementById('timerDisplay').textContent = '🎉 Fini !';
+                    document.getElementById('timerRingProg').style.stroke = '#C4892A';
                     tb.textContent = 'Recommencer'; tb.style.background = '#C4311B';
+                    try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAA').play(); } catch(e){}
                 }
             }, 1000);
-        } else { clearInterval(timerIv); }
+        } else {
+            clearInterval(timerIv);
+            tb.textContent = 'Reprendre';
+            tb.style.background = '#C4311B';
+        }
     });
+
     document.getElementById('timerReset').addEventListener('click', () => {
-        clearInterval(timerIv); timerRunning = false;
+        stopTimer();
         timerSecs = timerOrigSecs;
+        document.getElementById('timerRingProg').style.stroke = '#C4311B';
         updateTimerDisplay();
-        const tb = document.getElementById('timerToggle');
-        tb.textContent = 'Démarrer'; tb.style.background = '#C4311B';
     });
+
     document.getElementById('timerClose').addEventListener('click', () => {
-        clearInterval(timerIv); timerRunning = false;
         document.getElementById('cookingTimer').classList.add('hidden');
     });
+
     document.getElementById('stepsList').addEventListener('click', e => {
         const chip = e.target.closest('.timer-chip');
-        if (chip) startCookingTimer(+chip.dataset.mins, chip.dataset.label);
+        if (!chip) return;
+        stopTimer();
+        openTimer(+chip.dataset.mins * 60, chip.dataset.label);
     });
 })();
 </script>

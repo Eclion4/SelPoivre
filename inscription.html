@@ -288,22 +288,24 @@
 
                     <form id="step1Form" novalidate class="mt-6">
                         <div class="space-y-4">
-                            <!-- Prénom + Nom -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Prénom</label>
-                                    <div class="input-wrapper">
-                                        <svg class="input-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                        <input type="text" id="firstname" class="input-field" placeholder="Marie" autocomplete="given-name">
-                                    </div>
+                            <!-- Pseudo -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                    Pseudo <span class="text-red-500">*</span>
+                                </label>
+                                <div class="input-wrapper">
+                                    <svg class="input-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    <input type="text" id="username" class="input-field" placeholder="chef_marie, cuisto42…" autocomplete="username" maxlength="30" spellcheck="false">
+                                    <span id="usernameSpinner" class="hidden" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);">
+                                        <svg class="animate-spin w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                                    </span>
+                                    <span id="usernameCheck" class="hidden" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:1rem;"></span>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Nom</label>
-                                    <div class="input-wrapper">
-                                        <svg class="input-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                        <input type="text" id="lastname" class="input-field" placeholder="Lefèvre" autocomplete="family-name">
-                                    </div>
+                                <div class="mt-1.5 flex items-center justify-between gap-2">
+                                    <p class="text-xs text-gray-400">3 à 30 caractères — lettres, chiffres, <code>_</code> ou <code>-</code> autorisés.</p>
+                                    <span id="usernameAvailMsg" class="text-xs font-semibold whitespace-nowrap"></span>
                                 </div>
+                                <p class="mt-0.5 text-xs text-red-500 hidden" id="usernameError"></p>
                             </div>
 
                             <!-- Email -->
@@ -450,7 +452,7 @@
                         <div class="space-y-2">
                             <div class="flex items-start gap-2 text-xs text-gray-500">
                                 <svg class="w-4 h-4 text-or-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                                <span><strong class="text-gray-700">Prénom, nom, email</strong> — identification et connexion</span>
+                                <span><strong class="text-gray-700">Pseudo, email</strong> — identification et connexion</span>
                             </div>
                             <div class="flex items-start gap-2 text-xs text-gray-500">
                                 <svg class="w-4 h-4 text-or-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -623,25 +625,113 @@
             });
         }
 
+        /* ===== VÉRIF PSEUDO DISPONIBLE (debounce) ===== */
+        const USERNAME_RE = /^[a-zA-Z0-9_\-À-ɏ]{3,30}$/;
+        let usernameTimer = null;
+        let usernameAvailable = false;
+
+        function setUsernameUI(state, msg) {
+            // state: 'ok' | 'error' | 'loading' | 'idle'
+            const spinner  = document.getElementById('usernameSpinner');
+            const checkEl  = document.getElementById('usernameCheck');
+            const availMsg = document.getElementById('usernameAvailMsg');
+            const input    = document.getElementById('username');
+
+            spinner.classList.add('hidden');
+            checkEl.classList.add('hidden');
+            availMsg.textContent = msg || '';
+
+            if (state === 'loading') {
+                spinner.classList.remove('hidden');
+                availMsg.className = 'text-xs font-semibold whitespace-nowrap text-gray-400';
+                input.classList.remove('error', 'success');
+            } else if (state === 'ok') {
+                checkEl.textContent = '✓';
+                checkEl.classList.remove('hidden');
+                checkEl.style.color = '#22C55E';
+                availMsg.className = 'text-xs font-semibold whitespace-nowrap text-green-600';
+                input.classList.remove('error');
+                input.classList.add('success');
+                usernameAvailable = true;
+            } else if (state === 'error') {
+                checkEl.textContent = '✕';
+                checkEl.classList.remove('hidden');
+                checkEl.style.color = '#EF4444';
+                availMsg.className = 'text-xs font-semibold whitespace-nowrap text-red-500';
+                input.classList.add('error');
+                input.classList.remove('success');
+                usernameAvailable = false;
+            } else {
+                availMsg.className = 'text-xs font-semibold whitespace-nowrap';
+                input.classList.remove('error', 'success');
+                usernameAvailable = false;
+            }
+        }
+
+        async function checkUsernameAvailability(val) {
+            if (!USERNAME_RE.test(val)) {
+                setUsernameUI('error', val.length < 3 ? 'Trop court' : 'Format invalide');
+                return;
+            }
+            setUsernameUI('loading', 'Vérification…');
+            try {
+                const res  = await fetch('api/auth.php?action=check_username&username=' + encodeURIComponent(val));
+                const data = await res.json();
+                if (data.available) {
+                    setUsernameUI('ok', 'Disponible !');
+                } else {
+                    setUsernameUI('error', data.message || 'Déjà pris');
+                }
+            } catch {
+                setUsernameUI('idle', '');
+            }
+        }
+
+        document.getElementById('username').addEventListener('input', function () {
+            clearTimeout(usernameTimer);
+            const val = this.value.trim();
+            if (!val) { setUsernameUI('idle', ''); return; }
+            setUsernameUI('loading', '');
+            usernameTimer = setTimeout(() => checkUsernameAvailability(val), 500);
+        });
+
         /* ===== VALIDATION STEP 1 ===== */
         function validateStep1() {
-            const email = document.getElementById('email').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const email    = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const confirm = document.getElementById('passwordConfirm').value;
-            const firstname = document.getElementById('firstname').value.trim();
-            const lastname = document.getElementById('lastname').value.trim();
+            const confirm  = document.getElementById('passwordConfirm').value;
 
-            if (!firstname || !lastname) {
+            // Pseudo
+            const usernameErr = document.getElementById('usernameError');
+            if (!USERNAME_RE.test(username)) {
+                usernameErr.textContent = username.length < 3
+                    ? 'Pseudo trop court (3 caractères minimum).'
+                    : 'Pseudo invalide — lettres, chiffres, _ ou - uniquement.';
+                usernameErr.classList.remove('hidden');
+                document.getElementById('username').classList.add('error');
                 document.getElementById('step1Form').classList.add('shake');
                 setTimeout(() => document.getElementById('step1Form').classList.remove('shake'), 400);
                 return false;
             }
+            if (!usernameAvailable) {
+                usernameErr.textContent = 'Vérifiez la disponibilité du pseudo.';
+                usernameErr.classList.remove('hidden');
+                document.getElementById('username').classList.add('error');
+                document.getElementById('step1Form').classList.add('shake');
+                setTimeout(() => document.getElementById('step1Form').classList.remove('shake'), 400);
+                return false;
+            }
+            usernameErr.classList.add('hidden');
+            document.getElementById('username').classList.remove('error');
 
+            // Email
             const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             document.getElementById('emailError').classList.toggle('hidden', emailOk);
             document.getElementById('email').classList.toggle('error', !emailOk);
             if (!emailOk) return false;
 
+            // Mot de passe
             if (password.length < 8) {
                 document.getElementById('password').classList.add('error');
                 return false;
@@ -736,11 +826,9 @@
                 return;
             }
 
-            const firstname = document.getElementById('firstname').value.trim();
-            const lastname  = document.getElementById('lastname').value.trim();
+            const username  = document.getElementById('username').value.trim();
             const email     = document.getElementById('email').value.trim();
             const password  = document.getElementById('password').value;
-            const username  = (firstname + ' ' + lastname).trim();
 
             const dietary = [...document.querySelectorAll('#dietTags .tag-choice.selected')].map(el => el.textContent.trim());
             const level   = document.querySelector('.level-btn.border-sp-500 .text-sm')?.textContent.trim() || '';

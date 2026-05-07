@@ -12,6 +12,7 @@ switch ($action) {
     case 'change_password':  handleChangePassword();  break;
     case 'delete_account':   handleDeleteAccount();   break;
     case 'public_stats':     handlePublicStats();     break;
+    case 'check_username':   handleCheckUsername();   break;
     default: jsonResponse(['error' => 'Action inconnue'], 400);
 }
 
@@ -40,8 +41,10 @@ function handleRegister() {
         jsonResponse(['error' => 'Email invalide'], 400);
     if (strlen($password) < 8)
         jsonResponse(['error' => 'Mot de passe trop court (8 caractères min)'], 400);
-    if (strlen($username) < 3)
-        jsonResponse(['error' => 'Pseudo trop court (3 caractères min)'], 400);
+    if (strlen($username) < 3 || strlen($username) > 30)
+        jsonResponse(['error' => 'Pseudo : entre 3 et 30 caractères'], 400);
+    if (!preg_match('/^[\p{L}0-9_\-]{3,30}$/u', $username))
+        jsonResponse(['error' => 'Pseudo invalide : lettres, chiffres, _ ou - uniquement'], 400);
 
     $db = getDB();
     $s = $db->prepare('SELECT id FROM users WHERE email = ? OR username = ?');
@@ -127,7 +130,8 @@ function handleUpdateProfile() {
     $avatar   = trim($d['avatar']   ?? '');
     $prefs    = $d['preferences'] ?? null;
 
-    if (!$username || strlen($username) < 3) jsonResponse(['error' => 'Pseudo trop court (3 min)'], 400);
+    if (!$username || strlen($username) < 3 || strlen($username) > 30) jsonResponse(['error' => 'Pseudo : entre 3 et 30 caractères'], 400);
+    if (!preg_match('/^[\p{L}0-9_\-]{3,30}$/u', $username)) jsonResponse(['error' => 'Pseudo invalide : lettres, chiffres, _ ou - uniquement'], 400);
     if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) jsonResponse(['error' => 'Email invalide'], 400);
     if (mb_strlen($bio) > 500) jsonResponse(['error' => 'Bio trop longue (500 max)'], 400);
 
@@ -178,6 +182,30 @@ function handleChangePassword() {
     $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
        ->execute([$hash, $_SESSION['user_id']]);
     jsonResponse(['success' => true]);
+}
+
+function handleCheckUsername() {
+    rateLimit('check_username', 30, 60);
+    $username = trim($_GET['username'] ?? $_POST['username'] ?? '');
+    if (!$username) jsonResponse(['available' => false, 'error' => 'Pseudo manquant'], 400);
+
+    $valid = preg_match('/^[\p{L}0-9_\-]{3,30}$/u', $username);
+    if (!$valid) {
+        jsonResponse(['available' => false, 'valid' => false, 'message' => 'Format invalide']);
+    }
+
+    $db = getDB();
+    $uid = (int)($_SESSION['user_id'] ?? 0);
+    $s = $db->prepare('SELECT id FROM users WHERE username = ?' . ($uid ? ' AND id <> ?' : ''));
+    $params = $uid ? [$username, $uid] : [$username];
+    $s->execute($params);
+    $taken = (bool)$s->fetch();
+
+    jsonResponse([
+        'available' => !$taken,
+        'valid'     => true,
+        'message'   => $taken ? 'Pseudo déjà pris' : 'Pseudo disponible',
+    ]);
 }
 
 function handleDeleteAccount() {

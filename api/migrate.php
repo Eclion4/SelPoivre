@@ -221,6 +221,13 @@ $migrations = [
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
+    // ── Pseudo : contrainte UNIQUE + index pour check_username ───────────────
+    // UNIQUE garantit l'unicité même en cas de requêtes concurrentes.
+    // La migration échoue silencieusement si la contrainte existe déjà.
+    'users.username_unique' => "ALTER TABLE users ADD UNIQUE KEY uq_username (username)",
+    // Index sur email pour les logins (si absent)
+    'users.email_index'     => "ALTER TABLE users ADD INDEX idx_email (email)",
+
     // ── Notifications ─────────────────────────────────────────────────────────
     'notifications.create' => "CREATE TABLE IF NOT EXISTS notifications (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -241,7 +248,17 @@ foreach ($migrations as $name => $sql) {
         $db->exec($sql);
         $results[] = ['migration' => $name, 'status' => 'ok'];
     } catch (PDOException $e) {
-        $results[] = ['migration' => $name, 'status' => 'error', 'message' => $e->getMessage()];
+        $code = (int)$e->getCode();
+        $msg  = $e->getMessage();
+        // 1061 = Duplicate key name, 1060 = Duplicate column → déjà appliqué
+        $alreadyDone = $code === 1061 || $code === 1060
+            || str_contains($msg, 'Duplicate key name')
+            || str_contains($msg, 'Duplicate column name');
+        $results[] = [
+            'migration' => $name,
+            'status'    => $alreadyDone ? 'skipped' : 'error',
+            'message'   => $alreadyDone ? 'Déjà appliqué' : $msg,
+        ];
     }
 }
 

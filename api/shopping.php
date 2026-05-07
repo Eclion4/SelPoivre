@@ -1,6 +1,12 @@
 <?php
 require_once 'config.php';
 
+// Attrapeur global — convertit toute exception non gérée en JSON valide
+set_exception_handler(function (Throwable $e) {
+    error_log('[SP shopping] ' . $e->getMessage());
+    jsonResponse(['error' => 'Erreur serveur. Vérifiez que les migrations ont été exécutées.'], 500);
+});
+
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 

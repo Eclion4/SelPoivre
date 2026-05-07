@@ -126,6 +126,11 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         <span class="hidden md:inline">Publier</span>
     </a>
+    <!-- Cart -->
+    <button type="button" class="js-cart-trigger relative w-9 h-9 rounded-full hover:bg-sp-50 transition-colors flex items-center justify-center border border-gray-200 hover:border-sp-300" aria-label="Liste de courses" title="Ma liste de courses">
+        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="js-cart-badge hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-sp-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white leading-none">0</span>
+    </button>
     <!-- Bell -->
     <div class="relative js-bell-wrap hidden">
         <button type="button" class="js-bell-trigger relative p-2 rounded-full hover:bg-sp-50 transition-colors" aria-label="Notifications">
@@ -163,6 +168,14 @@
             <a href="${pagePath('profil.html')}#mes-recettes" class="flex items-center gap-3 px-4 py-2.5 text-sm text-encre hover:bg-sp-50 transition-colors">
                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
                 Mes recettes
+            </a>
+            <a href="${pagePath('liste-courses.html')}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-encre hover:bg-sp-50 transition-colors">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+                Liste de courses
+            </a>
+            <a href="${pagePath('planificateur.html')}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-encre hover:bg-sp-50 transition-colors">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Planificateur
             </a>
             <a href="${pagePath('publier.html')}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-encre hover:bg-sp-50 transition-colors">
                 <svg class="w-4 h-4 text-sp-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>

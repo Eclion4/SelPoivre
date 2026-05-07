@@ -221,6 +221,78 @@ $migrations = [
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 
+    // ── Compteur de vues ──────────────────────────────────────────────────────
+    'recipes.views'          => "ALTER TABLE recipes ADD COLUMN IF NOT EXISTS views INT UNSIGNED NOT NULL DEFAULT 0",
+    'recipes.views_index'    => "ALTER TABLE recipes ADD INDEX idx_views (views)",
+
+    // Log quotidien des vues (pour graphiques 30 jours) — 1 ligne par (recette, jour)
+    'recipe_view_log.create' => "CREATE TABLE IF NOT EXISTS recipe_view_log (
+        recipe_id INT NOT NULL,
+        day       DATE NOT NULL,
+        count     INT UNSIGNED NOT NULL DEFAULT 1,
+        PRIMARY KEY (recipe_id, day),
+        INDEX idx_day (day),
+        FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    // ── Mot de passe oublié ───────────────────────────────────────────────────
+    'password_resets.create' => "CREATE TABLE IF NOT EXISTS password_resets (
+        id         INT AUTO_INCREMENT PRIMARY KEY,
+        user_id    INT NOT NULL,
+        token      VARCHAR(64) NOT NULL,
+        expires_at DATETIME NOT NULL,
+        used       TINYINT(1) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_token (token),
+        INDEX idx_user (user_id),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    // ── Signalements ──────────────────────────────────────────────────────────
+    'reports.create'         => "CREATE TABLE IF NOT EXISTS reports (
+        id          INT AUTO_INCREMENT PRIMARY KEY,
+        reporter_id INT NOT NULL,
+        type        ENUM('recipe','comment') NOT NULL,
+        target_id   INT NOT NULL,
+        reason      ENUM('spam','inappropriate','copyright','other') NOT NULL DEFAULT 'other',
+        note        VARCHAR(500) NULL,
+        status      ENUM('pending','reviewed','dismissed') NOT NULL DEFAULT 'pending',
+        created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_status  (status),
+        INDEX idx_target  (type, target_id),
+        INDEX idx_reporter(reporter_id),
+        FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    // ── Liste de courses ──────────────────────────────────────────────────────
+    'shopping_list.create'   => "CREATE TABLE IF NOT EXISTS shopping_list (
+        id         INT AUTO_INCREMENT PRIMARY KEY,
+        user_id    INT NOT NULL,
+        ingredient VARCHAR(255) NOT NULL,
+        qty        VARCHAR(60)  NULL,
+        unit       VARCHAR(40)  NULL,
+        recipe_id  INT NULL,
+        checked    TINYINT(1) NOT NULL DEFAULT 0,
+        added_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user (user_id),
+        FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
+        FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    // ── Planificateur de repas ────────────────────────────────────────────────
+    'meal_plan.create'       => "CREATE TABLE IF NOT EXISTS meal_plan (
+        id         INT AUTO_INCREMENT PRIMARY KEY,
+        user_id    INT NOT NULL,
+        recipe_id  INT NOT NULL,
+        plan_date  DATE NOT NULL,
+        meal_type  ENUM('petit-dejeuner','dejeuner','diner','snack') NOT NULL DEFAULT 'dejeuner',
+        servings   TINYINT UNSIGNED DEFAULT 2,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user_week (user_id, plan_date),
+        FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
+        FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
     // ── Pseudo : contrainte UNIQUE + index pour check_username ───────────────
     // UNIQUE garantit l'unicité même en cas de requêtes concurrentes.
     // La migration échoue silencieusement si la contrainte existe déjà.

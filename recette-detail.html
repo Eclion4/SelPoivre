@@ -208,26 +208,31 @@
                     <!-- Author -->
                     <div class="mt-6 flex items-center gap-3" id="authorBlock"></div>
                     <!-- Stats -->
-                    <div class="mt-8 grid grid-cols-4 gap-3">
-                        <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
-                            <i data-lucide="clock" class="w-5 h-5 text-sp-500 mx-auto mb-1"></i>
+                    <div class="mt-8 grid grid-cols-5 gap-2">
+                        <div class="bg-white border border-gray-200 rounded-xl p-2 sm:p-3 text-center">
+                            <i data-lucide="clock" class="w-4 h-4 sm:w-5 sm:h-5 text-sp-500 mx-auto mb-1"></i>
                             <p class="text-xs text-gray-500">Total</p>
-                            <p id="statTotal" class="text-sm font-bold">—</p>
+                            <p id="statTotal" class="text-xs sm:text-sm font-bold">—</p>
                         </div>
-                        <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
-                            <i data-lucide="users" class="w-5 h-5 text-sp-500 mx-auto mb-1"></i>
+                        <div class="bg-white border border-gray-200 rounded-xl p-2 sm:p-3 text-center">
+                            <i data-lucide="users" class="w-4 h-4 sm:w-5 sm:h-5 text-sp-500 mx-auto mb-1"></i>
                             <p class="text-xs text-gray-500">Portions</p>
-                            <p id="statServings" class="text-sm font-bold">—</p>
+                            <p id="statServings" class="text-xs sm:text-sm font-bold">—</p>
                         </div>
-                        <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
-                            <i data-lucide="chef-hat" class="w-5 h-5 text-sp-500 mx-auto mb-1"></i>
+                        <div class="bg-white border border-gray-200 rounded-xl p-2 sm:p-3 text-center">
+                            <i data-lucide="chef-hat" class="w-4 h-4 sm:w-5 sm:h-5 text-sp-500 mx-auto mb-1"></i>
                             <p class="text-xs text-gray-500">Difficulté</p>
-                            <p id="statDifficulty" class="text-sm font-bold">—</p>
+                            <p id="statDifficulty" class="text-xs sm:text-sm font-bold">—</p>
                         </div>
-                        <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
-                            <i data-lucide="star" class="w-5 h-5 text-or-500 mx-auto mb-1"></i>
+                        <div class="bg-white border border-gray-200 rounded-xl p-2 sm:p-3 text-center">
+                            <i data-lucide="star" class="w-4 h-4 sm:w-5 sm:h-5 text-or-500 mx-auto mb-1"></i>
                             <p class="text-xs text-gray-500">Note</p>
-                            <p id="statRating" class="text-sm font-bold">—</p>
+                            <p id="statRating" class="text-xs sm:text-sm font-bold">—</p>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-xl p-2 sm:p-3 text-center">
+                            <i data-lucide="eye" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mx-auto mb-1"></i>
+                            <p class="text-xs text-gray-500">Vues</p>
+                            <p id="statViews" class="text-xs sm:text-sm font-bold">—</p>
                         </div>
                     </div>
                     <!-- Actions -->
@@ -265,6 +270,13 @@
                         <a id="editLink" class="hidden px-5 py-3 bg-or-50 border-2 border-or-200 text-or-700 rounded-full font-semibold text-sm hover:bg-or-100 transition-all flex items-center gap-2">
                             <i data-lucide="edit-3" class="w-4 h-4"></i> Modifier
                         </a>
+                        <button id="cartBtn" class="hidden px-5 py-3 bg-green-50 border-2 border-green-200 text-green-700 rounded-full font-semibold text-sm hover:bg-green-100 transition-all flex items-center gap-2">
+                            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                            <span id="cartBtnLabel">Ajouter aux courses</span>
+                        </button>
+                        <button id="reportBtn" class="hidden px-4 py-2.5 bg-white border border-gray-200 text-gray-400 rounded-full text-xs hover:border-red-200 hover:text-red-500 transition-all flex items-center gap-1.5">
+                            <i data-lucide="flag" class="w-3.5 h-3.5"></i> Signaler
+                        </button>
                     </div>
                 </div>
                 <div class="rounded-3xl overflow-hidden shadow-xl aspect-[4/3]">
@@ -364,6 +376,43 @@
             </div>
         </div>
     </section>
+    <!-- MODAL SIGNALEMENT -->
+    <div id="reportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="reportModalBackdrop"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="font-display font-bold text-lg flex items-center gap-2">
+                    <i data-lucide="flag" class="w-5 h-5 text-red-500"></i> Signaler cette recette
+                </h3>
+                <button id="reportModalClose" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-gray-700">Raison du signalement</label>
+                    <select id="reportReason" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sp-500 bg-white">
+                        <option value="inappropriate">Contenu inapproprié</option>
+                        <option value="spam">Spam ou publicité</option>
+                        <option value="copyright">Violation de droits d'auteur</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-gray-700">Note complémentaire <span class="font-normal text-gray-400">(optionnel)</span></label>
+                    <textarea id="reportNote" rows="3" maxlength="500" placeholder="Précisez si nécessaire…" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sp-500 resize-none"></textarea>
+                </div>
+                <p id="reportError" class="hidden text-sm text-red-500"></p>
+            </div>
+            <div class="mt-6 flex gap-3">
+                <button id="reportCancel" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">Annuler</button>
+                <button id="reportSubmit" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="flag" class="w-4 h-4"></i> Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="bg-encre text-white py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -397,6 +446,7 @@
     function fmtTime(min){if(!min)return '—';if(min<60)return min+' min';const h=Math.floor(min/60),m=min%60;return m?h+'h'+String(m).padStart(2,'0'):h+'h';}
     function fmtDate(iso){try{return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});}catch{return '';}}
     function realisticCount(raw){ return parseInt(raw) || 0; }
+    function fmtViews(n){n=parseInt(n)||0;if(n>=1000000)return (n/1000000).toFixed(1).replace('.0','')+'M';if(n>=1000)return (n/1000).toFixed(n>=10000?0:1).replace('.0','')+'k';return String(n);}
     function escape(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
     function starsHTML(rating){
@@ -571,6 +621,7 @@
         const ratingVal = parseFloat(r.rating || 0);
         const ratingCnt = realisticCount(r.rating_count);
         document.getElementById('statRating').innerHTML = ratingVal > 0 ? `${ratingVal.toFixed(1)} <span class="text-xs text-gray-400">(${ratingCnt})</span>` : '<span class="text-xs text-gray-400">Aucun avis</span>';
+        document.getElementById('statViews').textContent = fmtViews(r.views);
 
         // Edit link if owner or admin
         const u = window.SP && window.SP.user;
@@ -581,6 +632,15 @@
             link.href = 'publier.html?slug=' + encodeURIComponent(r.slug) + (fromAdmin ? '&from=admin' : '');
             link.classList.remove('hidden');
         }
+
+        // Cart button — visible to any logged-in user
+        const cartBtn = document.getElementById('cartBtn');
+        if (u) cartBtn.classList.remove('hidden');
+
+        // Report button — visible to logged-in non-authors
+        const reportBtn = document.getElementById('reportBtn');
+        const isOwnRecipe = u && (String(u.id) === String(r.author_id) || r.author_type === 'mijote' && u.role !== 'admin');
+        if (u && !isOwnRecipe) reportBtn.classList.remove('hidden');
 
         // Follow author button (only for user-authored recipes, not self)
         const followAuthorBtn = document.getElementById('followAuthorBtn');
@@ -857,6 +917,80 @@
     });
 
     document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    // ── Ajouter aux courses ────────────────────────────────────────────────
+    document.getElementById('cartBtn').addEventListener('click', async () => {
+        const r = currentRecipe; if (!r) return;
+        const btn   = document.getElementById('cartBtn');
+        const label = document.getElementById('cartBtnLabel');
+        btn.disabled = true;
+        label.textContent = 'Ajout en cours…';
+        try {
+            const res = await fetch(window.SP.apiPath('shopping.php?action=add_from_recipe'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ recipe_id: r.id, servings: currentPortions, base_servings: basePortions })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || 'Erreur');
+            // Success feedback
+            btn.classList.add('bg-green-500', 'border-green-500', 'text-white');
+            btn.classList.remove('bg-green-50', 'border-green-200', 'text-green-700');
+            label.textContent = `Ajouté ✓ (${data.added} ingr.)`;
+            setTimeout(() => {
+                btn.classList.remove('bg-green-500', 'border-green-500', 'text-white');
+                btn.classList.add('bg-green-50', 'border-green-200', 'text-green-700');
+                label.textContent = 'Ajouter aux courses';
+                btn.disabled = false;
+            }, 2500);
+        } catch (e) {
+            label.textContent = 'Ajouter aux courses';
+            btn.disabled = false;
+            alert('Impossible d\'ajouter aux courses : ' + e.message);
+        }
+    });
+
+    // ── Signalement ────────────────────────────────────────────────────────
+    function openReportModal()  { document.getElementById('reportModal').classList.remove('hidden'); if(window.lucide) lucide.createIcons(); }
+    function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); document.getElementById('reportError').classList.add('hidden'); document.getElementById('reportNote').value = ''; }
+
+    document.getElementById('reportBtn').addEventListener('click', openReportModal);
+    document.getElementById('reportModalClose').addEventListener('click', closeReportModal);
+    document.getElementById('reportCancel').addEventListener('click', closeReportModal);
+    document.getElementById('reportModalBackdrop').addEventListener('click', closeReportModal);
+
+    document.getElementById('reportSubmit').addEventListener('click', async () => {
+        const r = currentRecipe; if (!r) return;
+        const btn    = document.getElementById('reportSubmit');
+        const errBox = document.getElementById('reportError');
+        const reason = document.getElementById('reportReason').value;
+        const note   = document.getElementById('reportNote').value.trim();
+        errBox.classList.add('hidden');
+        btn.disabled = true;
+        try {
+            const res = await fetch(window.SP.apiPath('reports.php?action=create'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ type: 'recipe', target_id: r.id, reason, note: note || undefined })
+            });
+            const data = await res.json();
+            if (!res.ok && !data.already) throw new Error(data.error || 'Erreur');
+            closeReportModal();
+            // Brief toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-encre text-white text-sm font-semibold px-5 py-3 rounded-full shadow-xl pointer-events-none';
+            toast.textContent = 'Signalement envoyé, merci.';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        } catch (e) {
+            errBox.textContent = e.message;
+            errBox.classList.remove('hidden');
+            btn.disabled = false;
+        }
+    });
+
     // ── Share dropdown ────────────────────────────────────────────────────
     const shareBtn      = document.getElementById('shareBtn');
     const shareDropdown = document.getElementById('shareDropdown');

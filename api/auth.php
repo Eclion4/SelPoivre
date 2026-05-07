@@ -13,6 +13,8 @@ switch ($action) {
     case 'delete_account':   handleDeleteAccount();   break;
     case 'public_stats':     handlePublicStats();     break;
     case 'check_username':   handleCheckUsername();   break;
+    case 'forgot_password':  handleForgotPassword();  break;
+    case 'reset_password':   handleResetPassword();   break;
     default: jsonResponse(['error' => 'Action inconnue'], 400);
 }
 
@@ -206,6 +208,64 @@ function handleCheckUsername() {
         'valid'     => true,
         'message'   => $taken ? 'Pseudo déjà pris' : 'Pseudo disponible',
     ]);
+}
+
+function handleForgotPassword() {
+    rateLimit('forgot_password', 3, 3600);
+    $d     = getBody();
+    $email = trim($d['email'] ?? '');
+    if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL))
+        jsonResponse(['error' => 'Email invalide'], 400);
+
+    $db = getDB();
+    $s  = $db->prepare('SELECT id FROM users WHERE email = ? AND is_active = 1');
+    $s->execute([$email]);
+    $user = $s->fetch();
+
+    // On répond toujours success pour ne pas révéler si l'email existe
+    if (!$user) { jsonResponse(['success' => true]); }
+
+    // Invalider les anciens tokens
+    $db->prepare('UPDATE password_resets SET used = 1 WHERE user_id = ? AND used = 0')->execute([$user['id']]);
+
+    $token     = bin2hex(random_bytes(32)); // 64 chars hex
+    $expiresAt = date('Y-m-d H:i:s', time() + 3600); // 1h
+
+    $db->prepare('INSERT INTO password_resets (user_id, token, expires_at) VALUES (?,?,?)')->execute([$user['id'], $token, $expiresAt]);
+
+    // Envoi email
+    $resetUrl = 'https://www.sel-poivre.com/reinitialiser-mdp.html?token=' . $token;
+    $to       = $email;
+    $subject  = '=?UTF-8?B?' . base64_encode('Réinitialisation de votre mot de passe — Sel & Poivre') . '?=';
+    $body     = "Bonjour,\n\nVous avez demandé la réinitialisation de votre mot de passe sur Sel & Poivre.\n\n"
+              . "Cliquez sur le lien suivant (valable 1 heure) :\n$resetUrl\n\n"
+              . "Si vous n'avez pas fait cette demande, ignorez cet email.\n\nL'équipe Sel & Poivre";
+    $headers  = "From: noreply@sel-poivre.com\r\nContent-Type: text/plain; charset=UTF-8";
+
+    @mail($to, $subject, $body, $headers);
+    jsonResponse(['success' => true]);
+}
+
+function handleResetPassword() {
+    rateLimit('reset_password', 5, 3600);
+    $d        = getBody();
+    $token    = trim($d['token']    ?? '');
+    $password = trim($d['password'] ?? '');
+
+    if (!$token || strlen($token) !== 64) jsonResponse(['error' => 'Token invalide'], 400);
+    if (strlen($password) < 8) jsonResponse(['error' => 'Mot de passe trop court (8 min)'], 400);
+
+    $db = getDB();
+    $s  = $db->prepare('SELECT id, user_id FROM password_resets WHERE token = ? AND used = 0 AND expires_at > NOW()');
+    $s->execute([$token]);
+    $row = $s->fetch();
+    if (!$row) jsonResponse(['error' => 'Lien expiré ou déjà utilisé. Faites une nouvelle demande.'], 400);
+
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+    $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([$hash, $row['user_id']]);
+    $db->prepare('UPDATE password_resets SET used = 1 WHERE id = ?')->execute([$row['id']]);
+
+    jsonResponse(['success' => true]);
 }
 
 function handleDeleteAccount() {

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mot de passe oublié — Sel & Poivre</title>
+    <meta name="description" content="Réinitialisez votre mot de passe Sel &amp; Poivre en quelques secondes.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C4311B'/><g transform='translate(4,4)' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' fill='none'><path d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/><path d='M7 2v20'/><path d='M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3z'/><path d='M21 15v7'/></g></svg>">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8F5EF;
+            min-height: 100vh;
+            color: #18130F;
+        }
+        .input-field {
+            width: 100%; padding: 12px 16px 12px 48px;
+            background: #F9FAFB; border: 2px solid #E5E7EB; border-radius: 12px;
+            font-size: 0.9375rem; color: #18130F;
+            outline: none; transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        .input-field:focus {
+            background: #fff; border-color: #C4311B;
+            box-shadow: 0 0 0 4px rgba(196,49,27,0.1);
+        }
+        .input-field.error { border-color: #EF4444; background: #FEF2F2; }
+        .input-wrapper { position: relative; }
+        .input-icon {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%); color: #9CA3AF;
+            pointer-events: none; transition: color 0.2s ease;
+            width: 20px; height: 20px;
+        }
+        .input-wrapper:focus-within .input-icon { color: #C4311B; }
+        .btn-primary {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, #C4311B, #A42618);
+            color: white; border: none; border-radius: 9999px;
+            font-size: 16px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; box-shadow: 0 4px 15px rgba(196,49,27,0.3);
+            font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(196,49,27,0.4); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+    </style>
+</head>
+<body>
+
+    <!-- Background décor -->
+    <div style="position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;">
+        <div style="position:absolute;top:-160px;right:-160px;width:384px;height:384px;background:rgba(196,49,27,0.06);border-radius:9999px;filter:blur(60px);"></div>
+        <div style="position:absolute;bottom:-160px;left:-160px;width:384px;height:384px;background:rgba(196,137,42,0.07);border-radius:9999px;filter:blur(60px);"></div>
+    </div>
+
+    <div style="position:relative;min-height:100vh;display:flex;z-index:1;">
+
+        <!-- LEFT PANEL — image (desktop) -->
+        <div style="display:none;" class="left-panel">
+            <img src="/assets/recipes/_default.jpg" alt="Cuisine"
+                 style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy">
+            <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(24,19,15,0.72),rgba(24,19,15,0.35),transparent);"></div>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:48px;">
+                <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+                    <div style="width:40px;height:40px;background:rgba(255,255,255,0.18);backdrop-filter:blur(12px);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                        <i data-lucide="utensils" style="width:22px;height:22px;color:white;"></i>
+                    </div>
+                    <span style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:white;">Sel &amp; Poivre</span>
+                </a>
+                <div>
+                    <p style="color:rgba(255,255,255,0.6);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.15em;font-weight:500;margin-bottom:12px;">Sécurité</p>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;color:white;line-height:1.2;margin-bottom:16px;">Pas d'inquiétude,<br>ça arrive à tout le monde</h2>
+                    <p style="color:rgba(255,255,255,0.65);line-height:1.6;">Renseignez votre adresse email et nous vous enverrons un lien sécurisé pour créer un nouveau mot de passe.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL — form -->
+        <div style="width:100%;display:flex;align-items:center;justify-content:center;padding:24px 24px;">
+            <div style="width:100%;max-width:420px;">
+
+                <!-- Mobile logo -->
+                <a href="index.html" style="display:flex;align-items:center;gap:8px;margin-bottom:32px;text-decoration:none;">
+                    <div style="width:34px;height:34px;border-radius:10px;background:#C4311B;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i data-lucide="utensils" style="width:18px;height:18px;color:white;"></i>
+                    </div>
+                    <span style="font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;"><span style="color:#C4311B;">Sel</span> &amp; Poivre</span>
+                </a>
+
+                <!-- FORM STATE -->
+                <div id="formState">
+                    <h1 style="font-family:'Playfair Display',serif;font-size:1.875rem;font-weight:700;color:#18130F;margin-bottom:8px;">Mot de passe oublié ?</h1>
+                    <p style="color:#6B7280;margin-bottom:32px;line-height:1.6;">Saisissez votre email, nous vous enverrons un lien de réinitialisation.</p>
+
+                    <form id="forgotForm" onsubmit="handleForgot(event)" novalidate>
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block;font-size:0.875rem;font-weight:600;color:#18130F;margin-bottom:8px;" for="email">Adresse email</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <input type="email" id="email" class="input-field"
+                                       placeholder="vous@exemple.fr"
+                                       autocomplete="email" required>
+                            </div>
+                            <p class="text-red-500 text-xs mt-1 hidden" id="emailError" style="color:#EF4444;font-size:0.75rem;margin-top:6px;display:none;">Adresse email invalide.</p>
+                        </div>
+
+                        <!-- Error message -->
+                        <div id="formError" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:12px 16px;margin-bottom:16px;">
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <svg style="width:16px;height:16px;color:#DC2626;flex-shrink:0;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+                                <span id="formErrorText" style="font-size:0.875rem;color:#B91C1C;"></span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="submitBtn">
+                            Envoyer le lien
+                        </button>
+                    </form>
+
+                    <p style="text-align:center;margin-top:24px;">
+                        <a href="connexion.html" style="color:#6B7280;font-size:0.875rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color 0.2s;"
+                           onmouseover="this.style.color='#C4311B'" onmouseout="this.style.color='#6B7280'">
+                            <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+                            Retour à la connexion
+                        </a>
+                    </p>
+                </div>
+
+                <!-- SUCCESS STATE (hidden by default) -->
+                <div id="successState" style="display:none;text-align:center;">
+                    <div style="width:72px;height:72px;background:#DCFCE7;border-radius:9999px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+                        <svg style="width:36px;height:36px;color:#16A34A;" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h2 style="font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:700;color:#18130F;margin-bottom:12px;">Email envoyé !</h2>
+                    <p style="color:#6B7280;line-height:1.7;margin-bottom:8px;">Vérifiez votre boîte mail (et les spams).</p>
+                    <p style="color:#9CA3AF;font-size:0.875rem;margin-bottom:32px;">Le lien de réinitialisation est valable 1 heure.</p>
+                    <a href="connexion.html"
+                       style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:linear-gradient(135deg,#C4311B,#A42618);color:white;border-radius:9999px;font-weight:600;font-size:0.9375rem;text-decoration:none;transition:all 0.2s;box-shadow:0 4px 15px rgba(196,49,27,0.3);"
+                       onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 8px 25px rgba(196,49,27,0.4)'"
+                       onmouseout="this.style.transform='';this.style.boxShadow='0 4px 15px rgba(196,49,27,0.3)'">
+                        <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+                        Retour à la connexion
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @media (min-width: 1024px) {
+            .left-panel {
+                display: flex !important;
+                width: 50%;
+                position: relative;
+                overflow: hidden;
+                flex-direction: column;
+            }
+            body > div:last-of-type > div:last-child {
+                width: 50%;
+            }
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) lucide.createIcons();
+    });
+
+    async function handleForgot(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+
+        // Reset errors
+        document.getElementById('emailError').style.display = 'none';
+        document.getElementById('email').classList.remove('error');
+        document.getElementById('formError').style.display = 'none';
+
+        // Validate
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            document.getElementById('emailError').style.display = 'block';
+            document.getElementById('email').classList.add('error');
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="animate-spin" style="width:20px;height:20px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Envoi en cours…';
+
+        try {
+            const res = await fetch('api/auth.php?action=forgot_password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ email })
+            });
+
+            if (res.status === 429) {
+                document.getElementById('formErrorText').textContent = 'Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.';
+                document.getElementById('formError').style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Envoyer le lien';
+                return;
+            }
+
+            const data = await res.json();
+
+            if (data.success) {
+                document.getElementById('formState').style.display = 'none';
+                document.getElementById('successState').style.display = 'block';
+            } else {
+                document.getElementById('formErrorText').textContent = data.error || 'Une erreur est survenue. Veuillez réessayer.';
+                document.getElementById('formError').style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Envoyer le lien';
+            }
+        } catch {
+            document.getElementById('formErrorText').textContent = 'Erreur réseau, veuillez réessayer.';
+            document.getElementById('formError').style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = 'Envoyer le lien';
+        }
+    }
+    </script>
+    <script src="js/consent.js"></script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma liste de courses — Sel & Poivre</title>
+    <meta name="description" content="Gérez votre liste de courses depuis vos recettes Sel &amp; Poivre.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C4311B'/><g transform='translate(4,4)' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' fill='none'><path d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/><path d='M7 2v20'/><path d='M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3z'/><path d='M21 15v7'/></g></svg>">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background: #F8F5EF; font-family: 'Inter', sans-serif; color: #18130F; }
+
+        /* Bottom nav */
+        .sp-bnav { display: block; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9900; background: #F8F5EF; border-top: 1px solid rgba(196,137,42,.2); box-shadow: 0 -4px 20px rgba(24,19,15,.08); padding-bottom: env(safe-area-inset-bottom, 0px); }
+        @media (min-width: 768px) { .sp-bnav { display: none !important; } }
+        .sp-bnav-row { display: flex; align-items: stretch; height: 64px; padding: 0 4px; }
+        .sp-bnav-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; flex: 1; min-width: 0; padding: 10px 2px 8px; color: #A89880; text-decoration: none; -webkit-tap-highlight-color: transparent; transition: color .15s; }
+        .sp-bnav-item:hover, .sp-bnav-item:focus { color: #C4311B; outline: none; }
+        .sp-bnav-item--active { color: #C4311B; }
+        .sp-bnav-bar { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 24px; height: 3px; background: #C4311B; border-radius: 9999px; }
+        .sp-bnav-label { font-size: 10px; line-height: 1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .sp-bnav-item--active .sp-bnav-label { font-weight: 700; }
+        .sp-bnav-center { display: flex; align-items: center; justify-content: center; flex: 1; min-width: 0; }
+        .sp-bnav-pub { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 56px; height: 56px; margin-top: -22px; background: linear-gradient(135deg, #C4311B 0%, #8B1E0F 100%); color: #fff; border-radius: 50%; outline: 3px solid #F8F5EF; box-shadow: 0 6px 18px rgba(196,49,27,.45); transition: transform .15s, box-shadow .15s; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+        .sp-bnav-pub:active { transform: scale(.92); box-shadow: 0 3px 8px rgba(196,49,27,.35); }
+        @media (max-width: 767.98px) { body { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; } html, body { overflow-x: hidden !important; max-width: 100vw; } }
+
+        /* Item list */
+        .shopping-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fff; border-radius: 12px; border: 1px solid #E5E7EB; transition: all .2s; }
+        .shopping-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+        .shopping-item.checked { opacity: .5; }
+        .shopping-item.checked .item-name { text-decoration: line-through; color: #9CA3AF; }
+        .item-checkbox { width: 22px; height: 22px; border: 2px solid #D1D5DB; border-radius: 6px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+        .item-checkbox.checked { background: linear-gradient(135deg, #C4311B, #A42618); border-color: #C4311B; color: white; }
+        .item-name { font-size: 0.9375rem; font-weight: 500; flex: 1; min-width: 0; }
+        .item-qty { font-size: 0.8125rem; color: #6B7280; white-space: nowrap; }
+        .item-delete { width: 28px; height: 28px; border: none; background: none; cursor: pointer; color: #D1D5DB; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all .15s; flex-shrink: 0; }
+        .item-delete:hover { color: #EF4444; background: #FEF2F2; }
+
+        /* Group headers */
+        .group-header { display: flex; align-items: center; gap: 8px; padding: 6px 0 10px; }
+        .group-title { font-size: 0.875rem; font-weight: 700; color: #18130F; text-decoration: none; transition: color .15s; }
+        .group-title:hover { color: #C4311B; }
+        .group-title-plain { font-size: 0.875rem; font-weight: 700; color: #6B7280; }
+
+        /* Buttons */
+        .btn-ghost { padding: 8px 14px; border: 1.5px solid #E5E7EB; background: #fff; color: #374151; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600; cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-ghost:hover { border-color: #C4311B; color: #C4311B; background: #FFF5F4; }
+        .btn-ghost-danger:hover { border-color: #EF4444; color: #EF4444; background: #FEF2F2; }
+
+        /* FAB */
+        .fab { position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 54px; height: 54px; background: linear-gradient(135deg, #C4311B, #A42618); color: white; border: none; border-radius: 50%; box-shadow: 0 6px 20px rgba(196,49,27,.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; z-index: 100; }
+        .fab:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(196,49,27,.5); }
+        @media (min-width: 768px) { .fab { bottom: 24px; } }
+
+        /* Modal */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .modal-box { background: #fff; border-radius: 20px; max-width: 420px; width: 100%; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+        .modal-input { width: 100%; padding: 11px 14px; background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 10px; font-size: 0.9375rem; color: #18130F; outline: none; transition: all .2s; font-family: 'Inter', sans-serif; }
+        .modal-input:focus { background: #fff; border-color: #C4311B; box-shadow: 0 0 0 3px rgba(196,49,27,.1); }
+        .btn-primary-sm { padding: 10px 22px; background: linear-gradient(135deg, #C4311B, #A42618); color: white; border: none; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; }
+        .btn-primary-sm:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(196,49,27,.35); }
+        .btn-cancel { padding: 10px 22px; background: #fff; border: 1.5px solid #E5E7EB; color: #6B7280; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif; }
+        .btn-cancel:hover { background: #F9FAFB; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 64px 24px; }
+        .empty-state svg { margin: 0 auto 16px; color: #D1D5DB; }
+
+        /* Skeleton */
+        .skeleton { background: linear-gradient(90deg, #f0ece4 25%, #e8e4dc 50%, #f0ece4 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 10px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav id="navbar" class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl shadow-sm border-b border-sp-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="index.html" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#C4311B">
+                        <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div class="leading-none">
+                        <div class="text-2xl font-display font-bold">
+                            <span style="color:#C4311B;">Sel</span><span style="color:#18130F;"> &amp; Poivre</span>
+                        </div>
+                        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#A89880;margin-top:3px;font-family:system-ui,sans-serif">Recettes &amp; Communauté</div>
+                    </div>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors" style="color:#18130F;">Accueil</a>
+                    <a href="recettes.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors" style="color:#18130F;">Recettes</a>
+                    <a href="communaute.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors" style="color:#18130F;">Communauté</a>
+                </div>
+                <div class="hidden md:flex items-center gap-4">
+                    <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all" style="background:linear-gradient(to right,#C4311B,#A42618);">Connexion</a>
+                </div>
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobileMenu" class="hidden md:hidden bg-white/95 backdrop-blur-xl shadow-2xl border-t border-sp-100">
+            <div class="px-4 py-6 space-y-4">
+                <a href="index.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Accueil</a>
+                <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
+                <a href="communaute.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Communauté</a>
+                <div class="pt-4 border-t border-gray-100">
+                    <a href="connexion.html" class="block w-full text-center px-5 py-3 text-white rounded-full font-semibold" style="background:linear-gradient(to right,#C4311B,#A42618);">Connexion</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+
+        <!-- Header -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-display font-bold" style="color:#18130F;">Ma liste de courses</h1>
+                <p class="text-sm mt-1" style="color:#A89880;" id="itemCounter">Chargement…</p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+                <button class="btn-ghost" id="clearCheckedBtn">
+                    <i data-lucide="check-square" style="width:15px;height:15px;"></i>
+                    Vider les cochés
+                </button>
+                <button class="btn-ghost btn-ghost-danger" id="clearAllBtn">
+                    <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                    Tout effacer
+                </button>
+            </div>
+        </div>
+
+        <!-- List container -->
+        <div id="listContainer">
+            <!-- Skeleton loader -->
+            <div id="skeleton">
+                <div class="skeleton h-5 w-32 mb-4"></div>
+                <div class="space-y-2 mb-6">
+                    <div class="skeleton h-14 rounded-xl"></div>
+                    <div class="skeleton h-14 rounded-xl"></div>
+                    <div class="skeleton h-14 rounded-xl"></div>
+                </div>
+                <div class="skeleton h-5 w-24 mb-4"></div>
+                <div class="space-y-2">
+                    <div class="skeleton h-14 rounded-xl"></div>
+                    <div class="skeleton h-14 rounded-xl"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== FAB "+" ===== -->
+    <button class="fab" id="fabAdd" aria-label="Ajouter un article">
+        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14"/>
+        </svg>
+    </button>
+
+    <!-- ===== MODAL AJOUT ITEM ===== -->
+    <div id="addModal" class="modal-backdrop" style="display:none;">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-display font-bold" style="color:#18130F;">Ajouter un article</h3>
+                <button id="closeModal" style="background:none;border:none;cursor:pointer;color:#9CA3AF;padding:4px;border-radius:8px;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#9CA3AF'">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label style="display:block;font-size:0.875rem;font-weight:600;color:#374151;margin-bottom:6px;">Ingrédient <span style="color:#EF4444;">*</span></label>
+                    <input type="text" id="newIngredient" class="modal-input" placeholder="Ex : Farine, tomates, beurre…" maxlength="120">
+                    <p id="addIngredientError" style="display:none;color:#EF4444;font-size:0.75rem;margin-top:4px;">Ce champ est requis.</p>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="display:block;font-size:0.875rem;font-weight:600;color:#374151;margin-bottom:6px;">Quantité</label>
+                        <input type="text" id="newQty" class="modal-input" placeholder="Ex : 200, 1/2, 3…" maxlength="20">
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:0.875rem;font-weight:600;color:#374151;margin-bottom:6px;">Unité</label>
+                        <input type="text" id="newUnit" class="modal-input" placeholder="Ex : g, ml, c.s…" maxlength="20">
+                    </div>
+                </div>
+                <div id="addError" style="display:none;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:10px 14px;font-size:0.875rem;color:#B91C1C;"></div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px;">
+                <button class="btn-cancel" id="cancelAddModal">Annuler</button>
+                <button class="btn-primary-sm" id="confirmAddItem">
+                    <span id="addBtnText">Ajouter</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BOTTOM NAV MOBILE ===== -->
+    <nav class="sp-bnav" aria-label="Navigation mobile">
+        <div class="sp-bnav-row">
+            <!-- Accueil -->
+            <a href="index.html" class="sp-bnav-item">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="sp-bnav-label">Accueil</span>
+            </a>
+            <!-- Recettes -->
+            <a href="recettes.html" class="sp-bnav-item">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path stroke-linecap="round" d="M9 12h6M9 16h4"/></svg>
+                <span class="sp-bnav-label">Recettes</span>
+            </a>
+            <!-- Bouton central Publier -->
+            <div class="sp-bnav-center">
+                <a href="publier.html" class="sp-bnav-pub" aria-label="Publier une recette">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                </a>
+            </div>
+            <!-- Communauté -->
+            <a href="communaute.html" class="sp-bnav-item">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                <span class="sp-bnav-label">Communauté</span>
+            </a>
+            <!-- Courses (actif) -->
+            <a href="liste-courses.html" class="sp-bnav-item sp-bnav-item--active">
+                <span class="sp-bnav-bar"></span>
+                <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+                <span class="sp-bnav-label">Courses</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="js/auth-ui.js?v=5"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        // ── Auth guard ─────────────────────────────────────────────
+        if (!window.SP || !window.SP.user) {
+            window.location.href = 'connexion.html';
+            return;
+        }
+
+        // ── State ──────────────────────────────────────────────────
+        let items = [];   // [{id, ingredient, qty, unit, checked, recipe_slug, recipe_title}]
+
+        // ── DOM refs ───────────────────────────────────────────────
+        const listContainer  = document.getElementById('listContainer');
+        const skeleton       = document.getElementById('skeleton');
+        const itemCounter    = document.getElementById('itemCounter');
+        const clearCheckedBtn = document.getElementById('clearCheckedBtn');
+        const clearAllBtn    = document.getElementById('clearAllBtn');
+        const fabAdd         = document.getElementById('fabAdd');
+        const addModal       = document.getElementById('addModal');
+        const closeModal     = document.getElementById('closeModal');
+        const cancelAddModal = document.getElementById('cancelAddModal');
+        const confirmAddItem = document.getElementById('confirmAddItem');
+
+        // ── Helpers ────────────────────────────────────────────────
+        function api(url, opts) {
+            return fetch(url, { credentials: 'include', ...opts });
+        }
+        function updateCounter() {
+            const total   = items.length;
+            const checked = items.filter(i => i.checked).length;
+            itemCounter.textContent = total === 0
+                ? 'Aucun article'
+                : `${checked} / ${total} article${total > 1 ? 's' : ''}`;
+        }
+
+        function renderList() {
+            updateCounter();
+            if (items.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/>
+                        </svg>
+                        <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:#18130F;margin-bottom:8px;">Liste vide</h2>
+                        <p style="color:#6B7280;font-size:0.9375rem;line-height:1.6;">Ajoutez des ingrédients depuis une recette ou via le bouton <strong>+</strong>.</p>
+                        <a href="recettes.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:24px;padding:12px 24px;background:linear-gradient(135deg,#C4311B,#A42618);color:white;border-radius:9999px;font-weight:600;font-size:0.875rem;text-decoration:none;box-shadow:0 4px 14px rgba(196,49,27,.3);">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+                            Parcourir les recettes
+                        </a>
+                    </div>`;
+                return;
+            }
+
+            // Group items by recipe (null → "Divers")
+            const groups = {};
+            items.forEach(item => {
+                const key = item.recipe_slug || '__divers__';
+                if (!groups[key]) groups[key] = { title: item.recipe_title || null, slug: item.recipe_slug || null, unchecked: [], checked: [] };
+                if (item.checked) groups[key].checked.push(item);
+                else groups[key].unchecked.push(item);
+            });
+
+            let html = '';
+
+            // Recipes first, then Divers
+            const recipeKeys = Object.keys(groups).filter(k => k !== '__divers__');
+            const allKeys = [...recipeKeys, ...(groups['__divers__'] ? ['__divers__'] : [])];
+
+            allKeys.forEach(key => {
+                const g = groups[key];
+                const isRecipe = key !== '__divers__';
+                const groupItems = [...g.unchecked, ...g.checked]; // unchecked first
+
+                html += `<div class="mb-6">`;
+
+                // Group header
+                if (isRecipe) {
+                    html += `<div class="group-header">
+                        <span style="font-size:1.1rem;">🍳</span>
+                        <a href="recette-detail.html?slug=${encodeURIComponent(g.slug)}" class="group-title">${escHtml(g.title || g.slug)}</a>
+                    </div>`;
+                } else {
+                    html += `<div class="group-header">
+                        <span style="font-size:1.1rem;">🛒</span>
+                        <span class="group-title-plain">Divers</span>
+                    </div>`;
+                }
+
+                html += `<div class="space-y-2">`;
+                groupItems.forEach(item => {
+                    const qtyLabel = [item.qty, item.unit].filter(Boolean).join(' ');
+                    html += `
+                    <div class="shopping-item${item.checked ? ' checked' : ''}" data-id="${item.id}">
+                        <button class="item-checkbox${item.checked ? ' checked' : ''}" onclick="toggleItem(${item.id})" aria-label="${item.checked ? 'Décocher' : 'Cocher'}">
+                            ${item.checked ? `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>` : ''}
+                        </button>
+                        <span class="item-name">${escHtml(item.ingredient)}</span>
+                        ${qtyLabel ? `<span class="item-qty">${escHtml(qtyLabel)}</span>` : ''}
+                        <button class="item-delete" onclick="removeItem(${item.id})" aria-label="Supprimer">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                        </button>
+                    </div>`;
+                });
+                html += `</div></div>`;
+            });
+
+            listContainer.innerHTML = html;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ── Load ───────────────────────────────────────────────────
+        async function loadList() {
+            try {
+                const res = await api('api/shopping.php?action=list');
+                if (res.status === 401) { window.location.href = 'connexion.html'; return; }
+                const data = await res.json();
+                items = data.items || [];
+            } catch {
+                items = [];
+            }
+            skeleton.remove();
+            renderList();
+        }
+
+        // ── Toggle item ────────────────────────────────────────────
+        window.toggleItem = async function(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            item.checked = !item.checked;
+            renderList();
+            try {
+                await api('api/shopping.php?action=toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+            } catch {
+                item.checked = !item.checked; // rollback
+                renderList();
+            }
+        };
+
+        // ── Remove item ────────────────────────────────────────────
+        window.removeItem = async function(id) {
+            const prev = [...items];
+            items = items.filter(i => i.id !== id);
+            renderList();
+            try {
+                await api('api/shopping.php?action=remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+            } catch {
+                items = prev; // rollback
+                renderList();
+            }
+        };
+
+        // ── Clear checked ──────────────────────────────────────────
+        clearCheckedBtn.addEventListener('click', async () => {
+            const checked = items.filter(i => i.checked);
+            if (checked.length === 0) return;
+            const prev = [...items];
+            items = items.filter(i => !i.checked);
+            renderList();
+            try {
+                await api('api/shopping.php?action=clear_checked', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+            } catch {
+                items = prev;
+                renderList();
+            }
+        });
+
+        // ── Clear all ──────────────────────────────────────────────
+        clearAllBtn.addEventListener('click', async () => {
+            if (items.length === 0) return;
+            if (!confirm('Vider entièrement la liste de courses ? Cette action est irréversible.')) return;
+            const prev = [...items];
+            items = [];
+            renderList();
+            try {
+                await api('api/shopping.php?action=clear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+            } catch {
+                items = prev;
+                renderList();
+            }
+        });
+
+        // ── Modal add item ─────────────────────────────────────────
+        function openModal() {
+            document.getElementById('newIngredient').value = '';
+            document.getElementById('newQty').value = '';
+            document.getElementById('newUnit').value = '';
+            document.getElementById('addIngredientError').style.display = 'none';
+            document.getElementById('addError').style.display = 'none';
+            document.getElementById('addBtnText').textContent = 'Ajouter';
+            confirmAddItem.disabled = false;
+            addModal.style.display = 'flex';
+            setTimeout(() => document.getElementById('newIngredient').focus(), 80);
+        }
+        function closeAddModal() {
+            addModal.style.display = 'none';
+        }
+
+        fabAdd.addEventListener('click', openModal);
+        closeModal.addEventListener('click', closeAddModal);
+        cancelAddModal.addEventListener('click', closeAddModal);
+        addModal.addEventListener('click', e => { if (e.target === addModal) closeAddModal(); });
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAddModal(); });
+
+        // Submit add
+        confirmAddItem.addEventListener('click', async () => {
+            const ingredient = document.getElementById('newIngredient').value.trim();
+            const qty        = document.getElementById('newQty').value.trim();
+            const unit       = document.getElementById('newUnit').value.trim();
+
+            document.getElementById('addIngredientError').style.display = 'none';
+            document.getElementById('addError').style.display = 'none';
+
+            if (!ingredient) {
+                document.getElementById('addIngredientError').style.display = 'block';
+                document.getElementById('newIngredient').focus();
+                return;
+            }
+
+            confirmAddItem.disabled = true;
+            document.getElementById('addBtnText').innerHTML = '<svg class="animate-spin" style="width:16px;height:16px;display:inline-block;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>';
+
+            try {
+                const res = await api('api/shopping.php?action=add_item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ingredient, qty, unit })
+                });
+                const data = await res.json();
+                if (data.success && data.item) {
+                    items.push(data.item);
+                    closeAddModal();
+                    renderList();
+                } else {
+                    document.getElementById('addError').textContent = data.error || 'Une erreur est survenue.';
+                    document.getElementById('addError').style.display = 'block';
+                    confirmAddItem.disabled = false;
+                    document.getElementById('addBtnText').textContent = 'Ajouter';
+                }
+            } catch {
+                document.getElementById('addError').textContent = 'Erreur réseau, veuillez réessayer.';
+                document.getElementById('addError').style.display = 'block';
+                confirmAddItem.disabled = false;
+                document.getElementById('addBtnText').textContent = 'Ajouter';
+            }
+        });
+
+        // Submit on Enter in ingredient field
+        document.getElementById('newIngredient').addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); confirmAddItem.click(); }
+        });
+
+        // ── Mobile menu toggle ─────────────────────────────────────
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu    = document.getElementById('mobileMenu');
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                const opened = mobileMenu.classList.toggle('hidden') === false;
+                mobileMenuBtn.setAttribute('aria-expanded', String(opened));
+            });
+        }
+
+        // ── Init ───────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+        if (window.lucide) lucide.createIcons();
+
+        loadList();
+
+    })();
+    </script>
+    <script src="js/consent.js"></script>
+</body>
+</html>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon planning de la semaine — Sel &amp; Poivre</title>
+    <meta name="description" content="Planifiez vos repas de la semaine sur Sel &amp; Poivre.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C4311B'/><g transform='translate(4,4)' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' fill='none'><path d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/><path d='M7 2v20'/><path d='M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3z'/><path d='M21 15v7'/></g></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/sp.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background: #F8F5EF; font-family: 'Inter', sans-serif; color: #18130F; }
+
+        /* ── Bottom nav ── */
+        .sp-bnav { display: block; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9900; background: #F8F5EF; border-top: 1px solid rgba(196,137,42,.2); box-shadow: 0 -4px 20px rgba(24,19,15,.08); padding-bottom: env(safe-area-inset-bottom, 0px); }
+        @media (min-width: 768px) { .sp-bnav { display: none !important; } }
+        .sp-bnav-row { display: flex; align-items: stretch; height: 64px; padding: 0 4px; }
+        .sp-bnav-item { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; flex: 1; min-width: 0; padding: 10px 2px 8px; color: #A89880; text-decoration: none; -webkit-tap-highlight-color: transparent; transition: color .15s; }
+        .sp-bnav-item:hover, .sp-bnav-item:focus { color: #C4311B; outline: none; }
+        .sp-bnav-item--active { color: #C4311B; }
+        .sp-bnav-bar { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 24px; height: 3px; background: #C4311B; border-radius: 9999px; }
+        .sp-bnav-label { font-size: 10px; line-height: 1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .sp-bnav-item--active .sp-bnav-label { font-weight: 700; }
+        .sp-bnav-center { display: flex; align-items: center; justify-content: center; flex: 1; min-width: 0; }
+        .sp-bnav-pub { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 56px; height: 56px; margin-top: -22px; background: linear-gradient(135deg, #C4311B 0%, #8B1E0F 100%); color: #fff; border-radius: 50%; outline: 3px solid #F8F5EF; box-shadow: 0 6px 18px rgba(196,49,27,.45); transition: transform .15s, box-shadow .15s; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+        .sp-bnav-pub:active { transform: scale(.92); box-shadow: 0 3px 8px rgba(196,49,27,.35); }
+        @media (max-width: 767.98px) { body { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; } html, body { overflow-x: hidden !important; max-width: 100vw; } }
+
+        /* ── Week nav ── */
+        .week-nav-btn { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1.5px solid #E5E7EB; border-radius: 50%; background: #fff; cursor: pointer; transition: all .15s; color: #18130F; flex-shrink: 0; }
+        .week-nav-btn:hover { border-color: #C4311B; color: #C4311B; background: #FFF5F4; }
+        .week-label { font-size: 0.9375rem; font-weight: 600; color: #18130F; white-space: nowrap; }
+
+        /* ── Grid desktop ── */
+        .planner-grid { display: grid; grid-template-columns: 100px repeat(7, 1fr); gap: 6px; }
+        .planner-grid-header { font-size: 0.75rem; font-weight: 700; text-align: center; padding: 8px 4px; border-radius: 10px; background: #18130F; color: #F8F5EF; letter-spacing: .04em; }
+        .planner-grid-label { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 10px; background: #fff; border: 1px solid #E5E7EB; font-size: 0.8125rem; font-weight: 600; color: #374151; min-height: 100px; }
+        .planner-grid-label .meal-emoji { font-size: 1.1rem; flex-shrink: 0; }
+
+        /* ── Recipe card (grid) ── */
+        .plan-card { position: relative; background: #fff; border: 1px solid #F3F4F6; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); transition: box-shadow .15s; }
+        .plan-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+        .plan-card img { width: 100%; height: 80px; object-fit: cover; display: block; }
+        .plan-card-body { padding: 6px 8px; }
+        .plan-card-title { font-size: 0.75rem; font-weight: 600; color: #18130F; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; line-clamp: 1; }
+        .plan-card-portions { font-size: 0.6875rem; color: #6B7280; margin-top: 2px; }
+        .plan-card-remove { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; background: rgba(0,0,0,.45); color: #fff; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; padding: 0; }
+        .plan-card-remove:hover { background: rgba(196,49,27,.85); }
+        .plan-card-remove svg { width: 12px; height: 12px; }
+
+        /* ── Empty cell ── */
+        .plan-cell-empty { display: flex; align-items: center; justify-content: center; min-height: 100px; border: 2px dashed #D1D5DB; border-radius: 12px; transition: border-color .15s, background .15s; }
+        .plan-cell-empty:hover { border-color: #C4892A; background: #FFFBF0; }
+        .plan-cell-add-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; color: #9CA3AF; border-radius: 50%; transition: color .15s; }
+        .plan-cell-add-btn:hover { color: #C4892A; }
+        .plan-cell-add-btn svg { width: 20px; height: 20px; }
+
+        /* ── Mobile day blocks ── */
+        .mobile-day { margin-bottom: 10px; border-radius: 14px; overflow: hidden; border: 1px solid #E5E7EB; background: #fff; }
+        .mobile-day-header { padding: 12px 16px; background: #18130F; color: #F8F5EF; font-size: 0.9375rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+        .mobile-day-header .chevron { transition: transform .2s; }
+        .mobile-day-header.open .chevron { transform: rotate(180deg); }
+        .mobile-day-body { display: none; padding: 12px; }
+        .mobile-day-body.open { display: block; }
+        .mobile-meal-row { margin-bottom: 10px; }
+        .mobile-meal-label { font-size: 0.8125rem; font-weight: 600; color: #374151; margin-bottom: 6px; display: flex; align-items: center; gap-4px; }
+
+        /* ── Modal ── */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .modal-box { background: #fff; border-radius: 20px; max-width: 480px; width: 100%; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.2); max-height: 90vh; overflow-y: auto; }
+        .search-input { width: 100%; padding: 11px 14px 11px 40px; background: #F9FAFB; border: 1.5px solid #E5E7EB; border-radius: 10px; font-size: 0.9375rem; color: #18130F; outline: none; transition: all .2s; font-family: 'Inter', sans-serif; }
+        .search-input:focus { background: #fff; border-color: #C4311B; box-shadow: 0 0 0 3px rgba(196,49,27,.1); }
+        .search-input-wrap { position: relative; }
+        .search-input-wrap .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9CA3AF; pointer-events: none; }
+
+        /* ── Recipe result card ── */
+        .recipe-result { display: flex; align-items: center; gap: 12px; padding: 10px; border: 1.5px solid #E5E7EB; border-radius: 12px; cursor: pointer; transition: all .15s; background: #fff; }
+        .recipe-result:hover, .recipe-result.selected { border-color: #C4311B; background: #FFF5F4; }
+        .recipe-result img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+        .recipe-result-info { flex: 1; min-width: 0; }
+        .recipe-result-title { font-size: 0.875rem; font-weight: 600; color: #18130F; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .recipe-result-meta { font-size: 0.75rem; color: #6B7280; margin-top: 2px; }
+
+        /* ── Portions selector ── */
+        .portions-selector { display: flex; align-items: center; gap: 10px; }
+        .portions-btn { width: 34px; height: 34px; border: 1.5px solid #E5E7EB; background: #fff; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 600; color: #374151; transition: all .15s; }
+        .portions-btn:hover { border-color: #C4311B; color: #C4311B; }
+        .portions-val { min-width: 28px; text-align: center; font-size: 1rem; font-weight: 700; color: #18130F; }
+
+        /* ── Buttons ── */
+        .btn-primary { padding: 10px 22px; background: linear-gradient(135deg, #C4311B, #A42618); color: white; border: none; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(196,49,27,.35); }
+        .btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+        .btn-cancel { padding: 10px 22px; background: #fff; border: 1.5px solid #E5E7EB; color: #6B7280; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif; }
+        .btn-cancel:hover { background: #F9FAFB; }
+        .btn-or { padding: 10px 20px; background: #fff; border: 2px solid #C4892A; color: #C4892A; border-radius: 9999px; font-size: 0.875rem; font-weight: 700; cursor: pointer; transition: all .15s; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 7px; }
+        .btn-or:hover { background: #C4892A; color: #fff; }
+
+        /* ── Spinner ── */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+
+        /* ── Toast ── */
+        #toast { position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(20px); background: #18130F; color: #F8F5EF; padding: 10px 20px; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; white-space: nowrap; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        @media (min-width: 768px) { #toast { bottom: 28px; } }
+
+        /* ── Generate btn loading ── */
+        #generateBtn.loading { opacity: .7; cursor: wait; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav id="navbar" class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl shadow-sm border-b border-sp-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="index.html" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#C4311B">
+                        <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div class="leading-none">
+                        <div class="text-2xl font-display font-bold">
+                            <span style="color:#C4311B;">Sel</span><span style="color:#18130F;"> &amp; Poivre</span>
+                        </div>
+                        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#A89880;margin-top:3px;font-family:system-ui,sans-serif">Recettes &amp; Communauté</div>
+                    </div>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="index.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors" style="color:#18130F;">Accueil</a>
+                    <a href="recettes.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors" style="color:#18130F;">Recettes</a>
+                    <a href="communaute.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors" style="color:#18130F;">Communauté</a>
+                </div>
+                <div class="hidden md:flex items-center gap-4">
+                    <a href="connexion.html" id="navAuthBtn" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
+                </div>
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobileMenu" class="hidden md:hidden bg-white/95 backdrop-blur-xl shadow-2xl border-t border-sp-100">
+            <div class="px-4 py-6 space-y-4">
+                <a href="index.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Accueil</a>
+                <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
+                <a href="communaute.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Communauté</a>
+                <div class="pt-4 border-t border-gray-100">
+                    <a href="connexion.html" class="block w-full text-center px-5 py-3 text-white rounded-full font-semibold" style="background:linear-gradient(to right,#C4311B,#A42618);">Connexion</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN ===== -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ── Page header ── -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h1 class="font-display font-bold text-3xl" style="color:#18130F;">Mon planning de la semaine</h1>
+            <button id="generateBtn" class="btn-or">
+                <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                Générer ma liste de courses
+            </button>
+        </div>
+
+        <!-- ── Week navigation ── -->
+        <div class="flex items-center gap-3 mb-8">
+            <button class="week-nav-btn" id="prevWeekBtn" aria-label="Semaine précédente">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="week-label" id="weekLabel">Chargement…</span>
+            <button class="week-nav-btn" id="nextWeekBtn" aria-label="Semaine suivante">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div>
+
+        <!-- ── Desktop grid ── -->
+        <div id="desktopGrid" class="hidden md:block overflow-x-auto pb-2">
+            <div class="planner-grid" id="plannerGrid" style="min-width:780px;">
+                <!-- filled by JS -->
+            </div>
+        </div>
+
+        <!-- ── Mobile list ── -->
+        <div id="mobileList" class="md:hidden" id="mobileListInner">
+            <!-- filled by JS -->
+        </div>
+
+    </main>
+
+    <!-- ===== MODAL AJOUT ===== -->
+    <div id="addModal" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-1">
+                <h3 class="font-display font-bold text-xl" id="modalTitle">Ajouter une recette</h3>
+                <button id="closeModalBtn" style="background:none;border:none;cursor:pointer;color:#9CA3AF;padding:4px;border-radius:8px;" aria-label="Fermer">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <p id="slotLabel" class="text-sm text-gray-500 mb-5"></p>
+
+            <!-- Search -->
+            <div class="search-input-wrap mb-3">
+                <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="recipeSearchInput" class="search-input" placeholder="Rechercher une recette…" autocomplete="off">
+            </div>
+
+            <!-- Results -->
+            <div id="searchResults" class="space-y-2 mb-5 min-h-[80px]">
+                <p class="text-sm text-gray-400 text-center py-6">Tapez pour rechercher une recette…</p>
+            </div>
+
+            <!-- Portions -->
+            <div class="flex items-center justify-between mb-6">
+                <span class="text-sm font-semibold text-gray-700">Nombre de portions</span>
+                <div class="portions-selector">
+                    <button class="portions-btn" id="portionsDown" aria-label="Diminuer">−</button>
+                    <span class="portions-val" id="portionsVal">2</span>
+                    <button class="portions-btn" id="portionsUp" aria-label="Augmenter">+</button>
+                </div>
+            </div>
+
+            <div id="modalError" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm"></div>
+
+            <div class="flex gap-3 justify-end">
+                <button class="btn-cancel" id="cancelModalBtn">Annuler</button>
+                <button class="btn-primary" id="confirmAddBtn" disabled>
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Ajouter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast"></div>
+
+    <!-- ===== BOTTOM NAV MOBILE ===== -->
+    <nav class="sp-bnav" aria-label="Navigation mobile">
+        <div class="sp-bnav-row">
+            <!-- Accueil -->
+            <a href="index.html" class="sp-bnav-item">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span class="sp-bnav-label">Accueil</span>
+            </a>
+            <!-- Recettes -->
+            <a href="recettes.html" class="sp-bnav-item">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path stroke-linecap="round" d="M9 12h6M9 16h4"/></svg>
+                <span class="sp-bnav-label">Recettes</span>
+            </a>
+            <!-- Bouton central Publier -->
+            <div class="sp-bnav-center">
+                <a href="publier.html" class="sp-bnav-pub" aria-label="Publier une recette">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                </a>
+            </div>
+            <!-- Planning (actif) -->
+            <a href="planificateur.html" class="sp-bnav-item sp-bnav-item--active">
+                <span class="sp-bnav-bar"></span>
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+                <span class="sp-bnav-label">Planning</span>
+            </a>
+            <!-- Courses -->
+            <a href="liste-courses.html" class="sp-bnav-item">
+                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+                <span class="sp-bnav-label">Courses</span>
+            </a>
+        </div>
+    </nav>
+
+    <script src="js/auth-ui.js?v=5"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        // ── Auth guard ────────────────────────────────────────────────
+        if (!window.SP || !window.SP.user) {
+            window.location.href = 'connexion.html';
+            return;
+        }
+
+        // ── Constants ─────────────────────────────────────────────────
+        const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+        const MEAL_TYPES = [
+            { key: 'petit-dejeuner', label: 'Petit-déj',  emoji: '☀️' },
+            { key: 'dejeuner',       label: 'Déjeuner',   emoji: '🍽️' },
+            { key: 'diner',          label: 'Dîner',      emoji: '🌙' },
+            { key: 'snack',          label: 'Snack',      emoji: '🍎' },
+        ];
+        const FR_MONTHS = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+        const FR_MONTHS_LONG = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+        // ── State ─────────────────────────────────────────────────────
+        let currentMonday = getThisMonday();
+        let planData = {};   // { 'YYYY-MM-DD': { 'petit-dejeuner': [...], ... } }
+        let pendingSlot = null;  // { date, mealType }
+        let selectedRecipe = null;
+        let portions = 2;
+        let searchTimer = null;
+
+        // ── Utils ─────────────────────────────────────────────────────
+        function getThisMonday() {
+            const d = new Date();
+            d.setHours(0, 0, 0, 0);
+            const day = d.getDay(); // 0=Sun
+            const diff = day === 0 ? -6 : 1 - day;
+            d.setDate(d.getDate() + diff);
+            return d;
+        }
+        function addDays(date, n) {
+            const d = new Date(date);
+            d.setDate(d.getDate() + n);
+            return d;
+        }
+        function toYMD(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+        function formatShort(date) {
+            return `${String(date.getDate()).padStart(2,'0')} ${FR_MONTHS[date.getMonth()]}`;
+        }
+        function formatLong(date) {
+            return `${date.getDate()} ${FR_MONTHS_LONG[date.getMonth()]} ${date.getFullYear()}`;
+        }
+        function escHtml(s) {
+            if (!s) return '';
+            return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+        function fmtTime(min) {
+            if (!min) return '';
+            if (min < 60) return min + ' min';
+            const h = Math.floor(min / 60), m = min % 60;
+            return m ? h + 'h' + String(m).padStart(2, '0') : h + 'h';
+        }
+        function showToast(msg, duration = 2800) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), duration);
+        }
+
+        // ── Week label ────────────────────────────────────────────────
+        function updateWeekLabel() {
+            const sunday = addDays(currentMonday, 6);
+            document.getElementById('weekLabel').textContent =
+                `Semaine du Lun ${formatShort(currentMonday)} au Dim ${formatShort(sunday)}`;
+        }
+
+        // ── Fetch week data ───────────────────────────────────────────
+        async function loadWeek() {
+            const weekStart = toYMD(currentMonday);
+            planData = {};
+            try {
+                const res = await fetch(window.SP.apiPath(`meal-plan.php?action=week&week=${weekStart}`), { credentials: 'include' });
+                if (res.status === 401) { window.location.href = 'connexion.html'; return; }
+                const data = await res.json();
+                if (data.entries && Array.isArray(data.entries)) {
+                    data.entries.forEach(entry => {
+                        const d = entry.plan_date;
+                        const m = entry.meal_type;
+                        if (!planData[d]) planData[d] = {};
+                        if (!planData[d][m]) planData[d][m] = [];
+                        planData[d][m].push(entry);
+                    });
+                }
+            } catch (e) {
+                console.error('Erreur chargement planning', e);
+            }
+            render();
+        }
+
+        // ── Build a recipe mini card (HTML string) ────────────────────
+        function buildCard(entry) {
+            const img = entry.image_url || 'assets/recipes/_default.jpg';
+            return `
+            <div class="plan-card" data-entry-id="${entry.id}">
+                <button class="plan-card-remove" data-id="${entry.id}" aria-label="Supprimer">
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+                <img src="${escHtml(img)}" alt="${escHtml(entry.recipe_title || '')}" loading="lazy">
+                <div class="plan-card-body">
+                    <div class="plan-card-title">${escHtml(entry.recipe_title || 'Recette')}</div>
+                    <div class="plan-card-portions">${entry.servings} portion${entry.servings > 1 ? 's' : ''}</div>
+                </div>
+            </div>`;
+        }
+
+        // ── Build empty cell ──────────────────────────────────────────
+        function buildEmptyCell(date, mealType) {
+            return `
+            <div class="plan-cell-empty">
+                <button class="plan-cell-add-btn" data-date="${date}" data-meal="${mealType}" aria-label="Ajouter une recette">
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+            </div>`;
+        }
+
+        // ── Desktop render ────────────────────────────────────────────
+        function renderDesktop() {
+            const grid = document.getElementById('plannerGrid');
+            if (!grid) return;
+
+            let html = '';
+
+            // Row 0 — headers
+            html += '<div></div>'; // corner
+            DAYS.forEach((day, i) => {
+                const date = addDays(currentMonday, i);
+                html += `<div class="planner-grid-header">${escHtml(day)}<br><span style="font-size:.7rem;font-weight:400;opacity:.7">${formatShort(date)}</span></div>`;
+            });
+
+            // Rows 1-4 — meal types
+            MEAL_TYPES.forEach(meal => {
+                // Label cell
+                html += `<div class="planner-grid-label"><span class="meal-emoji">${meal.emoji}</span>${escHtml(meal.label)}</div>`;
+
+                // Day cells
+                for (let i = 0; i < 7; i++) {
+                    const date = toYMD(addDays(currentMonday, i));
+                    const entries = (planData[date] && planData[date][meal.key]) || [];
+                    if (entries.length > 0) {
+                        html += `<div class="plan-cell-filled" data-date="${date}" data-meal="${meal.key}">`;
+                        entries.forEach(e => { html += buildCard(e); });
+                        html += `</div>`;
+                    } else {
+                        html += buildEmptyCell(date, meal.key);
+                    }
+                }
+            });
+
+            grid.innerHTML = html;
+            bindGridEvents(grid);
+        }
+
+        // ── Mobile render ─────────────────────────────────────────────
+        function renderMobile() {
+            const list = document.getElementById('mobileList');
+            if (!list) return;
+
+            let html = '';
+            DAYS.forEach((day, i) => {
+                const date = addDays(currentMonday, i);
+                const ymd = toYMD(date);
+                const dayLabel = `${day} ${formatShort(date)}`;
+
+                html += `<div class="mobile-day">
+                    <div class="mobile-day-header" data-day="${i}">
+                        <span>${escHtml(dayLabel)}</span>
+                        <svg class="chevron" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="mobile-day-body" data-daybody="${i}">`;
+
+                MEAL_TYPES.forEach(meal => {
+                    const entries = (planData[ymd] && planData[ymd][meal.key]) || [];
+                    html += `<div class="mobile-meal-row">
+                        <div class="mobile-meal-label" style="gap:6px;">${meal.emoji} <span style="margin-left:4px;">${escHtml(meal.label)}</span></div>`;
+
+                    if (entries.length > 0) {
+                        entries.forEach(e => { html += buildCard(e); });
+                    } else {
+                        html += buildEmptyCell(ymd, meal.key);
+                    }
+                    html += `</div>`;
+                });
+
+                html += `</div></div>`;
+            });
+
+            list.innerHTML = html;
+
+            // Day toggle
+            list.querySelectorAll('.mobile-day-header').forEach(hdr => {
+                hdr.addEventListener('click', () => {
+                    const idx = hdr.dataset.day;
+                    const body = list.querySelector(`.mobile-day-body[data-daybody="${idx}"]`);
+                    if (!body) return;
+                    const open = body.classList.toggle('open');
+                    hdr.classList.toggle('open', open);
+                });
+            });
+
+            bindGridEvents(list);
+        }
+
+        // ── Bind add/remove buttons ───────────────────────────────────
+        function bindGridEvents(container) {
+            container.querySelectorAll('.plan-cell-add-btn').forEach(btn => {
+                btn.addEventListener('click', () => openAddModal(btn.dataset.date, btn.dataset.meal));
+            });
+            container.querySelectorAll('.plan-card-remove').forEach(btn => {
+                btn.addEventListener('click', () => removeEntry(+btn.dataset.id));
+            });
+        }
+
+        // ── Full render ───────────────────────────────────────────────
+        function render() {
+            renderDesktop();
+            renderMobile();
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // ── Remove entry ──────────────────────────────────────────────
+        async function removeEntry(id) {
+            // Optimistic UI
+            for (const date in planData) {
+                for (const meal in planData[date]) {
+                    planData[date][meal] = planData[date][meal].filter(e => e.id !== id);
+                }
+            }
+            render();
+
+            try {
+                await fetch(window.SP.apiPath('meal-plan.php?action=remove'), {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id }),
+                });
+            } catch (e) {
+                showToast('Erreur lors de la suppression.');
+                loadWeek(); // reload to get consistent state
+            }
+        }
+
+        // ── Week navigation ───────────────────────────────────────────
+        document.getElementById('prevWeekBtn').addEventListener('click', () => {
+            currentMonday = addDays(currentMonday, -7);
+            updateWeekLabel();
+            loadWeek();
+        });
+        document.getElementById('nextWeekBtn').addEventListener('click', () => {
+            currentMonday = addDays(currentMonday, 7);
+            updateWeekLabel();
+            loadWeek();
+        });
+
+        // ── Generate shopping list ────────────────────────────────────
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('generateBtn');
+            if (btn.classList.contains('loading')) return;
+            btn.classList.add('loading');
+            btn.setAttribute('disabled', 'true');
+            try {
+                const res = await fetch(window.SP.apiPath('meal-plan.php?action=generate_list'), {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ week_start: toYMD(currentMonday) }),
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || 'Erreur lors de la génération.');
+                window.location.href = 'liste-courses.html';
+            } catch (e) {
+                showToast('Erreur : ' + e.message, 4000);
+                btn.classList.remove('loading');
+                btn.removeAttribute('disabled');
+            }
+        });
+
+        // ── Modal state ───────────────────────────────────────────────
+        function openAddModal(date, mealType) {
+            pendingSlot = { date, mealType };
+            selectedRecipe = null;
+            portions = 2;
+
+            const meal = MEAL_TYPES.find(m => m.key === mealType);
+            const dateObj = new Date(date + 'T00:00:00');
+            const dayName = DAYS[dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1];
+
+            document.getElementById('slotLabel').textContent =
+                `${dayName} ${formatShort(dateObj)} — ${meal ? meal.label : mealType}`;
+
+            document.getElementById('recipeSearchInput').value = '';
+            document.getElementById('portionsVal').textContent = '2';
+            document.getElementById('confirmAddBtn').disabled = true;
+            document.getElementById('modalError').classList.add('hidden');
+            document.getElementById('searchResults').innerHTML =
+                '<p class="text-sm text-gray-400 text-center py-6">Tapez pour rechercher une recette…</p>';
+
+            document.getElementById('addModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('recipeSearchInput').focus(), 80);
+            if (window.lucide) lucide.createIcons();
+        }
+        function closeAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+            pendingSlot = null;
+            selectedRecipe = null;
+        }
+
+        document.getElementById('closeModalBtn').addEventListener('click', closeAddModal);
+        document.getElementById('cancelModalBtn').addEventListener('click', closeAddModal);
+        document.getElementById('addModal').addEventListener('click', e => {
+            if (e.target === document.getElementById('addModal')) closeAddModal();
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && document.getElementById('addModal').style.display !== 'none') closeAddModal();
+        });
+
+        // ── Portions ──────────────────────────────────────────────────
+        document.getElementById('portionsDown').addEventListener('click', () => {
+            if (portions > 1) { portions--; document.getElementById('portionsVal').textContent = portions; }
+        });
+        document.getElementById('portionsUp').addEventListener('click', () => {
+            if (portions < 8) { portions++; document.getElementById('portionsVal').textContent = portions; }
+        });
+
+        // ── Recipe search (debounced) ─────────────────────────────────
+        document.getElementById('recipeSearchInput').addEventListener('input', function () {
+            clearTimeout(searchTimer);
+            const q = this.value.trim();
+            if (!q) {
+                document.getElementById('searchResults').innerHTML =
+                    '<p class="text-sm text-gray-400 text-center py-6">Tapez pour rechercher une recette…</p>';
+                selectedRecipe = null;
+                document.getElementById('confirmAddBtn').disabled = true;
+                return;
+            }
+            document.getElementById('searchResults').innerHTML =
+                '<p class="text-sm text-gray-400 text-center py-4 animate-spin inline-block">…</p>';
+            searchTimer = setTimeout(() => searchRecipes(q), 400);
+        });
+
+        async function searchRecipes(q) {
+            try {
+                const res = await fetch(
+                    window.SP.apiPath('recipes.php?action=list&search=') + encodeURIComponent(q) + '&limit=5',
+                    { credentials: 'include' }
+                );
+                const data = await res.json();
+                const recipes = (data.recipes || []).slice(0, 5);
+                renderSearchResults(recipes);
+            } catch {
+                document.getElementById('searchResults').innerHTML =
+                    '<p class="text-sm text-red-500 text-center py-4">Erreur de recherche.</p>';
+            }
+        }
+
+        function renderSearchResults(recipes) {
+            const box = document.getElementById('searchResults');
+            if (recipes.length === 0) {
+                box.innerHTML = '<p class="text-sm text-gray-400 text-center py-6">Aucune recette trouvée.</p>';
+                return;
+            }
+            box.innerHTML = recipes.map(r => {
+                const img = r.image_url || 'assets/recipes/_default.jpg';
+                const time = fmtTime(r.total_time);
+                const diff = r.difficulty || '';
+                const meta = [diff, time].filter(Boolean).join(' · ');
+                return `<div class="recipe-result" data-id="${r.id}" data-slug="${escHtml(r.slug)}" data-title="${escHtml(r.title)}" data-img="${escHtml(img)}">
+                    <img src="${escHtml(img)}" alt="${escHtml(r.title)}" onerror="this.src='assets/recipes/_default.jpg'">
+                    <div class="recipe-result-info">
+                        <div class="recipe-result-title">${escHtml(r.title)}</div>
+                        ${meta ? `<div class="recipe-result-meta">${escHtml(meta)}</div>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+
+            box.querySelectorAll('.recipe-result').forEach(el => {
+                el.addEventListener('click', () => {
+                    box.querySelectorAll('.recipe-result').forEach(x => x.classList.remove('selected'));
+                    el.classList.add('selected');
+                    selectedRecipe = {
+                        id: +el.dataset.id,
+                        slug: el.dataset.slug,
+                        title: el.dataset.title,
+                        image_url: el.dataset.img,
+                    };
+                    document.getElementById('confirmAddBtn').disabled = false;
+                });
+            });
+        }
+
+        // ── Confirm add ───────────────────────────────────────────────
+        document.getElementById('confirmAddBtn').addEventListener('click', async () => {
+            if (!selectedRecipe || !pendingSlot) return;
+            const btn = document.getElementById('confirmAddBtn');
+            const errBox = document.getElementById('modalError');
+            errBox.classList.add('hidden');
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="animate-spin" style="width:16px;height:16px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>`;
+
+            try {
+                const res = await fetch(window.SP.apiPath('meal-plan.php?action=add'), {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        recipe_id: selectedRecipe.id,
+                        plan_date: pendingSlot.date,
+                        meal_type: pendingSlot.mealType,
+                        servings: portions,
+                    }),
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || 'Erreur lors de l\'ajout.');
+
+                // Update local state
+                const entry = data.entry || {
+                    id: data.id || Date.now(),
+                    recipe_id: selectedRecipe.id,
+                    recipe_title: selectedRecipe.title,
+                    image_url: selectedRecipe.image_url,
+                    plan_date: pendingSlot.date,
+                    meal_type: pendingSlot.mealType,
+                    servings: portions,
+                };
+                const d = pendingSlot.date;
+                const m = pendingSlot.mealType;
+                if (!planData[d]) planData[d] = {};
+                if (!planData[d][m]) planData[d][m] = [];
+                planData[d][m].push(entry);
+
+                closeAddModal();
+                render();
+                showToast('Recette ajoutée au planning ✓');
+            } catch (e) {
+                errBox.textContent = e.message;
+                errBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Ajouter`;
+            }
+        });
+
+        // ── Mobile menu toggle ────────────────────────────────────────
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu    = document.getElementById('mobileMenu');
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                const opened = mobileMenu.classList.toggle('hidden') === false;
+                mobileMenuBtn.setAttribute('aria-expanded', String(opened));
+            });
+        }
+
+        // ── Init ──────────────────────────────────────────────────────
+        updateWeekLabel();
+        loadWeek();
+        if (window.lucide) lucide.createIcons();
+
+    })();
+    </script>
+    <script src="js/consent.js"></script>
+</body>
+</html>

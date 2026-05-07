@@ -9,6 +9,7 @@ $slug   = $_GET['slug'] ?? '';
 switch ("$method:$action") {
     case 'GET:list':      getList();           break;
     case 'GET:single':    getSingle($slug);    break;
+    case 'GET:views':     getViewStats($id);   break;
     case 'GET:mine':      getMine();           break;
     case 'GET:all':       getAllAdmin();       break;
     case 'POST:create':   createRecipe();      break;
@@ -109,6 +110,7 @@ function getList() {
         'populaires' => 'r.rating_count DESC',
         'notees'     => 'r.rating DESC',
         'rapides'    => 'r.total_time ASC',
+        'vues'       => 'r.views DESC',
         default      => 'r.created_at DESC',
     };
 
@@ -150,6 +152,17 @@ function getSingle($slug) {
     $db = getDB();
     $userId   = $_SESSION['user_id'] ?? 0;
     $userRole = $_SESSION['user_role'] ?? '';
+
+    // Incrémenter le compteur de vues (non bloquant, ignore les erreurs de colonne manquante)
+    if ($slug) {
+        try {
+            $db->prepare("UPDATE recipes SET views = views + 1 WHERE slug = ? AND status = 'published'")->execute([$slug]);
+            // Log quotidien pour les graphiques
+            $db->prepare("INSERT INTO recipe_view_log (recipe_id, day, count)
+                          SELECT id, CURDATE(), 1 FROM recipes WHERE slug = ?
+                          ON DUPLICATE KEY UPDATE count = count + 1")->execute([$slug]);
+        } catch (PDOException $e) { /* colonne/table pas encore créée, on ignore */ }
+    }
 
     // LEFT JOIN sur favorites — entièrement paramétré
     $sql = "SELECT r.*,
@@ -313,6 +326,31 @@ function approveRecipe($id) {
     $db = getDB();
     $db->prepare("UPDATE recipes SET status = 'published' WHERE id = ?")->execute([$id]);
     jsonResponse(['success' => true]);
+}
+
+/* ── Stats de vues (30 jours) pour le profil auteur ─────────── */
+function getViewStats($id) {
+    requireAuth();
+    $db  = getDB();
+    $uid = (int)$_SESSION['user_id'];
+
+    // Vérifie que la recette appartient à l'utilisateur (ou admin)
+    if ($_SESSION['user_role'] !== 'admin') {
+        $chk = $db->prepare('SELECT id FROM recipes WHERE id = ? AND author_id = ?');
+        $chk->execute([$id, $uid]);
+        if (!$chk->fetch()) jsonResponse(['error' => 'Non autorisé'], 403);
+    }
+
+    try {
+        $s = $db->prepare("SELECT day, count FROM recipe_view_log
+                           WHERE recipe_id = ? AND day >= DATE_SUB(CURDATE(), INTERVAL 29 DAY)
+                           ORDER BY day ASC");
+        $s->execute([$id]);
+        $rows = $s->fetchAll();
+    } catch (PDOException $e) {
+        $rows = [];
+    }
+    jsonResponse(['views' => $rows]);
 }
 
 /* ── Helpers ─────────────────────────────────────────────────── */

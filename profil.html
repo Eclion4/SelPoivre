@@ -115,7 +115,7 @@
         </div>
 
         <!-- ===== STATS ===== -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-8">
             <div class="bg-white border border-gray-200 rounded-xl p-4">
                 <p class="text-2xl font-bold" id="statRecipes">—</p>
                 <p class="text-xs text-gray-500 mt-1">Publiées</p>
@@ -140,10 +140,23 @@
                 <p class="text-2xl font-bold text-or-600" id="statRating">—</p>
                 <p class="text-xs text-gray-500 mt-1">Note moyenne</p>
             </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <p class="text-2xl font-bold text-gray-500" id="statViews">—</p>
+                <p class="text-xs text-gray-500 mt-1">Vues totales</p>
+            </div>
         </div>
 
         <!-- ===== BADGES ===== -->
         <div id="userBadges" class="hidden flex flex-wrap gap-2 mb-8">
+        </div>
+
+        <!-- ===== TOP RECETTES PAR VUES ===== -->
+        <div id="topViewsCard" class="hidden bg-white border border-gray-200 rounded-2xl p-5 mb-6">
+            <div class="flex items-center gap-2 mb-4">
+                <i data-lucide="trending-up" class="w-5 h-5 text-sp-500"></i>
+                <h3 class="font-display font-bold text-base">Vos recettes les plus consultées</h3>
+            </div>
+            <ol id="topViewsList" class="space-y-2"></ol>
         </div>
 
         <!-- ===== TABS ===== -->
@@ -336,6 +349,28 @@
         function initials(name) { return (name||'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2); }
         function fmtTime(min) { if(!min) return '—'; if(min<60) return min+' min'; const h=Math.floor(min/60), m=min%60; return m? h+'h'+String(m).padStart(2,'0') : h+'h'; }
         function fmtDate(iso) { try { return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}); } catch { return ''; } }
+        function fmtViews(n) { n=parseInt(n)||0; if(n>=1e6) return (n/1e6).toFixed(1).replace('.0','')+'M'; if(n>=1000) return (n/1000).toFixed(n>=10000?0:1).replace('.0','')+'k'; return String(n); }
+        function esc(s) { return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function renderTopViews(allRecipes) {
+            const pub = (allRecipes || []).filter(r => r.status === 'published');
+            const top = pub.filter(r => (parseInt(r.views)||0) > 0).sort((a,b) => (parseInt(b.views)||0) - (parseInt(a.views)||0)).slice(0, 5);
+            if (top.length === 0) return;
+            const maxV = parseInt(top[0].views) || 1;
+            document.getElementById('topViewsList').innerHTML = top.map((r, i) => {
+                const v = parseInt(r.views) || 0;
+                const pct = Math.round(v / maxV * 100);
+                return `<li class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-gray-400 w-4 text-right flex-shrink-0">${i+1}</span>
+                    <div class="flex-1 min-w-0">
+                        <a href="recette-detail.html?slug=${encodeURIComponent(r.slug)}" class="text-sm font-semibold hover:text-sp-600 transition-colors truncate block">${esc(r.title)}</a>
+                        <div class="mt-1 h-1.5 bg-gray-100 rounded-full overflow-hidden"><div class="h-full bg-sp-400 rounded-full transition-all" style="width:${pct}%"></div></div>
+                    </div>
+                    <span class="text-sm font-bold text-gray-600 flex-shrink-0 flex items-center gap-1"><i data-lucide="eye" class="w-3.5 h-3.5 text-gray-400"></i>${fmtViews(v)}</span>
+                </li>`;
+            }).join('');
+            document.getElementById('topViewsCard').classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        }
 
         function renderHeader(u) {
             const a = document.getElementById('avatarBox');
@@ -668,8 +703,12 @@
                 const data = await res.json();
                 window.__myLoaded = true;
                 const list = data.recipes || [];
-                document.getElementById('statRecipes').textContent = list.filter(r => r.status === 'published').length;
+                const pub  = list.filter(r => r.status === 'published');
+                document.getElementById('statRecipes').textContent = pub.length;
                 document.getElementById('statPending').textContent  = list.filter(r => r.status === 'pending').length;
+                // Views
+                document.getElementById('statViews').textContent = fmtViews(pub.reduce((s,r) => s + (parseInt(r.views)||0), 0));
+                renderTopViews(list);
                 if (list.length === 0) {
                     box.innerHTML = `
                     <div class="col-span-full text-center py-16 bg-white border-2 border-dashed border-gray-200 rounded-2xl">
@@ -755,6 +794,10 @@
                 } else {
                     document.getElementById('statRating').textContent = '—';
                 }
+                // Vues totales + top recettes
+                const totalViews = pub.reduce((s, r) => s + (parseInt(r.views) || 0), 0);
+                document.getElementById('statViews').textContent = fmtViews(totalViews);
+                renderTopViews(pub);
             } catch {}
             // Followers / Following counts (via public profile endpoint)
             try {

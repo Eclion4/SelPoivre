@@ -14,7 +14,8 @@ function getDB() {
         } catch (PDOException $e) {
             http_response_code(500);
             header('Content-Type: application/json; charset=utf-8');
-            die(json_encode(['error' => 'DB: ' . $e->getMessage()]));
+            error_log('[SP] DB connection error: ' . $e->getMessage());
+            die(json_encode(['error' => 'Erreur serveur, veuillez réessayer.']));
         }
     }
     return $pdo;
@@ -65,9 +66,15 @@ function rateLimit(string $action, int $max = 5, int $window = 300): void {
 
 header('Content-Type: application/json; charset=utf-8');
 
-$allowedOrigins = ['https://www.sel-poivre.com', 'http://localhost', 'http://localhost:8080', 'http://127.0.0.1', 'http://127.0.0.1:8080'];
+// CORS : localhost autorisé uniquement en développement local
+$allowedOrigins = ['https://www.sel-poivre.com', 'https://sel-poivre.com'];
+if (defined('APP_ENV') && APP_ENV === 'development') {
+    $allowedOrigins = array_merge($allowedOrigins, [
+        'http://localhost', 'http://localhost:8080', 'http://127.0.0.1', 'http://127.0.0.1:8080'
+    ]);
+}
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($origin, $allowedOrigins, true) || preg_match('/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/', $origin)) {
+if (in_array($origin, $allowedOrigins, true)) {
     header('Access-Control-Allow-Origin: ' . $origin);
 } else {
     header('Access-Control-Allow-Origin: https://www.sel-poivre.com');
@@ -78,4 +85,10 @@ header('Access-Control-Allow-Credentials: true');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
 
-session_start();
+// Session sécurisée : SameSite=Lax protège contre le CSRF,
+// HttpOnly bloque l'accès JS au cookie, Secure impose HTTPS.
+session_start([
+    'cookie_httponly' => true,
+    'cookie_secure'   => true,
+    'cookie_samesite' => 'Lax',
+]);

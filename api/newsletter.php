@@ -14,9 +14,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405); exit;
 }
 
+rateLimit('newsletter_' . ($_SERVER['REMOTE_ADDR'] ?? '0'), 3, 3600); // 3 inscriptions/heure par IP
+
 $d     = getBody();
 $email = trim($d['email'] ?? '');
-$src   = trim($d['source'] ?? 'website');
+
+// Whitelist des sources autorisées
+$allowedSources = ['website', 'footer', 'popup', 'recipe', 'communaute'];
+$src = in_array(trim($d['source'] ?? ''), $allowedSources, true)
+    ? trim($d['source']) : 'website';
 
 if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     jsonResponse(['error' => 'Adresse email invalide.'], 400);

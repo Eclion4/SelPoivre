@@ -6,9 +6,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Réservé aux admins connectés (sinon n'importe qui pourrait insérer
-// des recettes en masse dans la BDD).
+// Double protection : session admin + clé secrète MIGRATION_KEY définie dans db_config.php
+// Sans cette clé, même une session admin compromise ne peut pas insérer des données en masse.
 requireAdmin();
+$migKey = $_POST['migration_key'] ?? getBody()['migration_key'] ?? '';
+if (!defined('MIGRATION_KEY') || !hash_equals(MIGRATION_KEY, $migKey)) {
+    jsonResponse(['error' => 'Clé de migration manquante ou invalide'], 403);
+}
 
 $recipes = json_decode(file_get_contents('php://input'), true);
 if (!$recipes || !is_array($recipes)) {

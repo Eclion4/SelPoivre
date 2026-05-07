@@ -369,41 +369,31 @@
         const u = getStoredUser();
 
         const item = (href, iconFilled, iconOutline, label, active) => `
-            <a href="${pagePath(href)}"
-               class="relative flex flex-col items-center justify-center gap-[3px] flex-1 pt-3 pb-2
-                      ${active ? 'text-sp-600' : 'text-gray-400'} hover:text-sp-500 transition-colors">
-                ${active ? `<span class="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] bg-sp-500 rounded-full"></span>` : ''}
+            <a href="${pagePath(href)}" class="sp-bnav-item${active ? ' sp-bnav-item--active' : ''}">
+                ${active ? '<span class="sp-bnav-bar"></span>' : ''}
                 ${active ? iconFilled : iconOutline}
-                <span class="text-[10px] ${active ? 'font-semibold' : 'font-medium'} leading-none">${label}</span>
+                <span class="sp-bnav-label">${label}</span>
             </a>`;
 
-        // ── Filled icons (active)
-        const homeF  = `<svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`;
-        const recF   = `<svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>`;
-        const commF  = `<svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`;
-        const userF  = `<svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v1c0 .55.45 1 1 1h18c.55 0 1-.45 1-1v-1c0-3.33-6.67-5-10-5z"/></svg>`;
-        const loginF = `<svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="currentColor"><path d="M10 17l5-5-5-5v3H3v4h7v3zm7-14H7c-1.11 0-2 .9-2 2v4h2V5h10v14H7v-4H5v4c0 1.1.89 2 2 2h10c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>`;
+        // ── Filled icons (active) — taille via attributs SVG, aucune dépendance CSS
+        const homeF  = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`;
+        const recF   = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>`;
+        const commF  = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`;
+        const userF  = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v1c0 .55.45 1 1 1h18c.55 0 1-.45 1-1v-1c0-3.33-6.67-5-10-5z"/></svg>`;
+        const loginF = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 17l5-5-5-5v3H3v4h7v3zm7-14H7c-1.11 0-2 .9-2 2v4h2V5h10v14H7v-4H5v4c0 1.1.89 2 2 2h10c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>`;
 
         // ── Outline icons (inactive)
-        const homeO  = `<svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>`;
-        const recO   = `<svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path stroke-linecap="round" d="M9 12h6M9 16h4"/></svg>`;
-        const commO  = `<svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`;
-        const userO  = `<svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path stroke-linecap="round" d="M5 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/></svg>`;
-        const loginO = `<svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>`;
+        const homeO  = `<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>`;
+        const recO   = `<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path stroke-linecap="round" d="M9 12h6M9 16h4"/></svg>`;
+        const commO  = `<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`;
+        const userO  = `<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path stroke-linecap="round" d="M5 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/></svg>`;
+        const loginO = `<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>`;
 
-        // ── Center "Publier" button
-        const pubIcon = `<svg class="w-[30px] h-[30px]" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`;
+        // ── Bouton central Publier
+        const pubIcon = `<svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`;
 
         const middleBtn = u
-            ? `<a href="${pagePath('publier.html')}"
-                  class="flex items-center justify-center flex-shrink-0
-                         w-[58px] h-[58px] -mt-6
-                         bg-gradient-to-br from-sp-500 to-sp-600
-                         text-white rounded-full
-                         ring-[3px] ring-white
-                         shadow-[0_6px_22px_rgba(232,93,38,0.45)]
-                         active:scale-95 transition-all duration-200"
-                  aria-label="Publier une recette">${pubIcon}</a>`
+            ? `<a href="${pagePath('publier.html')}" class="sp-bnav-pub" aria-label="Publier une recette">${pubIcon}</a>`
             : item('inscription.html', loginF, loginO, 'Inscription', isActive('inscription.html'));
 
         const profileItem = u
@@ -411,23 +401,85 @@
             : item('connexion.html', loginF, loginO, 'Connexion', isActive('connexion.html'));
 
         const html = `
-        <nav class="js-sp-bottomnav md:hidden fixed bottom-0 left-0 right-0 z-40
-                    bg-white border-t border-gray-100
-                    shadow-[0_-4px_24px_rgba(0,0,0,0.08)]
-                    pb-safe">
-            <div class="flex items-stretch h-[60px] px-1">
+        <nav class="js-sp-bottomnav md:hidden fixed bottom-0 left-0 right-0 z-40 pb-safe sp-bnav">
+            <div class="sp-bnav-row">
                 ${item('index.html', homeF, homeO, 'Accueil', isActive('index.html'))}
                 ${item('recettes.html', recF, recO, 'Recettes', isActive('recettes.html'))}
-                <div class="flex flex-1 items-center justify-center">${middleBtn}</div>
+                <div class="sp-bnav-center">${middleBtn}</div>
                 ${item('communaute.html', commF, commO, 'Communauté', isActive('communaute.html'))}
                 ${profileItem}
             </div>
         </nav>
         <style>
+            .sp-bnav {
+                background: #fff;
+                border-top: 1px solid #f3f4f6;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            }
+            .sp-bnav-row {
+                display: flex;
+                align-items: stretch;
+                height: 60px;
+                padding: 0 4px;
+            }
+            .sp-bnav-item {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 3px;
+                flex: 1;
+                padding: 10px 2px 8px;
+                color: #9ca3af;
+                text-decoration: none;
+                transition: color 0.15s;
+            }
+            .sp-bnav-item:hover { color: #C4311B; }
+            .sp-bnav-item--active { color: #A42618; }
+            .sp-bnav-bar {
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 24px;
+                height: 3px;
+                background: #C4311B;
+                border-radius: 9999px;
+            }
+            .sp-bnav-label {
+                font-size: 10px;
+                line-height: 1;
+                font-weight: 500;
+            }
+            .sp-bnav-item--active .sp-bnav-label { font-weight: 600; }
+            .sp-bnav-center {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex: 1;
+            }
+            .sp-bnav-pub {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                width: 58px;
+                height: 58px;
+                margin-top: -22px;
+                background: linear-gradient(135deg, #C4311B, #8B1E0F);
+                color: #fff;
+                border-radius: 9999px;
+                outline: 3px solid #fff;
+                box-shadow: 0 6px 20px rgba(196,49,27,0.45);
+                transition: transform 0.15s, box-shadow 0.15s;
+                text-decoration: none;
+            }
+            .sp-bnav-pub:active { transform: scale(0.93); box-shadow: 0 3px 10px rgba(196,49,27,0.35); }
             @supports (padding: env(safe-area-inset-bottom)) {
                 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
             }
-            @media (max-width: 767.98px) { body { padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0)); } }
+            @media (max-width: 767.98px) { body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); } }
         </style>`;
         document.body.insertAdjacentHTML('beforeend', html);
     }

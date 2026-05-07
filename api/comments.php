@@ -35,9 +35,10 @@ function listComments() {
 
 function addComment() {
     requireAuth();
+    rateLimit('comment_' . ($_SESSION['user_id'] ?? '0'), 10, 60); // 10 commentaires/minute max
     $d = getBody();
     $recipeId = (int)($d['recipe_id'] ?? 0);
-    $content  = trim($d['content'] ?? '');
+    $content  = strip_tags(trim($d['content'] ?? '')); // Supprime toute balise HTML
     $rating   = isset($d['rating']) ? (int)$d['rating'] : null;
 
     if (!$recipeId)               jsonResponse(['error' => 'recipe_id requis'], 400);

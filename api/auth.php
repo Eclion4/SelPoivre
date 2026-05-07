@@ -54,6 +54,7 @@ function handleRegister() {
     $s->execute([$username, $email, $hash, $prefs]);
     $id = $db->lastInsertId();
 
+    session_regenerate_id(true); // Prévient la fixation de session
     $_SESSION['user_id']   = $id;
     $_SESSION['user_role'] = 'user';
 
@@ -81,6 +82,7 @@ function handleLogin() {
     if (!$user['is_active'])
         jsonResponse(['error' => 'Compte désactivé'], 403);
 
+    session_regenerate_id(true); // Prévient la fixation de session
     $_SESSION['user_id']   = $user['id'];
     $_SESSION['user_role'] = $user['role'];
 
@@ -128,6 +130,15 @@ function handleUpdateProfile() {
     if (!$username || strlen($username) < 3) jsonResponse(['error' => 'Pseudo trop court (3 min)'], 400);
     if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) jsonResponse(['error' => 'Email invalide'], 400);
     if (mb_strlen($bio) > 500) jsonResponse(['error' => 'Bio trop longue (500 max)'], 400);
+
+    // L'avatar doit être un chemin local issu de l'upload — on rejette toute URL externe
+    if ($avatar !== '' && (stripos($avatar, 'http://') === 0 || stripos($avatar, 'https://') === 0 || stripos($avatar, '//') === 0)) {
+        jsonResponse(['error' => 'Avatar invalide : seuls les fichiers uploadés sont acceptés'], 400);
+    }
+    // On ne conserve que les chemins relatifs internes (/uploads/... ou assets/...)
+    if ($avatar !== '' && !preg_match('#^/?uploads/#i', $avatar) && !preg_match('#^/?assets/#i', $avatar)) {
+        $avatar = '';
+    }
 
     $db = getDB();
     $check = $db->prepare('SELECT id FROM users WHERE (email = ? OR username = ?) AND id <> ?');

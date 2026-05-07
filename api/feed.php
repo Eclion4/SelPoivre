@@ -37,17 +37,11 @@ function listPosts() {
         $params = $ids;
     }
 
-    $favSelect = $userId
-        ? "(SELECT 1 FROM favorites f WHERE f.recipe_id = r.id AND f.user_id = " . (int)$userId . ") AS is_favorited,"
-        : "0 AS is_favorited,";
-    $followSelect = $userId
-        ? "(SELECT 1 FROM follows fw WHERE fw.follower_id = " . (int)$userId . " AND fw.followed_id = r.author_id) AS is_following,"
-        : "0 AS is_following,";
-
+    // LEFT JOINs entièrement paramétrés pour favorites et follows
     $sql = "SELECT r.id, r.slug, r.title, r.description, r.image_url, r.created_at,
                    r.author_id, r.category, r.total_time, r.difficulty, r.rating,
-                   $favSelect
-                   $followSelect
+                   (fav.user_id IS NOT NULL)   AS is_favorited,
+                   (fw.follower_id IS NOT NULL) AS is_following,
                    CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS author_type,
                    CASE WHEN r.author_id IS NULL THEN 'Sel & Poivre'
                         ELSE COALESCE(u.username, 'Sel & Poivre')
@@ -56,12 +50,14 @@ function listPosts() {
                    (SELECT COUNT(*) FROM favorites WHERE recipe_id = r.id) AS like_count,
                    (SELECT COUNT(*) FROM comments  WHERE recipe_id = r.id) AS comment_count
             FROM recipes r
-            LEFT JOIN users u ON r.author_id = u.id
+            LEFT JOIN users u   ON r.author_id = u.id
+            LEFT JOIN favorites fav ON fav.recipe_id = r.id AND fav.user_id = ?
+            LEFT JOIN follows   fw  ON fw.follower_id = ? AND fw.followed_id = r.author_id
             WHERE " . implode(' AND ', $where) . "
             ORDER BY r.created_at DESC
-            LIMIT $limit OFFSET $offset";
+            LIMIT " . $limit . " OFFSET " . $offset;
     $rs = $db->prepare($sql);
-    $rs->execute($params);
+    $rs->execute(array_merge([(int)$userId, (int)$userId], $params));
     $posts = $rs->fetchAll();
 
     // Cast bool/int and fetch top-3 comments per recipe in one shot

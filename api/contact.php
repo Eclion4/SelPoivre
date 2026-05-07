@@ -13,6 +13,7 @@ switch ("$method:$action") {
 }
 
 function sendMessage() {
+    rateLimit('contact_' . ($_SERVER['REMOTE_ADDR'] ?? '0'), 5, 3600); // 5 messages/heure par IP
     $d = getBody();
     $name    = trim($d['name']    ?? '');
     $email   = trim($d['email']   ?? '');
@@ -36,10 +37,13 @@ function sendMessage() {
     // Ajoutez dans db_config.php : define('ADMIN_EMAIL', 'votre@email.com');
     $adminEmail = defined('ADMIN_EMAIL') ? ADMIN_EMAIL : '';
     if ($adminEmail) {
-        $subjectMail = '[Sel & Poivre] Nouveau message : ' . mb_substr($subject, 0, 80);
+        // Nettoyage anti-injection de headers : suppression des retours à la ligne
+        $safeName    = preg_replace('/[\r\n]/', '', $name);
+        $safeSubject = preg_replace('/[\r\n]/', '', $subject);
+        $subjectMail = '[Sel & Poivre] Nouveau message : ' . mb_substr($safeSubject, 0, 80);
         $body  = "Nouveau message reçu sur Sel & Poivre\n\n";
-        $body .= "De     : {$name} <{$email}>\n";
-        $body .= "Sujet  : {$subject}\n\n";
+        $body .= "De     : {$safeName} <{$email}>\n";
+        $body .= "Sujet  : {$safeSubject}\n\n";
         $body .= $message . "\n\n";
         $body .= "Répondre directement à : {$email}";
         $headers  = "From: noreply@sel-poivre.com\r\n";

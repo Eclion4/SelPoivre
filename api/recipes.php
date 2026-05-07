@@ -31,6 +31,27 @@ function fixImgUrl(array &$r): void {
     }
 }
 
+/** Valide et nettoie les champs recette en entrée — retourne un tableau corrigé */
+function sanitizeRecipeInput(array $d): array {
+    $difficulties = ['Facile', 'Moyen', 'Difficile'];
+    $categories   = ['Entrée', 'Plat', 'Dessert', 'Petit-déjeuner', 'Snack', 'Boisson', 'Autre'];
+
+    $d['difficulty'] = in_array($d['difficulty'] ?? '', $difficulties, true)
+        ? $d['difficulty'] : 'Facile';
+
+    $d['category'] = in_array($d['category'] ?? '', $categories, true)
+        ? $d['category'] : 'Plat';
+
+    // L'image doit être un chemin local — pas d'URL externe
+    $img = trim($d['image_url'] ?? '');
+    if ($img !== '' && (stripos($img, 'http://') === 0 || stripos($img, 'https://') === 0)) {
+        $img = '';
+    }
+    $d['image_url'] = $img ?: null;
+
+    return $d;
+}
+
 /* ── Toutes les recettes (admin) ─────────────────────────────── */
 function getAllAdmin() {
     requireAdmin();
@@ -89,16 +110,13 @@ function getList() {
         default      => 'r.created_at DESC',
     };
 
-    $favSelect = $userId
-        ? "(SELECT 1 FROM favorites f WHERE f.recipe_id = r.id AND f.user_id = " . (int)$userId . ") AS is_favorited,"
-        : "0 AS is_favorited,";
-
+    // LEFT JOIN sur favorites (user_id=0 ne matche rien si non connecté) — entièrement paramétré
     $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 100;
     $sql = "SELECT r.id, r.slug, r.title, r.description, r.category,
                    r.prep_time, r.cook_time, r.total_time, r.servings,
                    r.difficulty, r.rating, r.rating_count, r.image_url,
                    r.created_at, r.author_id,
-                   $favSelect
+                   (fav.user_id IS NOT NULL) AS is_favorited,
                    CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS author_type,
                    CASE WHEN r.author_id IS NULL THEN 'Sel & Poivre'
                         ELSE COALESCE(u.username, 'Sel & Poivre')
@@ -106,12 +124,13 @@ function getList() {
                    u.avatar AS author_avatar
             FROM recipes r
             LEFT JOIN users u ON r.author_id = u.id
+            LEFT JOIN favorites fav ON fav.recipe_id = r.id AND fav.user_id = ?
             WHERE " . implode(' AND ', $where) . "
             ORDER BY $orderBy
-            LIMIT $limit";
+            LIMIT " . $limit;
 
     $s = $db->prepare($sql);
-    $s->execute($params);
+    $s->execute(array_merge([(int)$userId], $params));
     $recipes = $s->fetchAll();
 
     foreach ($recipes as &$r) {
@@ -130,12 +149,9 @@ function getSingle($slug) {
     $userId   = $_SESSION['user_id'] ?? 0;
     $userRole = $_SESSION['user_role'] ?? '';
 
-    $favSelect = $userId
-        ? "(SELECT 1 FROM favorites f WHERE f.recipe_id = r.id AND f.user_id = " . (int)$userId . ") AS is_favorited,"
-        : "0 AS is_favorited,";
-
+    // LEFT JOIN sur favorites — entièrement paramétré
     $sql = "SELECT r.*,
-                   $favSelect
+                   (fav.user_id IS NOT NULL) AS is_favorited,
                    CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS norm_author_type,
                    CASE WHEN r.author_id IS NULL THEN 'Sel & Poivre'
                         ELSE COALESCE(u.username, 'Sel & Poivre')
@@ -143,10 +159,11 @@ function getSingle($slug) {
                    u.avatar AS author_avatar
             FROM recipes r
             LEFT JOIN users u ON r.author_id = u.id
+            LEFT JOIN favorites fav ON fav.recipe_id = r.id AND fav.user_id = ?
             WHERE r.slug = ?";
 
     $s = $db->prepare($sql);
-    $s->execute([$slug]);
+    $s->execute([(int)$userId, $slug]);
     $recipe = $s->fetch();
     if (!$recipe) jsonResponse(['error' => 'Recette introuvable'], 404);
     fixImgUrl($recipe);
@@ -206,6 +223,7 @@ function createRecipe() {
         if (empty($d[$f])) jsonResponse(['error' => "Champ '$f' requis"], 400);
     }
 
+    $d    = sanitizeRecipeInput($d);
     $db   = getDB();
     $slug = makeSlug($d['title'], $db);
 
@@ -220,7 +238,7 @@ function createRecipe() {
         $slug, $d['title'], $d['description'], $d['category'],
         (int)($d['prep_time'] ?? 0), (int)($d['cook_time'] ?? 0),
         (int)($d['total_time'] ?? 0), (int)($d['servings'] ?? 4),
-        $d['difficulty'] ?? 'Facile', $d['image_url'] ?? null,
+        $d['difficulty'], $d['image_url'],
         $_SESSION['user_id'], 'user', $status
     ]);
     $recipeId = $db->lastInsertId();
@@ -246,7 +264,7 @@ function updateRecipe($id) {
     if ($_SESSION['user_role'] !== 'admin' && $recipe['author_id'] != $_SESSION['user_id'])
         jsonResponse(['error' => 'Accès refusé'], 403);
 
-    $d = getBody();
+    $d = sanitizeRecipeInput(getBody());
     $s = $db->prepare("UPDATE recipes SET title=?, description=?, category=?,
         prep_time=?, cook_time=?, total_time=?, servings=?, difficulty=?,
         image_url=?, updated_at=NOW() WHERE id=?");
@@ -254,7 +272,7 @@ function updateRecipe($id) {
         $d['title'], $d['description'], $d['category'],
         (int)($d['prep_time'] ?? 0), (int)($d['cook_time'] ?? 0),
         (int)($d['total_time'] ?? 0), (int)($d['servings'] ?? 4),
-        $d['difficulty'] ?? 'Facile', $d['image_url'] ?? null, $id
+        $d['difficulty'], $d['image_url'], $id
     ]);
 
     $db->prepare('DELETE FROM ingredients WHERE recipe_id = ?')->execute([$id]);

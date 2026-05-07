@@ -32,20 +32,18 @@ function listMembers() {
     }
     $whereSql = implode(' AND ', $where);
 
-    $followSelect = $viewerId
-        ? "(SELECT 1 FROM follows fw WHERE fw.follower_id = $viewerId AND fw.followed_id = u.id) AS is_following"
-        : "0 AS is_following";
-
+    // LEFT JOIN entièrement paramétré pour le statut de suivi
     $s = $db->prepare("
         SELECT u.id, u.username, u.avatar, u.bio,
-               (SELECT COUNT(*) FROM recipes   WHERE author_id  = u.id AND status='published') AS recipe_count,
-               (SELECT COUNT(*) FROM follows   WHERE followed_id = u.id)                        AS follower_count,
-               $followSelect
+               (SELECT COUNT(*) FROM recipes WHERE author_id  = u.id AND status='published') AS recipe_count,
+               (SELECT COUNT(*) FROM follows WHERE followed_id = u.id)                        AS follower_count,
+               (fw.follower_id IS NOT NULL) AS is_following
         FROM users u
+        LEFT JOIN follows fw ON fw.follower_id = ? AND fw.followed_id = u.id
         WHERE $whereSql
         ORDER BY recipe_count DESC, u.created_at DESC
-        LIMIT $limit OFFSET $offset");
-    $s->execute($params);
+        LIMIT " . $limit . " OFFSET " . $offset);
+    $s->execute(array_merge([(int)$viewerId], $params));
     $users = $s->fetchAll();
 
     foreach ($users as &$u) {
@@ -63,7 +61,8 @@ function publicProfile() {
     if (!$username) jsonResponse(['error' => 'username requis'], 400);
 
     $db = getDB();
-    $s = $db->prepare("SELECT id, username, avatar, bio, created_at, role
+    // Le champ 'role' n'est pas exposé publiquement (évite de cibler les admins)
+    $s = $db->prepare("SELECT id, username, avatar, bio, created_at
                        FROM users WHERE username = ? AND is_active = 1");
     $s->execute([$username]);
     $u = $s->fetch();

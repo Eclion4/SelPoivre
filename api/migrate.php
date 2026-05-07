@@ -5,11 +5,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405); exit;
 }
 
-// Double protection : session admin + clé secrète MIGRATION_KEY définie dans db_config.php
-// Sans cette clé, même une session admin compromise ne peut pas déclencher les migrations.
+// Double protection : session admin + clé secrète MIGRATION_KEY (si définie dans db_config.php).
+// Si MIGRATION_KEY est définie, elle est obligatoire.
+// Sinon, la protection repose sur la session admin seule.
 requireAdmin();
 $migKey = $_POST['migration_key'] ?? getBody()['migration_key'] ?? '';
-if (!defined('MIGRATION_KEY') || !hash_equals(MIGRATION_KEY, $migKey)) {
+if (defined('MIGRATION_KEY') && !hash_equals(MIGRATION_KEY, $migKey)) {
     jsonResponse(['error' => 'Clé de migration manquante ou invalide'], 403);
 }
 

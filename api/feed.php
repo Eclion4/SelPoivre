@@ -39,7 +39,7 @@ function listPosts() {
 
     // LEFT JOINs entièrement paramétrés pour favorites et follows
     $sql = "SELECT r.id, r.slug, r.title, r.description, r.image_url, r.created_at,
-                   r.author_id, r.category, r.total_time, r.difficulty, r.rating,
+                   r.author_id, r.category, r.total_time, r.difficulty, r.rating, r.views,
                    (fav.user_id IS NOT NULL)   AS is_favorited,
                    (fw.follower_id IS NOT NULL) AS is_following,
                    CASE WHEN r.author_id IS NULL THEN 'mijote' ELSE 'user' END AS author_type,
@@ -64,6 +64,7 @@ function listPosts() {
     foreach ($posts as &$p) {
         $p['like_count']    = (int)$p['like_count'];
         $p['comment_count'] = (int)$p['comment_count'];
+        $p['views']         = (int)$p['views'];
         $p['is_favorited']  = (bool)($p['is_favorited'] ?? false);
         $p['is_following']  = (bool)($p['is_following'] ?? false);
         $p['comments_preview'] = [];

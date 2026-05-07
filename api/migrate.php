@@ -34,7 +34,7 @@ $migrations = [
     'utf8mb4.contact_messages' => "ALTER TABLE contact_messages CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
     'utf8mb4.newsletter'     => "ALTER TABLE newsletter_subscribers CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
     'recipes.author_type'    => "UPDATE recipes SET author_type = 'mijote' WHERE author_type = 'sel-poivre'",
-    'recipes.rating_count'   => "UPDATE recipes SET rating_count = FLOOR(2 + (id % 7)) WHERE status = 'published'",
+    'ratings.recalculate'    => "UPDATE recipes r SET rating = COALESCE((SELECT AVG(c.rating) FROM comments c WHERE c.recipe_id = r.id AND c.rating IS NOT NULL), 0), rating_count = COALESCE((SELECT COUNT(c.id) FROM comments c WHERE c.recipe_id = r.id AND c.rating IS NOT NULL), 0)",
     'favorites.create'       => "CREATE TABLE IF NOT EXISTS favorites (
         user_id INT NOT NULL,
         recipe_id INT NOT NULL,

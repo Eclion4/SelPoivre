@@ -419,16 +419,16 @@
                 left: 0;
                 right: 0;
                 z-index: 9900;
-                background: #fff;
-                border-top: 1px solid #f3f4f6;
-                box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+                background: #F8F5EF;
+                border-top: 1px solid rgba(196,137,42,0.2);
+                box-shadow: 0 -4px 20px rgba(24,19,15,0.08);
                 padding-bottom: env(safe-area-inset-bottom, 0px);
             }
             @media (min-width: 768px) { .sp-bnav { display: none !important; } }
             .sp-bnav-row {
                 display: flex;
                 align-items: stretch;
-                height: 60px;
+                height: 64px;
                 padding: 0 4px;
             }
             .sp-bnav-item {
@@ -441,14 +441,14 @@
                 flex: 1;
                 min-width: 0;
                 padding: 10px 2px 8px;
-                color: #9ca3af;
+                color: #A89880;
                 text-decoration: none;
                 -webkit-tap-highlight-color: transparent;
                 transition: color 0.15s;
             }
             .sp-bnav-item:hover,
             .sp-bnav-item:focus { color: #C4311B; outline: none; }
-            .sp-bnav-item--active { color: #A42618; }
+            .sp-bnav-item--active { color: #C4311B; }
             .sp-bnav-bar {
                 position: absolute;
                 top: 0;
@@ -468,7 +468,7 @@
                 text-overflow: ellipsis;
                 max-width: 100%;
             }
-            .sp-bnav-item--active .sp-bnav-label { font-weight: 600; }
+            .sp-bnav-item--active .sp-bnav-label { font-weight: 700; }
             .sp-bnav-center {
                 display: flex;
                 align-items: center;
@@ -483,19 +483,20 @@
                 flex-shrink: 0;
                 width: 56px;
                 height: 56px;
-                margin-top: -20px;
+                margin-top: -22px;
                 background: linear-gradient(135deg, #C4311B 0%, #8B1E0F 100%);
                 color: #fff;
                 border-radius: 50%;
-                outline: 3px solid #fff;
-                box-shadow: 0 6px 18px rgba(196,49,27,0.5);
+                outline: 3px solid #F8F5EF;
+                box-shadow: 0 6px 18px rgba(196,49,27,0.45);
                 transition: transform 0.15s, box-shadow 0.15s;
                 text-decoration: none;
                 -webkit-tap-highlight-color: transparent;
             }
             .sp-bnav-pub:active { transform: scale(0.92); box-shadow: 0 3px 8px rgba(196,49,27,0.35); }
             @media (max-width: 767.98px) {
-                body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important; }
+                body { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important; }
+                html, body { overflow-x: hidden !important; max-width: 100vw; }
             }
         </style>`;
         document.body.insertAdjacentHTML('beforeend', html);

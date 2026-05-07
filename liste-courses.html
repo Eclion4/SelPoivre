@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/sp.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
         body { background: #F8F5EF; font-family: 'Inter', sans-serif; color: #18130F; }
@@ -364,7 +365,13 @@
                 const res = await api('api/shopping.php?action=list');
                 if (res.status === 401) { window.location.href = 'connexion.html'; return; }
                 const data = await res.json();
-                items = data.items || [];
+                // API retourne { groups:[{recipe_slug,recipe_title,items:[]}], solo:[] }
+                items = [
+                    ...(data.groups || []).flatMap(g =>
+                        g.items.map(i => ({ ...i, recipe_slug: g.recipe_slug, recipe_title: g.recipe_title }))
+                    ),
+                    ...(data.solo || [])
+                ];
             } catch {
                 items = [];
             }
@@ -493,10 +500,9 @@
                     body: JSON.stringify({ ingredient, qty, unit })
                 });
                 const data = await res.json();
-                if (data.success && data.item) {
-                    items.push(data.item);
+                if (data.success) {
                     closeAddModal();
-                    renderList();
+                    await loadList();
                 } else {
                     document.getElementById('addError').textContent = data.error || 'Une erreur est survenue.';
                     document.getElementById('addError').style.display = 'block';

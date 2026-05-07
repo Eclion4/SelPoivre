@@ -12,6 +12,21 @@
     <link rel="stylesheet" href="css/sp.css">
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sp-bnav{display:block;position:fixed;bottom:0;left:0;right:0;z-index:9900;background:#fff;border-top:1px solid #f3f4f6;box-shadow:0 -4px 20px rgba(0,0,0,.08);padding-bottom:env(safe-area-inset-bottom,0px);}
+        @media(min-width:768px){.sp-bnav{display:none!important;}}
+        .sp-bnav-row{display:flex;align-items:stretch;height:60px;padding:0 4px;}
+        .sp-bnav-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex:1;min-width:0;padding:10px 2px 8px;color:#9ca3af;text-decoration:none;-webkit-tap-highlight-color:transparent;transition:color .15s;}
+        .sp-bnav-item:hover,.sp-bnav-item:focus{color:#C4311B;outline:none;}
+        .sp-bnav-item--active{color:#A42618;}
+        .sp-bnav-bar{position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:3px;background:#C4311B;border-radius:9999px;}
+        .sp-bnav-label{font-size:10px;line-height:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+        .sp-bnav-item--active .sp-bnav-label{font-weight:600;}
+        .sp-bnav-center{display:flex;align-items:center;justify-content:center;flex:1;min-width:0;}
+        .sp-bnav-pub{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:56px;height:56px;margin-top:-20px;background:linear-gradient(135deg,#C4311B 0%,#8B1E0F 100%);color:#fff;border-radius:50%;outline:3px solid #fff;box-shadow:0 6px 18px rgba(196,49,27,.5);transition:transform .15s,box-shadow .15s;text-decoration:none;-webkit-tap-highlight-color:transparent;}
+        .sp-bnav-pub:active{transform:scale(.92);box-shadow:0 3px 8px rgba(196,49,27,.35);}
+        @media(max-width:767.98px){body{padding-bottom:calc(60px + env(safe-area-inset-bottom,0px))!important;}}
+    </style>
 </head>
 <body class="bg-ivoire font-body text-encre">
 

@@ -59,6 +59,21 @@
         .sp-bnav-pub{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:56px;height:56px;margin-top:-22px;background:linear-gradient(135deg,#C4311B 0%,#8B1E0F 100%);color:#fff;border-radius:50%;outline:3px solid #F8F5EF;box-shadow:0 6px 18px rgba(196,49,27,.45);transition:transform .15s,box-shadow .15s;text-decoration:none;-webkit-tap-highlight-color:transparent;}
         .sp-bnav-pub:active{transform:scale(.92);box-shadow:0 3px 8px rgba(196,49,27,.35);}
         @media(max-width:767.98px){body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))!important;}html,body{overflow-x:hidden!important;max-width:100vw;}}
+        /* Timer chip */
+        .timer-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;background:#FEF2F0;color:#C4311B;border:1px solid rgba(196,49,27,.25);border-radius:9999px;font-size:.8125rem;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit;vertical-align:middle;line-height:1.6;}
+        .timer-chip:hover,.timer-chip:focus{background:#C4311B;color:white;border-color:#C4311B;outline:none;}
+        /* Cooking timer widget */
+        #cookingTimer{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));right:1rem;z-index:1000;background:#18130F;color:white;border-radius:1.25rem;padding:1.25rem;width:220px;box-shadow:0 20px 60px rgba(0,0,0,.4);transition:opacity .2s;}
+        @media(min-width:768px){#cookingTimer{bottom:2rem;right:1.5rem;}}
+        /* Print */
+        @media print{
+            #navbar,footer,.sp-bnav,#printBtn,#shareWrapper,#favBtn,#portionsMinus,#portionsPlus,#commentsSection,#similarSection,#statusBanner{display:none!important;}
+            body{background:white!important;padding:0!important;font-size:12pt;}
+            #recipeContent{display:block!important;}
+            .step-card::before{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+            section{page-break-inside:avoid;}
+            @page{margin:15mm;}
+        }
     </style>
 </head>
 <body class="overflow-x-hidden">
@@ -280,6 +295,25 @@
         </div>
     </section>
 
+
+    <!-- ========== NEWSLETTER ========== -->
+    <section class="py-16 bg-ivoire">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-br from-sp-50 to-amber-50 rounded-3xl p-8 sm:p-12 border border-sp-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-sp-200/30 rounded-full blur-3xl"></div>
+                <div class="relative text-center max-w-xl mx-auto">
+                    <span class="font-handwrite text-2xl text-sp-500">Restez gourmand</span>
+                    <h2 class="text-3xl sm:text-4xl font-display font-bold mt-2">Les recettes de la semaine dans votre boîte mail</h2>
+                    <p class="mt-4 text-gray-600">Recevez chaque vendredi une sélection de recettes de saison et les coups de cœur de la communauté.</p>
+                    <form id="newsletterForm" class="mt-8 flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                        <input id="newsletterEmail" type="email" required placeholder="votre@email.com" class="flex-1 px-6 py-4 rounded-full bg-white border border-sp-200 focus:outline-none focus:ring-2 focus:ring-sp-500 text-sm">
+                        <button type="submit" class="px-8 py-4 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all whitespace-nowrap">S'abonner</button>
+                    </form>
+                    <p id="newsletterMsg" class="mt-4 text-center text-xs text-gray-400">Pas de spam. Désabonnement en un clic.</p>
+                </div>
+            </div>
+        </div>
+    </section>
     <!-- FOOTER -->
     <footer class="bg-encre text-white py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -565,7 +599,7 @@
                     }
                     prevSection = s.section;
                 }
-                html += `<li class="step-card" data-step="${i+1}"><p class="text-base leading-relaxed">${escape(s.description)}</p></li>`;
+                html += `<li class="step-card" data-step="${i+1}"><p class="text-base leading-relaxed">${linkTimers(escape(s.description))}</p></li>`;
             });
             stepsBox.innerHTML = html;
         }
@@ -1013,7 +1047,121 @@
         }
     }
     init();
+
+    // ── Cooking Timer ─────────────────────────────────────────────
+    function parseTimerMins(raw) {
+        const hm = raw.match(/(\d+)\s*h(?:eure?s?)?\s*(\d+)/i);
+        if (hm) return parseInt(hm[1]) * 60 + parseInt(hm[2]);
+        const h = raw.match(/(\d+)\s*h(?:eure?s?)?/i);
+        const m = raw.match(/(\d+)\s*min(?:ute?s?)?/i);
+        let t = 0;
+        if (h) t += parseInt(h[1]) * 60;
+        if (m) t += parseInt(m[1]);
+        if (!h && !m) { const n = raw.match(/(\d+)/); if (n) t = parseInt(n[1]); }
+        return t;
+    }
+    function linkTimers(text) {
+        const re = /\b\d+\s*(?:h(?:eure?s?)?(?:\s*\d+\s*(?:min(?:ute?s?)?)?)?|min(?:ute?s?)?|heures?)\b/gi;
+        return text.replace(re, m => {
+            const mins = parseTimerMins(m);
+            if (mins < 1 || mins > 720) return m;
+            return `<button class="timer-chip" data-mins="${mins}" data-label="${m.replace(/"/g,'&quot;')}">⏱ ${m}</button>`;
+        });
+    }
+
+    let timerSecs = 0, timerOrigSecs = 0, timerRunning = false, timerIv = null;
+    function updateTimerDisplay() {
+        const m = String(Math.floor(timerSecs / 60)).padStart(2,'0');
+        const s = String(timerSecs % 60).padStart(2,'0');
+        document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+    }
+    function startCookingTimer(mins, label) {
+        clearInterval(timerIv); timerRunning = false;
+        timerSecs = timerOrigSecs = mins * 60;
+        document.getElementById('timerLabel').textContent = label || '';
+        const tb = document.getElementById('timerToggle');
+        tb.textContent = 'Démarrer'; tb.style.background = '#C4311B';
+        updateTimerDisplay();
+        document.getElementById('cookingTimer').classList.remove('hidden');
+    }
+    document.getElementById('timerToggle').addEventListener('click', () => {
+        if (timerSecs <= 0) { timerSecs = timerOrigSecs; updateTimerDisplay(); return; }
+        timerRunning = !timerRunning;
+        const tb = document.getElementById('timerToggle');
+        tb.textContent = timerRunning ? 'Pause' : 'Reprendre';
+        tb.style.background = timerRunning ? '#6B7280' : '#C4311B';
+        if (timerRunning) {
+            timerIv = setInterval(() => {
+                timerSecs--;
+                updateTimerDisplay();
+                if (timerSecs <= 0) {
+                    clearInterval(timerIv); timerRunning = false;
+                    document.getElementById('timerDisplay').textContent = '🎉 Fini !';
+                    tb.textContent = 'Recommencer'; tb.style.background = '#C4311B';
+                }
+            }, 1000);
+        } else { clearInterval(timerIv); }
+    });
+    document.getElementById('timerReset').addEventListener('click', () => {
+        clearInterval(timerIv); timerRunning = false;
+        timerSecs = timerOrigSecs;
+        updateTimerDisplay();
+        const tb = document.getElementById('timerToggle');
+        tb.textContent = 'Démarrer'; tb.style.background = '#C4311B';
+    });
+    document.getElementById('timerClose').addEventListener('click', () => {
+        clearInterval(timerIv); timerRunning = false;
+        document.getElementById('cookingTimer').classList.add('hidden');
+    });
+    document.getElementById('stepsList').addEventListener('click', e => {
+        const chip = e.target.closest('.timer-chip');
+        if (chip) startCookingTimer(+chip.dataset.mins, chip.dataset.label);
+    });
 })();
 </script>
-</body>
+
+<!-- ===== COOKING TIMER WIDGET ===== -->
+<div id="cookingTimer" class="hidden">
+    <div class="flex items-center justify-between mb-3">
+        <span class="text-sm font-semibold">⏱ Minuterie</span>
+        <button id="timerClose" class="text-white/50 hover:text-white text-xl leading-none">×</button>
+    </div>
+    <div id="timerDisplay" class="text-4xl font-bold text-center font-mono tracking-wider py-2">00:00</div>
+    <p id="timerLabel" class="text-xs text-center mb-3 truncate" style="color:rgba(255,255,255,.5)"></p>
+    <div class="flex gap-2">
+        <button id="timerToggle" class="flex-1 py-2 rounded-xl text-sm font-semibold transition-colors text-white" style="background:#C4311B">Démarrer</button>
+        <button id="timerReset" class="px-3 py-2 rounded-xl text-sm font-semibold text-white transition-colors" style="background:rgba(255,255,255,.12)">↺</button>
+    </div>
+</div>
+<script>
+(function(){
+    const form = document.getElementById('newsletterForm');
+    const msg  = document.getElementById('newsletterMsg');
+    if (!form) return;
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('newsletterEmail').value.trim();
+        if (!email) return;
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) { btn.disabled = true; btn.textContent = '…'; }
+        try {
+            const src = window.location.pathname.replace(/.*\//,'').replace('.html','') || 'page';
+            const res = await fetch('api/newsletter.php', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ email, source: src })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                form.reset();
+                msg.textContent = '🎉 Merci ! Vous recevrez notre prochaine sélection.';
+                msg.className   = 'mt-4 text-center text-sm text-green-600 font-medium';
+            } else {
+                msg.textContent = data.error || 'Une erreur est survenue.';
+                msg.className   = 'mt-4 text-center text-sm text-red-500';
+                if (btn) { btn.disabled = false; btn.textContent = "S'abonner"; }
+            }
+        } catch { if (btn) { btn.disabled = false; btn.textContent = "S'abonner"; } }
+    });
+})();
+</script></body>
 </html>

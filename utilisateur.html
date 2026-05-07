@@ -112,6 +112,7 @@
                     <button id="followersBtn" class="text-left hover:underline"><strong id="followerCount" class="text-encre font-bold">0</strong> <span class="text-gray-500">abonnés</span></button>
                     <button id="followingBtn" class="text-left hover:underline"><strong id="followingCount" class="text-encre font-bold">0</strong> <span class="text-gray-500">abonnements</span></button>
                 </div>
+                <div id="userBadges" class="hidden mt-3 flex flex-wrap gap-2"></div>
             </div>
             <div class="flex-shrink-0">
                 <button id="followBtn" class="hidden px-6 py-3 bg-sp-500 text-white rounded-full font-semibold text-sm hover:bg-sp-600 transition-all">
@@ -183,6 +184,26 @@
         </a>`;
     }
 
+    const BADGES = [
+        { emoji:'🌱', label:'Apprenti',    desc:'1re recette publiée',    cond:(r,f)=>r>=1 },
+        { emoji:'🍳', label:'Cuisinier',   desc:'5 recettes publiées',    cond:(r,f)=>r>=5 },
+        { emoji:'👨‍🍳',label:'Chef',         desc:'10 recettes publiées',   cond:(r,f)=>r>=10 },
+        { emoji:'⭐', label:'Grand Chef',  desc:'20 recettes publiées',   cond:(r,f)=>r>=20 },
+        { emoji:'👥', label:'Populaire',   desc:'10 abonnés',             cond:(r,f)=>f>=10 },
+        { emoji:'🌟', label:'Influenceur', desc:'50 abonnés',             cond:(r,f)=>f>=50 },
+    ];
+    function renderBadges(recipes, followers) {
+        const earned = BADGES.filter(b => b.cond(recipes, followers));
+        if (!earned.length) return;
+        const box = document.getElementById('userBadges');
+        box.innerHTML = earned.map(b =>
+            `<span title="${b.desc}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm font-medium cursor-default hover:shadow-sm transition-shadow">
+                <span>${b.emoji}</span><span class="text-gray-700">${b.label}</span>
+            </span>`
+        ).join('');
+        box.classList.remove('hidden');
+    }
+
     function renderProfile(p) {
         currentProfile = p;
         document.title = p.username + ' — Sel & Poivre';
@@ -212,6 +233,7 @@
         document.getElementById('recipeCount').textContent    = p.recipe_count;
         document.getElementById('followerCount').textContent  = p.follower_count;
         document.getElementById('followingCount').textContent = p.following_count;
+        renderBadges(p.recipe_count || 0, p.follower_count || 0);
 
         // Buttons: follow vs edit-self
         const u = window.SP && window.SP.user;

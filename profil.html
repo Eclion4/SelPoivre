@@ -128,6 +128,10 @@
             </div>
         </div>
 
+        <!-- ===== BADGES ===== -->
+        <div id="userBadges" class="hidden flex flex-wrap gap-2 mb-8">
+        </div>
+
         <!-- ===== TABS ===== -->
         <div class="border-b border-gray-200 mb-8">
             <div class="flex gap-8 overflow-x-auto -mb-px">
@@ -679,6 +683,31 @@
                     }
                 }
             } catch {}
+            renderBadges();
+        }
+
+        const BADGES = [
+            { emoji:'🌱', label:'Apprenti',    desc:'1re recette publiée',    cond:(r,f,fav)=>r>=1 },
+            { emoji:'🍳', label:'Cuisinier',   desc:'5 recettes publiées',    cond:(r,f,fav)=>r>=5 },
+            { emoji:'👨‍🍳',label:'Chef',         desc:'10 recettes publiées',   cond:(r,f,fav)=>r>=10 },
+            { emoji:'⭐', label:'Grand Chef',  desc:'20 recettes publiées',   cond:(r,f,fav)=>r>=20 },
+            { emoji:'❤️', label:'Connaisseur', desc:'20 recettes en favoris', cond:(r,f,fav)=>fav>=20 },
+            { emoji:'👥', label:'Populaire',   desc:'10 abonnés',             cond:(r,f,fav)=>f>=10 },
+            { emoji:'🌟', label:'Influenceur', desc:'50 abonnés',             cond:(r,f,fav)=>f>=50 },
+        ];
+        function renderBadges() {
+            const recipes   = parseInt(document.getElementById('statRecipes').textContent)   || 0;
+            const followers = parseInt(document.getElementById('statFollowers').textContent) || 0;
+            const favorites = parseInt(document.getElementById('statFavorites').textContent) || 0;
+            const earned = BADGES.filter(b => b.cond(recipes, followers, favorites));
+            if (!earned.length) return;
+            const box = document.getElementById('userBadges');
+            box.innerHTML = earned.map(b =>
+                `<span title="${b.desc}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm font-medium cursor-default hover:shadow-sm transition-shadow">
+                    <span>${b.emoji}</span><span class="text-gray-700">${b.label}</span>
+                </span>`
+            ).join('');
+            box.classList.remove('hidden');
         }
 
         // ── Collections ─────────────────────────────────────

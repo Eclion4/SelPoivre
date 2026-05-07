@@ -23,6 +23,13 @@ $staticPages = [
     ['loc' => '/contact',       'changefreq' => 'monthly', 'priority' => '0.3'],
     ['loc' => '/cgu',           'changefreq' => 'yearly',  'priority' => '0.1'],
     ['loc' => '/confidentialite', 'changefreq' => 'yearly', 'priority' => '0.1'],
+    // Pages catégories
+    ['loc' => '/categorie?cat=Entr%C3%A9e',        'changefreq' => 'daily',  'priority' => '0.8'],
+    ['loc' => '/categorie?cat=Plat',               'changefreq' => 'daily',  'priority' => '0.8'],
+    ['loc' => '/categorie?cat=Dessert',            'changefreq' => 'daily',  'priority' => '0.8'],
+    ['loc' => '/categorie?cat=Petit-d%C3%A9jeuner','changefreq' => 'weekly', 'priority' => '0.7'],
+    ['loc' => '/categorie?cat=Snack',              'changefreq' => 'weekly', 'priority' => '0.7'],
+    ['loc' => '/categorie?cat=Boisson',            'changefreq' => 'weekly', 'priority' => '0.6'],
 ];
 
 // Recettes publiées

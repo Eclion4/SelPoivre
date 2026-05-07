@@ -127,8 +127,8 @@
         <span class="hidden md:inline">Publier</span>
     </a>
     <!-- Cart -->
-    <button type="button" class="js-cart-trigger relative w-9 h-9 rounded-full hover:bg-sp-50 transition-colors flex items-center justify-center border border-gray-200 hover:border-sp-300" aria-label="Liste de courses" title="Ma liste de courses">
-        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+    <button type="button" class="js-cart-trigger relative w-10 h-10 rounded-full bg-white border border-gray-200 hover:border-sp-300 hover:bg-sp-50 transition-all flex items-center justify-center shadow-sm" aria-label="Liste de courses" title="Ma liste de courses">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m5 11 4-7"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 1.96 1.6h9.98a2 2 0 0 0 1.95-1.55L20.5 11"/><path d="m9 11 1 9"/><path d="M10.9 11a5 5 0 0 0 9.1 0"/><path d="m15 11-1 9"/></svg>
         <span class="js-cart-badge hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-sp-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white leading-none">0</span>
     </button>
     <!-- Bell -->

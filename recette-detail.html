@@ -59,20 +59,6 @@
         .sp-bnav-pub{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:56px;height:56px;margin-top:-22px;background:linear-gradient(135deg,#C4311B 0%,#8B1E0F 100%);color:#fff;border-radius:50%;outline:3px solid #F8F5EF;box-shadow:0 6px 18px rgba(196,49,27,.45);transition:transform .15s,box-shadow .15s;text-decoration:none;-webkit-tap-highlight-color:transparent;}
         .sp-bnav-pub:active{transform:scale(.92);box-shadow:0 3px 8px rgba(196,49,27,.35);}
         @media(max-width:767.98px){body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))!important;}html,body{overflow-x:hidden!important;max-width:100vw;}}
-        /* Cart panel */
-        #cartOverlay{position:fixed;inset:0;z-index:9980;background:rgba(24,19,15,.45);opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(2px);}
-        #cartOverlay.open{opacity:1;pointer-events:all;}
-        #cartPanel{position:fixed;top:0;right:0;bottom:0;z-index:9990;width:min(400px,100vw);background:#FFFBF5;display:flex;flex-direction:column;box-shadow:-20px 0 60px rgba(0,0,0,.15);transform:translateX(100%);transition:transform .35s cubic-bezier(.16,1,.3,1);}
-        #cartPanel.open{transform:translateX(0);}
-        #navCartBtn{position:relative;}
-        #cartBadge{position:absolute;top:-5px;right:-5px;background:#C4311B;color:white;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #F8F5EF;line-height:1;}
-        .cart-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F3F4F6;}
-        .cart-item:last-child{border-bottom:none;}
-        .cart-item-check{width:22px;height:22px;border:2px solid #E5E7EB;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
-        .cart-item-check.done{background:#C4311B;border-color:#C4311B;}
-        .cart-item-check.done::after{content:'';display:block;width:5px;height:9px;border:2px solid white;border-top:none;border-left:none;transform:rotate(45deg) translateY(-2px);}
-        .cart-item-text.done{text-decoration:line-through;color:#9CA3AF;}
-        .cart-group-title{font-size:.7rem;font-weight:700;color:#A89880;text-transform:uppercase;letter-spacing:.08em;padding:12px 0 6px;border-bottom:1px solid #F3F4F6;margin-bottom:2px;}
         /* Timer chip */
         .timer-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;background:#FEF2F0;color:#C4311B;border:1px solid rgba(196,49,27,.25);border-radius:9999px;font-size:.8125rem;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit;vertical-align:middle;line-height:1.6;}
         .timer-chip:hover,.timer-chip:focus{background:#C4311B;color:white;border-color:#C4311B;outline:none;}
@@ -158,11 +144,7 @@
                 <a href="communaute.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Communauté</a>
             </div>
             <div class="hidden md:flex items-center gap-3">
-                <button id="navCartBtn" class="hidden w-10 h-10 rounded-full bg-white border border-gray-200 hover:border-sp-300 hover:bg-sp-50 transition-all flex items-center justify-center shadow-sm" title="Ma liste de courses" aria-label="Liste de courses">
-                    <i data-lucide="shopping-basket" class="w-5 h-5 text-gray-600"></i>
-                    <span id="cartBadge" class="hidden">0</span>
-                </button>
-                <a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
+<a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
             </div>
             <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
                 <i data-lucide="menu" class="w-6 h-6"></i>
@@ -431,31 +413,6 @@
                     <i data-lucide="flag" class="w-4 h-4"></i> Envoyer
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- CART PANEL -->
-    <div id="cartOverlay"></div>
-    <div id="cartPanel">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
-            <div class="flex items-center gap-2">
-                <i data-lucide="shopping-basket" class="w-5 h-5 text-sp-500"></i>
-                <h2 class="font-display font-bold text-lg">Liste de courses</h2>
-            </div>
-            <button id="cartPanelClose" class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                <i data-lucide="x" class="w-4 h-4"></i>
-            </button>
-        </div>
-        <div id="cartPanelBody" class="flex-1 overflow-y-auto px-5 py-3">
-            <p class="text-gray-400 text-center py-12 text-sm">Votre liste est vide.<br>Ajoutez des recettes pour commencer.</p>
-        </div>
-        <div id="cartPanelFooter" class="hidden flex-shrink-0 border-t border-gray-100 px-5 py-4 space-y-2">
-            <button id="cartClearChecked" class="w-full py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                <i data-lucide="check-square" class="w-4 h-4"></i> Supprimer les cochés
-            </button>
-            <button id="cartClearAll" class="w-full py-2.5 rounded-xl border border-red-100 text-sm font-semibold text-red-400 hover:bg-red-50 transition-colors flex items-center justify-center gap-2">
-                <i data-lucide="trash-2" class="w-4 h-4"></i> Vider la liste
-            </button>
         </div>
     </div>
 
@@ -1469,131 +1426,6 @@
         stopTimer();
         openTimer(+chip.dataset.mins * 60, chip.dataset.label);
     });
-})();
-</script>
-
-<script>
-// ── Liste de courses — panneau ────────────────────────────────────────────
-(function () {
-    const API = window.SP ? window.SP.apiPath('shopping.php') : 'api/shopping.php';
-    let cartItems = [];
-
-    // ── Ouvrir / fermer ────────────────────────────────────────────────────
-    function openCart() {
-        document.getElementById('cartPanel').classList.add('open');
-        document.getElementById('cartOverlay').classList.add('open');
-        document.body.style.overflow = 'hidden';
-        loadCart();
-    }
-    function closeCart() {
-        document.getElementById('cartPanel').classList.remove('open');
-        document.getElementById('cartOverlay').classList.remove('open');
-        document.body.style.overflow = '';
-    }
-
-    document.getElementById('cartOverlay').addEventListener('click', closeCart);
-    document.getElementById('cartPanelClose').addEventListener('click', closeCart);
-
-    // ── Bouton nav (desktop) — visible seulement si connecté ──────────────
-    function initCartBtn() {
-        const sp = JSON.parse(localStorage.getItem('sp_user') || 'null');
-        if (!sp) return;
-        const btn = document.getElementById('navCartBtn');
-        if (btn) { btn.classList.remove('hidden'); btn.addEventListener('click', openCart); }
-        loadCart(); // charger badge au démarrage
-    }
-
-    // ── Charger la liste ───────────────────────────────────────────────────
-    async function loadCart() {
-        try {
-            const res  = await fetch(API + '?action=list', { credentials: 'include' });
-            const data = await res.json();
-            if (!res.ok) return;
-            const all = [
-                ...(data.grouped || []).flatMap(g => g.items),
-                ...(data.solo    || [])
-            ];
-            cartItems = all;
-            updateBadge(all.filter(i => !i.checked).length);
-            renderCart(data.grouped || [], data.solo || []);
-        } catch (e) {}
-    }
-
-    function updateBadge(n) {
-        const badge = document.getElementById('cartBadge');
-        if (!badge) return;
-        if (n > 0) { badge.textContent = n > 99 ? '99+' : n; badge.classList.remove('hidden'); }
-        else { badge.classList.add('hidden'); }
-    }
-
-    // ── Rendu du panneau ───────────────────────────────────────────────────
-    function renderCart(grouped, solo) {
-        const body   = document.getElementById('cartPanelBody');
-        const footer = document.getElementById('cartPanelFooter');
-        const total  = grouped.flatMap(g => g.items).length + solo.length;
-
-        if (total === 0) {
-            body.innerHTML = '<p class="text-gray-400 text-center py-12 text-sm">Votre liste est vide.<br>Ajoutez des recettes pour commencer.</p>';
-            footer.classList.add('hidden');
-            return;
-        }
-        footer.classList.remove('hidden');
-
-        let html = '';
-        grouped.forEach(g => {
-            html += `<div class="cart-group-title">
-                <a href="recette-detail.html?slug=${encodeURIComponent(g.recipe_slug||'')}" class="hover:text-sp-600 transition-colors">
-                    🍽 ${esc(g.recipe_title)}
-                </a>
-            </div>`;
-            g.items.forEach(item => { html += itemHTML(item); });
-        });
-        if (solo.length) {
-            html += '<div class="cart-group-title">Autres articles</div>';
-            solo.forEach(item => { html += itemHTML(item); });
-        }
-        body.innerHTML = html;
-        if (window.lucide) lucide.createIcons();
-    }
-
-    function itemHTML(item) {
-        const done = item.checked;
-        const qty  = [item.qty, item.unit].filter(Boolean).join(' ');
-        return `<div class="cart-item" data-id="${item.id}">
-            <div class="cart-item-check ${done ? 'done' : ''}" onclick="cartToggle(${item.id})"></div>
-            <div class="flex-1 min-w-0">
-                <span class="cart-item-text text-sm ${done ? 'done' : 'text-encre'}">${esc(item.ingredient)}</span>
-                ${qty ? `<span class="text-xs text-gray-400 ml-1">${esc(qty)}</span>` : ''}
-            </div>
-            <button onclick="cartRemove(${item.id})" class="text-gray-300 hover:text-red-400 transition-colors flex-shrink-0 ml-1">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            </button>
-        </div>`;
-    }
-
-    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-    // ── Actions ────────────────────────────────────────────────────────────
-    window.cartToggle = async function(id) {
-        await fetch(API + '?action=toggle', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id }) });
-        loadCart();
-    };
-    window.cartRemove = async function(id) {
-        await fetch(API + '?action=remove', { method:'POST', credentials:'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id }) });
-        loadCart();
-    };
-
-    document.getElementById('cartClearChecked').addEventListener('click', async () => {
-        await fetch(API + '?action=clear_checked', { method:'POST', credentials:'include' });
-        loadCart();
-    });
-    document.getElementById('cartClearAll').addEventListener('click', async () => {
-        if (!confirm('Vider toute la liste de courses ?')) return;
-        await fetch(API + '?action=clear', { method:'POST', credentials:'include' });
-        loadCart();
-    });
-
-    initCartBtn();
 })();
 </script>
 

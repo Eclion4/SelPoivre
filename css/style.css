@@ -595,3 +595,14 @@ img[data-src] {
     .animate-bounce-slow,
     .animate-shimmer { animation: none; }
 }
+
+/* ── Colonnes de grille non incluses dans le CSS Tailwind compilé ── */
+.grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.grid-cols-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+@media (min-width: 640px) {
+    .sm\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .sm\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+    .lg\:grid-cols-7 { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+}

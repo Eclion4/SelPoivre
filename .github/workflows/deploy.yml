@@ -21,14 +21,19 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASS: ${{ secrets.DB_PASS }}
           MIGRATION_KEY: ${{ secrets.MIGRATION_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
         run: |
-          if [ -n "$MIGRATION_KEY" ]; then
-            printf '<?php\ndefine("DB_HOST","localhost");\ndefine("DB_NAME","%s");\ndefine("DB_USER","%s");\ndefine("DB_PASS","%s");\ndefine("MIGRATION_KEY","%s");\n' \
-              "$DB_NAME" "$DB_USER" "$DB_PASS" "$MIGRATION_KEY" > api/db_config.php
-          else
-            printf '<?php\ndefine("DB_HOST","localhost");\ndefine("DB_NAME","%s");\ndefine("DB_USER","%s");\ndefine("DB_PASS","%s");\n' \
-              "$DB_NAME" "$DB_USER" "$DB_PASS" > api/db_config.php
-          fi
+          {
+            printf '<?php\n'
+            printf 'define("DB_HOST","localhost");\n'
+            printf 'define("DB_NAME","%s");\n'   "$DB_NAME"
+            printf 'define("DB_USER","%s");\n'   "$DB_USER"
+            printf 'define("DB_PASS","%s");\n'   "$DB_PASS"
+            [ -n "$MIGRATION_KEY"  ] && printf 'define("MIGRATION_KEY","%s");\n'  "$MIGRATION_KEY"
+            [ -n "$BREVO_API_KEY"  ] && printf 'define("BREVO_API_KEY","%s");\n'  "$BREVO_API_KEY"
+            [ -n "$BREVO_LIST_ID"  ] && printf 'define("BREVO_LIST_ID",%s);\n'    "$BREVO_LIST_ID"
+          } > api/db_config.php
 
       - name: Ensure remote dirs + reset sync state
         env:

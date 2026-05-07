@@ -392,9 +392,7 @@
         // ── Bouton central Publier
         const pubIcon = `<svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>`;
 
-        const middleBtn = u
-            ? `<a href="${pagePath('publier.html')}" class="sp-bnav-pub" aria-label="Publier une recette">${pubIcon}</a>`
-            : item('inscription.html', loginF, loginO, 'Inscription', isActive('inscription.html'));
+        const middleBtn = `<a href="${pagePath(u ? 'publier.html' : 'connexion.html')}" class="sp-bnav-pub" aria-label="Publier une recette">${pubIcon}</a>`;
 
         const profileItem = u
             ? item('profil.html', userF, userO, 'Profil', isActive('profil.html'))

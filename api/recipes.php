@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'notifications.php';   // createNotification()
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
@@ -224,7 +225,19 @@ function rejectRecipe($id) {
     requireAdmin();
     if (!$id) jsonResponse(['error' => 'ID manquant'], 400);
     $db = getDB();
+
+    $s = $db->prepare("SELECT title, author_id, status FROM recipes WHERE id = ?");
+    $s->execute([$id]);
+    $r = $s->fetch();
+    if (!$r) jsonResponse(['error' => 'Recette introuvable'], 404);
+
     $db->prepare("UPDATE recipes SET status = 'rejected' WHERE id = ?")->execute([$id]);
+
+    // Notifier l'auteur (cloche uniquement — pas d'email sur un refus)
+    if (!empty($r['author_id']) && $r['status'] !== 'rejected') {
+        createNotification($db, (int)$r['author_id'], 'recipe_rejected', (int)$_SESSION['user_id'], (int)$id,
+            "Votre recette « {$r['title']} » n'a pas été retenue cette fois");
+    }
     jsonResponse(['success' => true]);
 }
 
@@ -261,6 +274,26 @@ function createRecipe() {
     saveIngredients($db, $recipeId, $d['ingredients'] ?? []);
     saveSteps($db, $recipeId, $d['steps'] ?? []);
     saveTags($db, $recipeId, $d['tags'] ?? []);
+
+    // Recette soumise par un membre → notifier les admins (cloche + email)
+    if ($status === 'pending') {
+        $authorId = (int)$_SESSION['user_id'];
+        $au = $db->prepare('SELECT username FROM users WHERE id = ?');
+        $au->execute([$authorId]);
+        $authorName = $au->fetchColumn() ?: 'Un membre';
+        $titleEsc   = htmlspecialchars($d['title'], ENT_QUOTES, 'UTF-8');
+
+        $admins = $db->query("SELECT id, username, email FROM users WHERE role = 'admin' AND is_active = 1")->fetchAll();
+        foreach ($admins as $adm) {
+            createNotification($db, (int)$adm['id'], 'recipe_pending', $authorId, (int)$recipeId,
+                "$authorName a proposé la recette « {$d['title']} » à valider");
+            sendBrevoEmail($adm['email'], $adm['username'],
+                'Nouvelle recette à valider — Sel & Poivre',
+                "<p>Bonjour {$adm['username']},</p>"
+                . "<p><strong>$authorName</strong> vient de proposer la recette <strong>« $titleEsc »</strong>.</p>"
+                . "<p><a href=\"https://www.sel-poivre.com/admin/recettes.html?status=pending\">Voir les recettes à valider</a></p>");
+        }
+    }
 
     jsonResponse(['success' => true, 'slug' => $slug, 'status' => $status], 201);
 }
@@ -324,7 +357,31 @@ function approveRecipe($id) {
     requireAdmin();
     if (!$id) jsonResponse(['error' => 'ID manquant'], 400);
     $db = getDB();
+
+    $s = $db->prepare("SELECT title, slug, author_id, status FROM recipes WHERE id = ?");
+    $s->execute([$id]);
+    $r = $s->fetch();
+    if (!$r) jsonResponse(['error' => 'Recette introuvable'], 404);
+
     $db->prepare("UPDATE recipes SET status = 'published' WHERE id = ?")->execute([$id]);
+
+    // Notifier l'auteur que sa recette est en ligne (cloche + email)
+    if (!empty($r['author_id']) && $r['status'] !== 'published') {
+        $authorId = (int)$r['author_id'];
+        createNotification($db, $authorId, 'recipe_approved', (int)$_SESSION['user_id'], (int)$id,
+            "Votre recette « {$r['title']} » a été publiée 🎉");
+
+        $au = $db->prepare('SELECT username, email FROM users WHERE id = ?');
+        $au->execute([$authorId]);
+        if ($a = $au->fetch()) {
+            $titleEsc = htmlspecialchars($r['title'], ENT_QUOTES, 'UTF-8');
+            sendBrevoEmail($a['email'], $a['username'],
+                'Votre recette est en ligne ! — Sel & Poivre',
+                "<p>Bonjour {$a['username']},</p>"
+                . "<p>Bonne nouvelle : votre recette <strong>« $titleEsc »</strong> a été validée et est maintenant publiée. 🎉</p>"
+                . "<p><a href=\"https://www.sel-poivre.com/recette-detail.html?slug={$r['slug']}\">Voir ma recette en ligne</a></p>");
+        }
+    }
     jsonResponse(['success' => true]);
 }
 

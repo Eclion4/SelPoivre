@@ -64,6 +64,53 @@ function rateLimit(string $action, int $max = 5, int $window = 300): void {
     }
 }
 
+/**
+ * Envoie un email transactionnel via l'API Brevo (réutilise BREVO_API_KEY,
+ * déjà configurée pour la newsletter). No-op silencieux si la clé manque ou
+ * en cas d'erreur réseau — n'interrompt jamais l'action en cours.
+ * Optionnel dans db_config.php :
+ *   define('BREVO_SENDER_EMAIL', 'noreply@sel-poivre.com');
+ *   define('BREVO_SENDER_NAME',  'Sel & Poivre');
+ */
+function sendBrevoEmail(string $toEmail, string $toName, string $subject, string $htmlContent): bool {
+    $key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';
+    if (!$key || !filter_var($toEmail, FILTER_VALIDATE_EMAIL)) return false;
+
+    $senderEmail = defined('BREVO_SENDER_EMAIL') ? BREVO_SENDER_EMAIL : 'noreply@sel-poivre.com';
+    $senderName  = defined('BREVO_SENDER_NAME')  ? BREVO_SENDER_NAME  : 'Sel & Poivre';
+
+    $payload = json_encode([
+        'sender'      => ['name' => $senderName, 'email' => $senderEmail],
+        'to'          => [['email' => $toEmail, 'name' => $toName !== '' ? $toName : $toEmail]],
+        'subject'     => $subject,
+        'htmlContent' => '<html><body style="font-family:Arial,Helvetica,sans-serif;color:#18130F;line-height:1.5">'
+                         . $htmlContent
+                         . '<hr style="border:none;border-top:1px solid #eee;margin:24px 0">'
+                         . '<p style="font-size:12px;color:#999">Sel &amp; Poivre</p></body></html>',
+    ], JSON_UNESCAPED_UNICODE);
+
+    try {
+        $ch = curl_init('https://api.brevo.com/v3/smtp/email');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_TIMEOUT        => 6,
+            CURLOPT_HTTPHEADER     => [
+                'api-key: ' . $key,
+                'Content-Type: application/json',
+                'Accept: application/json',
+            ],
+        ]);
+        curl_exec($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        return $code >= 200 && $code < 300;
+    } catch (\Throwable $e) {
+        return false;
+    }
+}
+
 header('Content-Type: application/json; charset=utf-8');
 
 // CORS : localhost autorisé uniquement en développement local

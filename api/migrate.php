@@ -313,6 +313,10 @@ $migrations = [
         INDEX idx_user_unread (user_id, is_read),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+
+    // Élargit `type` (ENUM → VARCHAR) pour accepter les notifications de
+    // validation : recipe_pending / recipe_approved / recipe_rejected.
+    'notifications.type_varchar' => "ALTER TABLE notifications MODIFY COLUMN type VARCHAR(40) NOT NULL",
 ];
 
 foreach ($migrations as $name => $sql) {

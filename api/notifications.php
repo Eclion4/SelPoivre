@@ -1,13 +1,19 @@
 <?php
 require_once 'config.php';
 
-$method = $_SERVER['REQUEST_METHOD'];
-$action = $_GET['action'] ?? '';
+// Ce fichier est à la fois un endpoint ET une bibliothèque : createNotification()
+// est inclus par recipes.php / comments.php / follows.php via require_once. On ne
+// déclenche le routage QUE s'il est appelé directement, sinon l'inclusion
+// court-circuiterait la requête du script appelant.
+if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'notifications.php') {
+    $method = $_SERVER['REQUEST_METHOD'];
+    $action = $_GET['action'] ?? '';
 
-switch ("$method:$action") {
-    case 'GET:list':      listNotifications();   break;
-    case 'POST:read':     markRead();            break;
-    default: jsonResponse(['error' => 'Route inconnue'], 404);
+    switch ("$method:$action") {
+        case 'GET:list':      listNotifications();   break;
+        case 'POST:read':     markRead();            break;
+        default: jsonResponse(['error' => 'Route inconnue'], 404);
+    }
 }
 
 function listNotifications() {

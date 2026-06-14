@@ -20,6 +20,11 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # ── Sitemap XML → PHP dynamique ──────────────────────────────
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
 
+# ── Page recette rendue côté serveur (canonical/meta/schema Recipe par slug) ─
+# Sert le bon canonical ?slug= dans le HTML brut pour Googlebot. Si cette règle
+# échoue, l'URL retombe sur la page statique recette-detail.html (filet).
+RewriteRule ^recette-detail(?:\.html)?/?$ recette-detail.php [L,QSA]
+
 # ── Masquer les extensions .html ─────────────────────────────
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f

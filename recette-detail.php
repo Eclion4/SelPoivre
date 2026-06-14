@@ -1,0 +1,1539 @@
+<?php
+// ── SEO côté serveur : canonical + meta + schema Recipe par slug ─────────────
+// Googlebot lit le HTML brut : il faut que le bon canonical (avec ?slug=) y soit
+// AVANT le JS. injectSEO() ne sert plus qu'au confort d'affichage live.
+$BASE = 'https://www.sel-poivre.com';
+$slug = isset($_GET['slug']) ? trim((string)$_GET['slug']) : '';
+$recipe = null;
+$dbConnected = false;
+if ($slug !== '' && is_readable(__DIR__ . '/api/db_config.php')) {
+    try {
+        require_once __DIR__ . '/api/db_config.php';
+        $pdo = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+            DB_USER, DB_PASS,
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+        $dbConnected = true;
+        $st = $pdo->prepare(
+            "SELECT slug, title, description, image_url, category,
+                    prep_time, cook_time, total_time, servings, rating, rating_count, created_at
+             FROM recipes WHERE slug = ? AND status = 'published'");
+        $st->execute([$slug]);
+        $recipe = $st->fetch() ?: null;
+    } catch (Throwable $e) {
+        $recipe = null; // DB indisponible → la page s'affiche quand même
+    }
+}
+
+$esc = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+
+if ($recipe) {
+    $seoTitle = $recipe['title'] . ' — Sel & Poivre';
+    $seoDesc  = trim((string)$recipe['description']) !== '' ? $recipe['description'] : 'Recette Sel & Poivre';
+    $canon    = $BASE . '/recette-detail?slug=' . rawurlencode($recipe['slug']);
+    $img      = (string)($recipe['image_url'] ?? '');
+    $img      = ($img === '' || stripos($img, 'http') === 0)
+        ? $BASE . '/assets/recipes/' . $recipe['slug'] . '.jpg'
+        : $BASE . $img;
+    $robots   = 'index, follow';
+
+    $ld = [
+        '@context'      => 'https://schema.org',
+        '@type'         => 'Recipe',
+        'name'          => $recipe['title'],
+        'description'   => $seoDesc,
+        'image'         => [$img],
+        'url'           => $canon,
+        'datePublished' => substr((string)$recipe['created_at'], 0, 10),
+    ];
+    if ((string)$recipe['category'] !== '') $ld['recipeCategory'] = $recipe['category'];
+    if ((int)$recipe['prep_time'])  $ld['prepTime']    = 'PT' . (int)$recipe['prep_time'] . 'M';
+    if ((int)$recipe['cook_time'])  $ld['cookTime']    = 'PT' . (int)$recipe['cook_time'] . 'M';
+    if ((int)$recipe['total_time']) $ld['totalTime']   = 'PT' . (int)$recipe['total_time'] . 'M';
+    if ((int)$recipe['servings'])   $ld['recipeYield'] = (int)$recipe['servings'] . ' portions';
+    if ((float)$recipe['rating'] > 0 && (int)$recipe['rating_count'] > 0) {
+        $ld['aggregateRating'] = [
+            '@type'       => 'AggregateRating',
+            'ratingValue' => (string)round((float)$recipe['rating'], 1),
+            'reviewCount' => (string)(int)$recipe['rating_count'],
+        ];
+    }
+    // JSON_HEX_TAG empêche un titre contenant </script> de casser la balise
+    $jsonLd = json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+} else {
+    // Slug fourni mais recette inexistante (DB joignable) → vrai 404 pour Google
+    if ($slug !== '' && $dbConnected) http_response_code(404);
+    // Page générique, non indexable
+    $seoTitle = 'Recette — Sel & Poivre';
+    $seoDesc  = 'Recette Sel & Poivre';
+    $canon    = $BASE . '/recettes';
+    $img      = $BASE . '/assets/recipes/_default.jpg';
+    $robots   = 'noindex, follow';
+    $jsonLd   = '';
+}
+?>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle"><?= $esc($seoTitle) ?></title>
+    <meta name="description" id="pageDesc" content="<?= $esc($seoDesc) ?>">
+    <meta name="robots" content="<?= $robots ?>">
+    <link rel="canonical" id="pageCanonical" href="<?= $esc($canon) ?>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23C4311B'/><g transform='translate(4,4)' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' fill='none'><path d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2'/><path d='M7 2v20'/><path d='M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3z'/><path d='M21 15v7'/></g></svg>">
+
+    <!-- Open Graph (mis à jour dynamiquement par JS après chargement de la recette) -->
+    <meta property="og:type"        content="article">
+    <meta property="og:site_name"   content="Sel & Poivre">
+    <meta property="og:locale"      content="fr_FR">
+    <meta id="ogTitle"       property="og:title"       content="<?= $esc($seoTitle) ?>">
+    <meta id="ogDescription" property="og:description" content="<?= $esc($seoDesc) ?>">
+    <meta id="ogImage"       property="og:image"       content="<?= $esc($img) ?>">
+    <meta id="ogUrl"         property="og:url"         content="<?= $esc($canon) ?>">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"                          content="summary_large_image">
+    <meta id="twTitle"       name="twitter:title"      content="<?= $esc($seoTitle) ?>">
+    <meta id="twDescription" name="twitter:description" content="<?= $esc($seoDesc) ?>">
+    <meta id="twImage"       name="twitter:image"      content="<?= $esc($img) ?>">
+    <?php if ($jsonLd): ?><script type="application/ld+json" id="jsonld-recipe"><?= $jsonLd ?></script><?php endif; ?>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/sp.css">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background: #F8F5EF; font-family: 'Inter', sans-serif; color: #18130F; }
+        .ingredient-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #F3F4F6; cursor:pointer; user-select:none; }
+        .ingredient-item:last-child { border-bottom:none; }
+        .ingredient-item .checkbox { width:20px; height:20px; border:2px solid #E5E7EB; border-radius:6px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+        .ingredient-item.checked .checkbox { background:#C4311B; border-color:#C4311B; }
+        .ingredient-item.checked .checkbox::after { content:''; display:block; width:5px; height:9px; border:2px solid white; border-top:none; border-left:none; transform:rotate(45deg) translateY(-2px); }
+        .ingredient-item.checked .ing-text { text-decoration:line-through; color:#9CA3AF; }
+        .step-card { position:relative; padding-left:54px; }
+        .step-card::before { content:attr(data-step); position:absolute; left:0; top:0; width:38px; height:38px; background:linear-gradient(135deg,#C4311B,#A42618); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; }
+        .step-card:not(:last-child)::after { content:''; position:absolute; left:18px; top:38px; bottom:-24px; width:2px; background:linear-gradient(to bottom,#A4261820,transparent); }
+        .star-input { cursor:pointer; transition: transform .15s; }
+        .star-input:hover { transform: scale(1.15); }
+        #navbar { background: rgba(255,251,240,.92); backdrop-filter: blur(20px); box-shadow: 0 2px 20px rgba(0,0,0,.06); }
+        .heart-btn.is-fav { background:#C4311B !important; color:white !important; }
+        .heart-btn.is-fav svg { fill: currentColor; }
+        .sp-bnav{display:block;position:fixed;bottom:0;left:0;right:0;z-index:9900;background:#F8F5EF;border-top:1px solid rgba(196,137,42,.2);box-shadow:0 -4px 20px rgba(24,19,15,.08);padding-bottom:env(safe-area-inset-bottom,0px);}
+        @media(min-width:768px){.sp-bnav{display:none!important;}}
+        .sp-bnav-row{display:flex;align-items:stretch;height:64px;padding:0 4px;}
+        .sp-bnav-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex:1;min-width:0;padding:10px 2px 8px;color:#A89880;text-decoration:none;-webkit-tap-highlight-color:transparent;transition:color .15s;}
+        .sp-bnav-item:hover,.sp-bnav-item:focus{color:#C4311B;outline:none;}
+        .sp-bnav-item--active{color:#C4311B;}
+        .sp-bnav-bar{position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:3px;background:#C4311B;border-radius:9999px;}
+        .sp-bnav-label{font-size:10px;line-height:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+        .sp-bnav-item--active .sp-bnav-label{font-weight:700;}
+        .sp-bnav-center{display:flex;align-items:center;justify-content:center;flex:1;min-width:0;}
+        .sp-bnav-pub{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:56px;height:56px;margin-top:-22px;background:linear-gradient(135deg,#C4311B 0%,#8B1E0F 100%);color:#fff;border-radius:50%;outline:3px solid #F8F5EF;box-shadow:0 6px 18px rgba(196,49,27,.45);transition:transform .15s,box-shadow .15s;text-decoration:none;-webkit-tap-highlight-color:transparent;}
+        .sp-bnav-pub:active{transform:scale(.92);box-shadow:0 3px 8px rgba(196,49,27,.35);}
+        @media(max-width:767.98px){body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))!important;}html,body{overflow-x:hidden!important;max-width:100vw;}}
+        /* Timer chip */
+        .timer-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;background:#FEF2F0;color:#C4311B;border:1px solid rgba(196,49,27,.25);border-radius:9999px;font-size:.8125rem;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit;vertical-align:middle;line-height:1.6;}
+        .timer-chip:hover,.timer-chip:focus{background:#C4311B;color:white;border-color:#C4311B;outline:none;}
+        /* Timer FAB */
+        #timerFab{position:fixed;bottom:calc(76px + env(safe-area-inset-bottom,0px));right:1rem;z-index:900;display:flex;align-items:center;gap:8px;padding:11px 18px;background:#18130F;color:white;border:1px solid rgba(255,255,255,.10);border-radius:9999px;font-size:.8125rem;font-weight:600;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.32),0 2px 8px rgba(0,0,0,.18);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;letter-spacing:.01em;font-family:inherit;}
+        #timerFab:hover{transform:scale(1.04);box-shadow:0 12px 40px rgba(0,0,0,.38);}
+        #timerFab:active{transform:scale(.96);}
+        #timerFab .fab-dot{width:8px;height:8px;border-radius:50%;background:#C4311B;flex-shrink:0;}
+        @media(min-width:768px){#timerFab{bottom:2rem;right:1.5rem;}}
+        /* Cooking timer widget — Apple style */
+        #cookingTimer{position:fixed;bottom:calc(140px + env(safe-area-inset-bottom,0px));right:1rem;z-index:1000;background:rgba(20,15,10,.88);-webkit-backdrop-filter:blur(40px) saturate(1.8);backdrop-filter:blur(40px) saturate(1.8);color:white;border-radius:28px;padding:24px 24px 20px;width:288px;box-shadow:0 40px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.07);transition:opacity .25s,transform .35s cubic-bezier(.34,1.56,.64,1);transform-origin:bottom right;}
+        #cookingTimer.hidden{opacity:0;transform:scale(.82) translateY(24px);pointer-events:none;}
+        #cookingTimer:not(.hidden){opacity:1;transform:scale(1) translateY(0);}
+        @media(min-width:768px){#cookingTimer{bottom:5.5rem;right:1.5rem;}}
+        /* Ring */
+        #timerRingTrack{stroke:rgba(255,255,255,.08);}
+        #timerRingProg{stroke:#C4311B;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s;}
+        /* Time input */
+        .timer-time-input{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.10);border-radius:14px;color:white;font-size:2rem;font-weight:700;text-align:center;width:72px;padding:6px 4px;font-variant-numeric:tabular-nums;outline:none;-moz-appearance:textfield;}
+        .timer-time-input::-webkit-inner-spin-button,.timer-time-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+        .timer-time-input:focus{border-color:rgba(196,49,27,.6);background:rgba(196,49,27,.08);}
+        /* Buttons */
+        #timerToggle{flex:1;padding:10px;border-radius:14px;font-size:.875rem;font-weight:700;border:none;cursor:pointer;transition:all .2s;background:#C4311B;color:white;letter-spacing:.01em;}
+        #timerToggle:active{transform:scale(.95);}
+        #timerReset{width:44px;height:44px;border-radius:14px;border:none;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.10);color:white;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        #timerReset:active{transform:scale(.92);}
+        #timerReset:hover{background:rgba(255,255,255,.16);}
+        #timerToggle:hover{background:#a82818;}
+        /* Print */
+        @media print{
+            #navbar,footer,.sp-bnav,#printBtn,#shareWrapper,#favBtn,
+            #portionsMinus,#portionsPlus,#commentsSection,#similarSection,
+            #statusBanner,#cookingTimer,#authorBlock button,
+            .sp-bnav-pub,#backToTop,a[href="recettes.html"]{display:none!important;}
+            body{background:white!important;padding:0!important;font-size:9.5pt;line-height:1.35;}
+            #recipeContent{display:block!important;}
+            /* Compact hero */
+            section.pt-24{padding-top:6mm!important;padding-bottom:4mm!important;}
+            .bg-gradient-to-b{background:white!important;}
+            .lg\:grid-cols-2{grid-template-columns:1fr 1fr!important;gap:8mm!important;align-items:start;}
+            /* Hero image: petite, pas écrasée */
+            .lg\:grid-cols-2 > div:last-child img{max-height:160px!important;width:100%!important;object-fit:cover;border-radius:6px;}
+            /* Stats bar compact */
+            .grid.grid-cols-4{grid-template-columns:repeat(4,1fr)!important;gap:3px!important;}
+            .grid.grid-cols-4 > div{padding:4px 6px!important;}
+            .grid.grid-cols-4 svg{display:none!important;}
+            .grid.grid-cols-4 p{font-size:8pt!important;margin:0!important;}
+            /* Actions hidden */
+            .flex.flex-wrap.gap-3{display:none!important;}
+            /* Portions: show count only */
+            #portionsSection .flex{gap:0!important;}
+            /* Ingredients 2 colonnes */
+            #ingredientsList{columns:2;column-gap:6mm;}
+            .ingredient-item{break-inside:avoid;padding:2px 0!important;border:none!important;}
+            .ing-emoji{display:none!important;}
+            .checkbox{display:none!important;}
+            /* Steps compact */
+            .step-card{padding-left:30px!important;margin-bottom:4px!important;}
+            .step-card::before{-webkit-print-color-adjust:exact;print-color-adjust:exact;width:24px!important;height:24px!important;font-size:10px!important;top:0!important;}
+            .step-card::after{display:none!important;}
+            .step-card p{font-size:9pt!important;line-height:1.3!important;}
+            /* Sections layout */
+            .lg\:col-span-2,.col-span-2,.md\:col-span-2{page-break-inside:avoid;}
+            @page{margin:12mm;size:A4;}
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+<!-- NAVBAR -->
+<nav id="navbar" data-always-scrolled class="fixed top-0 left-0 right-0 z-50 transition-all scrolled">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#C4311B">
+                    <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                </div>
+                <div class="leading-none"><div class="text-2xl font-display font-bold"><span class="text-sp-500">Sel</span><span class="text-encre"> &amp; Poivre</span></div><div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#A89880;margin-top:3px;font-family:system-ui,sans-serif">Recettes &amp; Communauté</div></div>
+            </a>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="index.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Accueil</a>
+                <a href="recettes.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Recettes</a>
+                <a href="communaute.html" class="font-medium text-sm tracking-wide uppercase hover:text-sp-600 transition-colors">Communauté</a>
+            </div>
+            <div class="hidden md:flex items-center gap-3">
+<a href="connexion.html" class="px-5 py-2.5 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full text-sm font-semibold hover:shadow-lg transition-all">Connexion</a>
+            </div>
+            <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-sp-100 transition-colors" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobileMenu">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+        </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden bg-white/95 backdrop-blur-xl shadow-2xl border-t border-sp-100">
+        <div class="px-4 py-6 space-y-4">
+            <a href="index.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Accueil</a>
+            <a href="recettes.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Recettes</a>
+            <a href="communaute.html" class="block py-3 px-4 rounded-xl hover:bg-sp-50 transition-colors font-medium">Communauté</a>
+            <a href="connexion.html" class="block w-full text-center px-5 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Connexion</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== LOADING ===== -->
+<div id="loadingState" class="min-h-screen flex items-center justify-center pt-20">
+    <div class="text-center">
+        <svg class="animate-spin mx-auto mb-4 w-10 h-10 text-sp-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.291l3-2z"></path>
+        </svg>
+        <p class="text-gray-500">Chargement de la recette…</p>
+    </div>
+</div>
+
+<!-- ===== ERROR ===== -->
+<div id="errorState" class="hidden min-h-screen flex items-center justify-center pt-20 px-4">
+    <div class="text-center max-w-md">
+        <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <i data-lucide="search-x" class="w-10 h-10 text-gray-400"></i>
+        </div>
+        <h1 class="text-2xl font-display font-bold mb-2">Recette introuvable</h1>
+        <p id="errorMsg" class="text-gray-500 mb-6">Cette recette n'existe pas ou n'est plus disponible.</p>
+        <a href="recettes.html" class="inline-block px-6 py-3 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold">Toutes les recettes</a>
+    </div>
+</div>
+
+<!-- ===== CONTENT ===== -->
+<main id="recipeContent" class="hidden">
+
+    <!-- Status banner (only when status !== 'published') -->
+    <div id="statusBanner" class="hidden pt-24">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="statusBannerInner" class="flex items-center gap-3 px-5 py-3 rounded-xl border"></div>
+        </div>
+    </div>
+
+    <!-- HERO -->
+    <section class="pt-24 pb-12 bg-gradient-to-b from-sp-50 to-ivoire">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <a href="recettes.html" class="text-sm text-gray-500 hover:text-sp-600 transition-colors inline-flex items-center gap-1 mb-4">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Retour aux recettes
+            </a>
+            <div class="grid lg:grid-cols-2 gap-10 items-start">
+                <div>
+                    <div id="heroBadges" class="flex flex-wrap gap-2 mb-4"></div>
+                    <h1 id="heroTitle" class="text-4xl sm:text-5xl lg:text-6xl font-display font-bold leading-tight"></h1>
+                    <p id="heroDesc" class="mt-4 text-lg text-gray-600 leading-relaxed"></p>
+                    <!-- Author -->
+                    <div class="mt-6 flex items-center gap-3" id="authorBlock"></div>
+                    <!-- Stats -->
+                    <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm">
+                            <div class="w-9 h-9 rounded-xl bg-sp-50 flex items-center justify-center mx-auto mb-2">
+                                <i data-lucide="clock" class="w-5 h-5 text-sp-500"></i>
+                            </div>
+                            <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Temps total</p>
+                            <p id="statTotal" class="text-sm font-bold text-encre mt-0.5">—</p>
+                        </div>
+                        <div class="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm">
+                            <div class="w-9 h-9 rounded-xl bg-sp-50 flex items-center justify-center mx-auto mb-2">
+                                <i data-lucide="users" class="w-5 h-5 text-sp-500"></i>
+                            </div>
+                            <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Portions</p>
+                            <p id="statServings" class="text-sm font-bold text-encre mt-0.5">—</p>
+                        </div>
+                        <div class="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm">
+                            <div class="w-9 h-9 rounded-xl bg-sp-50 flex items-center justify-center mx-auto mb-2">
+                                <i data-lucide="chef-hat" class="w-5 h-5 text-sp-500"></i>
+                            </div>
+                            <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Difficulté</p>
+                            <p id="statDifficulty" class="text-sm font-bold text-encre mt-0.5">—</p>
+                        </div>
+                        <div class="bg-white border border-gray-100 rounded-2xl p-4 text-center shadow-sm">
+                            <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center mx-auto mb-2">
+                                <i data-lucide="star" class="w-5 h-5 text-amber-400"></i>
+                            </div>
+                            <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wide">Note</p>
+                            <p id="statRating" class="text-sm font-bold text-encre mt-0.5">—</p>
+                        </div>
+                    </div>
+                    <!-- Actions -->
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <button id="favBtn" class="heart-btn px-5 py-3 bg-white border-2 border-gray-200 rounded-full font-semibold text-sm hover:bg-sp-50 hover:border-sp-200 transition-all flex items-center gap-2">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            <span id="favLabel">Ajouter aux favoris</span>
+                        </button>
+                        <button id="printBtn" class="px-5 py-3 bg-white border-2 border-gray-200 rounded-full font-semibold text-sm hover:bg-gray-50 transition-all flex items-center gap-2">
+                            <i data-lucide="printer" class="w-4 h-4"></i> Imprimer
+                        </button>
+                        <div class="relative" id="shareWrapper">
+                            <button id="shareBtn" class="px-5 py-3 bg-white border-2 border-gray-200 rounded-full font-semibold text-sm hover:bg-gray-50 transition-all flex items-center gap-2">
+                                <i data-lucide="share-2" class="w-4 h-4"></i> Partager
+                            </button>
+                            <!-- Share dropdown -->
+                            <div id="shareDropdown" class="hidden absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-20">
+                                <button id="shareCopy" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors text-left">
+                                    <i data-lucide="link" class="w-4 h-4 text-gray-500"></i> Copier le lien
+                                </button>
+                                <a id="shareWhatsapp" href="#" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                                    WhatsApp
+                                </a>
+                                <a id="sharePinterest" href="#" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4" fill="#E60023" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+                                    Épingler sur Pinterest
+                                </a>
+                                <a id="shareTwitter" href="#" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4" fill="#000" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                    Partager sur X
+                                </a>
+                            </div>
+                        </div>
+                        <a id="editLink" class="hidden px-5 py-3 bg-or-50 border-2 border-or-200 text-or-700 rounded-full font-semibold text-sm hover:bg-or-100 transition-all flex items-center gap-2">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i> Modifier
+                        </a>
+                        <button id="cartBtn" class="hidden px-5 py-3 bg-green-50 border-2 border-green-200 text-green-700 rounded-full font-semibold text-sm hover:bg-green-100 transition-all flex items-center gap-2">
+                            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                            <span id="cartBtnLabel">Ajouter aux courses</span>
+                        </button>
+                        <button id="reportBtn" class="hidden px-4 py-2.5 bg-white border border-gray-200 text-gray-400 rounded-full text-xs hover:border-red-200 hover:text-red-500 transition-all flex items-center gap-1.5">
+                            <i data-lucide="flag" class="w-3.5 h-3.5"></i> Signaler
+                        </button>
+                    </div>
+                </div>
+                <div class="rounded-3xl overflow-hidden shadow-xl aspect-[4/3]">
+                    <img id="heroImg" alt="" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BODY -->
+    <section class="py-16">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-3 gap-10">
+
+                <!-- INGREDIENTS -->
+                <aside class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-28">
+                        <div class="flex items-center justify-between mb-5">
+                            <h2 class="font-display font-bold text-2xl">Ingrédients</h2>
+                            <div class="flex items-center gap-2 text-sm">
+                                <button id="portionsMinus" class="w-7 h-7 rounded-full bg-sp-50 text-sp-600 font-bold hover:bg-sp-100">-</button>
+                                <span id="portionsCount" class="font-semibold w-6 text-center">4</span>
+                                <button id="portionsPlus" class="w-7 h-7 rounded-full bg-sp-50 text-sp-600 font-bold hover:bg-sp-100">+</button>
+                                <span class="text-xs text-gray-400 ml-1">pers.</span>
+                            </div>
+                        </div>
+                        <ul id="ingredientsList"></ul>
+                        <div class="mt-5 pt-4 border-t border-gray-100">
+                            <p class="text-xs text-gray-500 mb-2">Tags</p>
+                            <div id="tagsList" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- STEPS -->
+                <div class="lg:col-span-2">
+                    <h2 class="font-display font-bold text-2xl mb-6">Préparation</h2>
+                    <ol id="stepsList" class="space-y-6"></ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMMENTS -->
+    <section id="commentsSection" class="py-16 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="font-display font-bold text-3xl mb-8">Avis &amp; commentaires <span id="commentsCount" class="text-gray-400 text-2xl"></span></h2>
+
+            <!-- Add comment (logged in) -->
+            <div id="commentFormBox" class="hidden bg-ivoire rounded-2xl p-5 mb-8 border border-gray-100">
+                <p class="font-semibold mb-3">Laisser un avis</p>
+                <div id="ratingInput" class="flex gap-1.5 mb-3"></div>
+                <textarea id="commentText" rows="3" maxlength="2000" class="w-full p-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-sp-500 transition-all" placeholder="Partagez votre expérience…"></textarea>
+                <div id="commentError" class="hidden mt-2 text-sm text-red-600"></div>
+                <div class="flex justify-end mt-3">
+                    <button id="submitComment" class="px-5 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Publier mon avis</button>
+                </div>
+            </div>
+
+            <!-- Login CTA (anonymous) -->
+            <div id="commentLoginCTA" class="hidden bg-ivoire rounded-2xl p-5 mb-8 border border-gray-100 text-center">
+                <p class="text-gray-600 mb-3">Connectez-vous pour laisser un avis.</p>
+                <a href="connexion.html" class="inline-block px-5 py-2 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold text-sm">Se connecter</a>
+            </div>
+
+            <!-- Comments list -->
+            <div id="commentsList" class="space-y-5">
+                <p class="text-gray-400 text-center py-8">Aucun avis pour le moment. Soyez le premier !</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- RECETTES SIMILAIRES -->
+    <section id="similarSection" class="hidden py-12 bg-ivoire border-t border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl font-display font-bold mb-6">Vous aimerez aussi</h2>
+            <div id="similarGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"></div>
+        </div>
+    </section>
+
+
+    <!-- ========== NEWSLETTER ========== -->
+    <section class="py-16 bg-ivoire">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-br from-sp-50 to-amber-50 rounded-3xl p-8 sm:p-12 border border-sp-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-sp-200/30 rounded-full blur-3xl"></div>
+                <div class="relative text-center max-w-xl mx-auto">
+                    <span class="font-handwrite text-2xl text-sp-500">Restez gourmand</span>
+                    <h2 class="text-3xl sm:text-4xl font-display font-bold mt-2">Les recettes de la semaine dans votre boîte mail</h2>
+                    <p class="mt-4 text-gray-600">Recevez chaque vendredi une sélection de recettes de saison et les coups de cœur de la communauté.</p>
+                    <form id="newsletterForm" class="mt-8 flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                        <input id="newsletterEmail" type="email" required placeholder="votre@email.com" class="flex-1 px-6 py-4 rounded-full bg-white border border-sp-200 focus:outline-none focus:ring-2 focus:ring-sp-500 text-sm">
+                        <button type="submit" class="px-8 py-4 bg-gradient-to-r from-sp-500 to-sp-600 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-sp-500/30 transform hover:-translate-y-0.5 transition-all whitespace-nowrap">S'abonner</button>
+                    </form>
+                    <p id="newsletterMsg" class="mt-4 text-center text-xs text-gray-400">Pas de spam. Désabonnement en un clic.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- MODAL SIGNALEMENT -->
+    <div id="reportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="reportModalBackdrop"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="font-display font-bold text-lg flex items-center gap-2">
+                    <i data-lucide="flag" class="w-5 h-5 text-red-500"></i> Signaler cette recette
+                </h3>
+                <button id="reportModalClose" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-gray-700">Raison du signalement</label>
+                    <select id="reportReason" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sp-500 bg-white">
+                        <option value="inappropriate">Contenu inapproprié</option>
+                        <option value="spam">Spam ou publicité</option>
+                        <option value="copyright">Violation de droits d'auteur</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-gray-700">Note complémentaire <span class="font-normal text-gray-400">(optionnel)</span></label>
+                    <textarea id="reportNote" rows="3" maxlength="500" placeholder="Précisez si nécessaire…" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sp-500 resize-none"></textarea>
+                </div>
+                <p id="reportError" class="hidden text-sm text-red-500"></p>
+            </div>
+            <div class="mt-6 flex gap-3">
+                <button id="reportCancel" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors">Annuler</button>
+                <button id="reportSubmit" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors flex items-center justify-center gap-2">
+                    <i data-lucide="flag" class="w-4 h-4"></i> Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-encre text-white py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                <a href="index.html" class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-sp-500 to-sp-600 rounded-lg flex items-center justify-center">
+                        <i data-lucide="utensils" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="text-lg font-display font-bold">Sel &amp; Poivre</span>
+                </a>
+                <nav class="flex flex-wrap gap-6 justify-center text-sm text-gray-400">
+                    <a href="recettes.html"       class="hover:text-white transition-colors">Recettes</a>
+                    <a href="communaute.html"      class="hover:text-white transition-colors">Communauté</a>
+                    <a href="a-propos.html"        class="hover:text-white transition-colors">À propos</a>
+                    <a href="contact.html"         class="hover:text-white transition-colors">Contact</a>
+                    <a href="cgu.html"             class="hover:text-white transition-colors">CGU</a>
+                    <a href="confidentialite.html" class="hover:text-white transition-colors">Confidentialité</a>
+                </nav>
+                <p class="text-gray-500 text-sm">&copy; 2026 Sel &amp; Poivre.</p>
+            </div>
+        </div>
+    </footer>
+</main>
+
+<script src="js/auth-ui.js?v=6"></script>
+<script src="js/cart.js"></script>
+<script>
+(function () {
+    const PALETTE = ['#E85D26','#16A34A','#7C3AED','#DB2777','#0284C7','#CA8A04'];
+    function colorFor(name){let h=0;for(const c of (name||''))h=(h*31+c.charCodeAt(0))&0xFFFF;return PALETTE[h%PALETTE.length];}
+    function initials(name){return (name||'U').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+    function fmtTime(min){if(!min)return '—';if(min<60)return min+' min';const h=Math.floor(min/60),m=min%60;return m?h+'h'+String(m).padStart(2,'0'):h+'h';}
+    function fmtDate(iso){try{return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});}catch{return '';}}
+    function realisticCount(raw){ return parseInt(raw) || 0; }
+    function fmtViews(n){n=parseInt(n)||0;if(n>=1000000)return (n/1000000).toFixed(1).replace('.0','')+'M';if(n>=1000)return (n/1000).toFixed(n>=10000?0:1).replace('.0','')+'k';return String(n);}
+    function escape(s){return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+    function starsHTML(rating){
+        let s = '';
+        for (let i=1;i<=5;i++){
+            const f = i <= Math.round(rating || 0);
+            s += `<svg class="w-4 h-4 ${f?'text-amber-400 fill-amber-400':'text-gray-300 fill-gray-200'}" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+        }
+        return s;
+    }
+
+    function getBadge(r) {
+        const tags = (r.tags || []);
+        if (r.author_type === 'mijote')               return '<span class="px-3 py-1 bg-sp-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Sel &amp; Poivre</span>';
+        if (tags.some(t => /végétar/i.test(t)))       return '<span class="px-3 py-1 bg-green-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Végétarien</span>';
+        if (tags.some(t => /vegan/i.test(t)))          return '<span class="px-3 py-1 bg-green-600/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Vegan</span>';
+        if (tags.some(t => /sans gluten/i.test(t)))    return '<span class="px-3 py-1 bg-blue-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Sans gluten</span>';
+        if (+r.total_time > 0 && +r.total_time <= 20)  return '<span class="px-3 py-1 bg-or-500/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Rapide</span>';
+        if (r.difficulty === 'Difficile')              return '<span class="px-3 py-1 bg-amber-600/90 backdrop-blur-sm rounded-full text-xs font-semibold text-white">Expert</span>';
+        return '';
+    }
+
+    let currentRecipe = null;
+    let currentPortions = 4;
+    let basePortions    = 4;
+    let portionSteps    = [1, 2, 3, 4, 6, 8, 10, 12];
+
+    function showError(msg) {
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('errorState').classList.remove('hidden');
+        document.getElementById('errorMsg').textContent = msg || "Cette recette n'existe pas ou n'est plus disponible.";
+        if (window.lucide) lucide.createIcons();
+    }
+
+    /* ── SEO helpers ─────────────────────────────────────────── */
+    function absImg(url) {
+        if (!url) return window.location.origin + '/assets/recipes/_default.jpg';
+        return url.startsWith('http') ? url : window.location.origin + url;
+    }
+    function pt(min) { return min ? 'PT' + min + 'M' : undefined; }
+
+    function injectSEO(r) {
+        const base = window.location.origin;
+        const imgUrl = absImg(r.image_url);
+        const pageUrl = base + '/recette-detail?slug=' + encodeURIComponent(r.slug);
+        const title   = r.title + ' — Sel & Poivre';
+        const desc    = r.description || 'Recette Sel & Poivre';
+
+        // <title> + description
+        document.title = title;
+        document.getElementById('pageDesc').setAttribute('content', desc);
+
+        // Canonical
+        const can = document.getElementById('pageCanonical');
+        if (can) can.href = pageUrl;
+
+        // Open Graph
+        document.getElementById('ogTitle').content       = title;
+        document.getElementById('ogDescription').content = desc;
+        document.getElementById('ogImage').content       = imgUrl;
+        document.getElementById('ogUrl').content         = pageUrl;
+
+        // Twitter
+        document.getElementById('twTitle').content       = title;
+        document.getElementById('twDescription').content = desc;
+        document.getElementById('twImage').content       = imgUrl;
+
+        // JSON-LD Recipe (Schema.org)
+        const old = document.getElementById('jsonld-recipe');
+        if (old) old.remove();
+
+        const ingredients = (r.ingredients || []).map(i =>
+            [i.amount, i.unit, i.name].filter(Boolean).join(' ')
+        );
+        const steps = (r.steps || []).map((s, idx) => ({
+            '@type': 'HowToStep',
+            position: idx + 1,
+            text: typeof s === 'string' ? s : (s.description || '')
+        }));
+
+        const schema = {
+            '@context': 'https://schema.org',
+            '@type':    'Recipe',
+            name:        r.title,
+            description: r.description || '',
+            image:       [imgUrl],
+            author: {
+                '@type': r.author_id ? 'Person' : 'Organization',
+                name:    r.author_name || 'Sel & Poivre'
+            },
+            datePublished:     r.created_at ? r.created_at.slice(0, 10) : undefined,
+            recipeCategory:    r.category   || '',
+            recipeCuisine:     'Française',
+            recipeYield:       (r.servings || 4) + ' personnes',
+            recipeIngredient:  ingredients,
+            recipeInstructions: steps,
+        };
+        if (r.prep_time)  schema.prepTime  = pt(r.prep_time);
+        if (r.cook_time)  schema.cookTime  = pt(r.cook_time);
+        if (r.total_time) schema.totalTime = pt(r.total_time);
+        if (r.rating && parseFloat(r.rating) > 0) {
+            schema.aggregateRating = {
+                '@type':      'AggregateRating',
+                ratingValue:  parseFloat(r.rating).toFixed(1),
+                ratingCount:  Math.max(1, parseInt(r.rating_count) || 1),
+                bestRating:   '5',
+                worstRating:  '1'
+            };
+        }
+        // Strip undefined
+        Object.keys(schema).forEach(k => { if (schema[k] === undefined) delete schema[k]; });
+
+        const tag = document.createElement('script');
+        tag.id = 'jsonld-recipe';
+        tag.type = 'application/ld+json';
+        tag.textContent = JSON.stringify(schema);
+        document.head.appendChild(tag);
+    }
+
+    function renderRecipe(r) {
+        currentRecipe = r;
+        injectSEO(r);
+
+        // Status banner (only if not published)
+        const banner = document.getElementById('statusBanner');
+        const bannerInner = document.getElementById('statusBannerInner');
+        const heroSection = document.querySelector('main section.pt-24');
+        if (r.status === 'pending') {
+            banner.classList.remove('hidden');
+            bannerInner.className = 'flex items-center gap-3 px-5 py-3 rounded-xl border bg-amber-50 border-amber-200 text-amber-800';
+            bannerInner.innerHTML = '<i data-lucide="clock" class="w-5 h-5 flex-shrink-0"></i><div class="text-sm"><strong>Recette en attente de validation.</strong> Elle n\'est pas visible publiquement tant qu\'un administrateur ne l\'a pas approuvée.</div>';
+            if (heroSection) { heroSection.classList.remove('pt-24'); heroSection.classList.add('pt-6'); }
+        } else if (r.status === 'rejected') {
+            banner.classList.remove('hidden');
+            bannerInner.className = 'flex items-center gap-3 px-5 py-3 rounded-xl border bg-red-50 border-red-200 text-red-800';
+            bannerInner.innerHTML = '<i data-lucide="x-circle" class="w-5 h-5 flex-shrink-0"></i><div class="text-sm"><strong>Recette refusée.</strong> Elle n\'est pas publiée. Vous pouvez la modifier puis la resoumettre.</div>';
+            if (heroSection) { heroSection.classList.remove('pt-24'); heroSection.classList.add('pt-6'); }
+        }
+
+        // Hero
+        document.getElementById('heroTitle').textContent = r.title;
+        document.getElementById('heroDesc').textContent  = r.description || '';
+        document.getElementById('heroImg').src = r.image_url || '/assets/recipes/_default.jpg';
+        document.getElementById('heroImg').alt = r.title;
+        const badge = getBadge(r);
+        document.getElementById('heroBadges').innerHTML = badge + (r.category ? `<span class="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-semibold text-gray-600 capitalize">${r.category}</span>` : '');
+
+        // Author (clickable to public profile, except for "mijote" team account)
+        const authorName = r.author_name || 'Sel & Poivre';
+        const authorBlock = document.getElementById('authorBlock');
+        if (r.author_type === 'mijote') {
+            authorBlock.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sp-500 to-sp-600 flex items-center justify-center text-white font-bold text-xs">SP</div>
+                <div><p class="text-sm font-semibold">Sel &amp; Poivre</p><p class="text-xs text-gray-500">Recette officielle</p></div>`;
+        } else {
+            const link = `utilisateur.html?username=${encodeURIComponent(authorName)}`;
+            const avatarMarkup = r.author_avatar
+                ? `<img src="${r.author_avatar}" alt="" class="w-10 h-10 rounded-full object-cover flex-shrink-0">`
+                : `<div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style="background:${colorFor(authorName)}">${initials(authorName)}</div>`;
+            authorBlock.innerHTML = `
+                <a href="${link}" class="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1 min-w-0">
+                    ${avatarMarkup}
+                    <div class="min-w-0"><p class="text-sm font-semibold hover:underline truncate">${escape(authorName)}</p><p class="text-xs text-gray-500">Membre · ${r.created_at ? fmtDate(r.created_at) : ''}</p></div>
+                </a>
+                <button id="followAuthorBtn" class="hidden ml-4 px-4 py-1.5 border-2 border-sp-500 text-sp-600 rounded-full text-xs font-semibold hover:bg-sp-500 hover:text-white transition-all flex-shrink-0">+ Suivre</button>`;
+        }
+
+        // Stats
+        document.getElementById('statTotal').textContent      = fmtTime(+r.total_time);
+        document.getElementById('statServings').textContent   = (r.servings || 4) + ' pers.';
+        document.getElementById('statDifficulty').textContent = r.difficulty || 'Facile';
+        const ratingVal = parseFloat(r.rating || 0);
+        const ratingCnt = realisticCount(r.rating_count);
+        document.getElementById('statRating').innerHTML = ratingVal > 0 ? `${ratingVal.toFixed(1)} <span class="text-xs text-gray-400">(${ratingCnt})</span>` : '<span class="text-xs text-gray-400">Aucun avis</span>';
+        const svEl = document.getElementById('statViews'); if (svEl) svEl.textContent = fmtViews(r.views);
+
+        // Edit link if owner or admin
+        const u = window.SP && window.SP.user;
+        if (u && (u.role === 'admin' || u.id == r.author_id)) {
+            const link = document.getElementById('editLink');
+            // Preserve admin context if coming from admin panel
+            const fromAdmin = /\/admin\//.test(document.referrer || '');
+            link.href = 'publier.html?slug=' + encodeURIComponent(r.slug) + (fromAdmin ? '&from=admin' : '');
+            link.classList.remove('hidden');
+        }
+
+        // Cart button — visible to any logged-in user
+        const cartBtn = document.getElementById('cartBtn');
+        if (u) cartBtn.classList.remove('hidden');
+
+        // Report button — visible to logged-in non-authors
+        const reportBtn = document.getElementById('reportBtn');
+        const isOwnRecipe = u && (String(u.id) === String(r.author_id) || r.author_type === 'mijote' && u.role !== 'admin');
+        if (u && !isOwnRecipe) reportBtn.classList.remove('hidden');
+
+        // Follow author button (only for user-authored recipes, not self)
+        const followAuthorBtn = document.getElementById('followAuthorBtn');
+        if (followAuthorBtn && r.author_id && r.author_type !== 'mijote') {
+            const isOwn = u && String(u.id) === String(r.author_id);
+            if (!isOwn) {
+                followAuthorBtn.classList.remove('hidden');
+                // Load follow status if logged in
+                if (u) {
+                    fetch(window.SP.apiPath('follows.php?action=check&user_id=' + r.author_id), { credentials: 'include' })
+                        .then(res => res.json())
+                        .then(data => { if (data.following) applyFollowingStyle(followAuthorBtn, true); })
+                        .catch(() => {});
+                }
+                followAuthorBtn.addEventListener('click', async () => {
+                    if (!window.SP.user) { window.location.href = window.SP.pagePath('connexion.html'); return; }
+                    followAuthorBtn.disabled = true;
+                    try {
+                        const res = await fetch(window.SP.apiPath('follows.php?action=toggle'), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ user_id: r.author_id })
+                        });
+                        const d = await res.json();
+                        applyFollowingStyle(followAuthorBtn, d.following);
+                    } catch(e) { /* noop */ }
+                    followAuthorBtn.disabled = false;
+                });
+            }
+        }
+        function applyFollowingStyle(btn, following) {
+            if (following) {
+                btn.textContent = 'Abonné ✓';
+                btn.classList.add('bg-sp-500', 'text-white');
+                btn.classList.remove('border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
+            } else {
+                btn.textContent = '+ Suivre';
+                btn.classList.remove('bg-sp-500', 'text-white');
+                btn.classList.add('border-sp-500', 'text-sp-600', 'hover:bg-sp-500', 'hover:text-white');
+            }
+        }
+
+        // Ingredients
+        basePortions    = parseInt(r.servings || 4);
+        currentPortions = basePortions;
+        portionSteps    = buildPortionSteps(basePortions);
+        document.getElementById('portionsCount').textContent = currentPortions;
+        renderIngredients();
+
+        // Steps (avec sections optionnelles)
+        const stepsBox = document.getElementById('stepsList');
+        const rawSteps = (r.steps || []).map(s => typeof s === 'string'
+            ? { description: s, section: '' }
+            : { description: s.description || '', section: s.section || '' });
+        if (rawSteps.length === 0) {
+            stepsBox.innerHTML = '<li class="text-gray-400">Aucune étape renseignée.</li>';
+        } else {
+            const hasSections = rawSteps.some(s => s.section);
+            let html = '';
+            let prevSection = null;
+            rawSteps.forEach((s, i) => {
+                if (hasSections && s.section !== prevSection) {
+                    if (s.section) {
+                        html += `<li class="list-none"><h3 class="font-display font-bold text-lg text-sp-700 mt-4 first:mt-0 mb-3 flex items-center gap-2"><span class="w-1 h-6 bg-gradient-to-b from-sp-500 to-sp-600 rounded-full"></span>${escape(s.section)}</h3></li>`;
+                    }
+                    prevSection = s.section;
+                }
+                html += `<li class="step-card" data-step="${i+1}"><p class="text-base leading-relaxed">${linkTimers(escape(s.description))}</p></li>`;
+            });
+            stepsBox.innerHTML = html;
+        }
+
+        // Tags
+        const tagsBox = document.getElementById('tagsList');
+        const tags = r.tags || [];
+        tagsBox.innerHTML = tags.length === 0 ? '<span class="text-xs text-gray-400">Aucun tag</span>' : tags.map(t => `<span class="px-2.5 py-1 bg-sp-50 text-sp-700 rounded-full text-xs font-medium">${escape(t)}</span>`).join('');
+
+        // Favorite button
+        updateFavBtn(r.is_favorited);
+
+        // Show
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('recipeContent').classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    /* ── Ingredient emoji DB + countable detection ───────────── */
+    // Each entry: regex (matched against ingredient name) → { e: emoji, c: countable? }
+    const INGREDIENT_DB = [
+        // Œufs / volaille / viandes
+        { r: /\b(oeuf|œuf|jaune|blanc d['’]oeuf)/i, e: '🥚', c: true },
+        { r: /\bpoulet\b|\bcuisse\b|\bblanc de volaille|coq\b/i, e: '🍗' },
+        { r: /\bbœuf|\bboeuf|\bsteak|\bbavette|\bfaux-filet/i, e: '🥩' },
+        { r: /\bporc|saucisse|chorizo|jambon|lardon|guanciale|pancetta|bacon/i, e: '🥓' },
+        { r: /\bagneau|\bmouton|gigot/i, e: '🥩' },
+        { r: /\bcanard|magret/i, e: '🦆' },
+        // Poissons / fruits de mer
+        { r: /saumon|truite|cabillaud|colin|merlu|bar\b|dorade|maquereau|sardine|thon|poisson/i, e: '🐟' },
+        { r: /crevette|gambas|langoustine/i, e: '🦐' },
+        { r: /moule|huître|coquille saint|coquillage/i, e: '🦪' },
+        { r: /calamar|poulpe|seiche|encornet/i, e: '🦑' },
+        // Légumes
+        { r: /tomate cerise/i, e: '🍅' },
+        { r: /\btomate\b/i, e: '🍅', c: true },
+        { r: /carotte/i, e: '🥕', c: true },
+        { r: /pomme de terre|patate/i, e: '🥔', c: true },
+        { r: /\boignon\b|\béchalote/i, e: '🧅', c: true },
+        { r: /gousse|ail\b/i, e: '🧄', c: true },
+        { r: /poivron/i, e: '🫑', c: true },
+        { r: /aubergine/i, e: '🍆', c: true },
+        { r: /courgette/i, e: '🥒', c: true },
+        { r: /concombre/i, e: '🥒', c: true },
+        { r: /maïs|mais\b/i, e: '🌽' },
+        { r: /piment/i, e: '🌶️' },
+        { r: /champignon|cèpe|girolle|pleurote/i, e: '🍄' },
+        { r: /épinard|epinard|salade|laitue|roquette|mâche|mache|cresson/i, e: '🥬' },
+        { r: /chou\b|broccoli|brocoli/i, e: '🥦' },
+        { r: /asperge/i, e: '🌱' },
+        { r: /haricot|petit pois|pois chiche|lentille/i, e: '🫘' },
+        { r: /artichaut|fenouil|poireau|céleri|celeri|navet/i, e: '🥗' },
+        // Fruits
+        { r: /pomme\b/i, e: '🍎', c: true },
+        { r: /poire/i, e: '🍐', c: true },
+        { r: /banane/i, e: '🍌', c: true },
+        { r: /orange/i, e: '🍊', c: true },
+        { r: /citron/i, e: '🍋', c: true },
+        { r: /fraise/i, e: '🍓' },
+        { r: /framboise|myrtille|cassis|groseille|mûre|mure/i, e: '🫐' },
+        { r: /raisin/i, e: '🍇' },
+        { r: /pêche|peche\b|nectarine|abricot/i, e: '🍑' },
+        { r: /cerise/i, e: '🍒' },
+        { r: /ananas/i, e: '🍍' },
+        { r: /mangue/i, e: '🥭' },
+        { r: /avocat/i, e: '🥑', c: true },
+        { r: /pastèque|pasteque|melon/i, e: '🍉' },
+        { r: /noix de coco|coco/i, e: '🥥' },
+        // Féculents / boulange
+        { r: /baguette|pain\b|brioche|bagel/i, e: '🥖', c: true },
+        { r: /pâte\b|pates\b|spaghetti|tagliatelle|penne|fusilli|nouille/i, e: '🍝' },
+        { r: /\briz\b|\briso/i, e: '🍚' },
+        { r: /farine|semoule|polenta|boulgour|quinoa/i, e: '🌾' },
+        // Crémerie
+        { r: /lait\b/i, e: '🥛' },
+        { r: /yaourt|fromage blanc|skyr/i, e: '🥛' },
+        { r: /crème|creme/i, e: '🥛' },
+        { r: /beurre/i, e: '🧈' },
+        { r: /mozzarell|parmesan|gruyère|gruyere|comté|comte|cheddar|reblochon|chèvre|chevre|fromage/i, e: '🧀' },
+        // Sucré / pâtisserie
+        { r: /chocolat|cacao/i, e: '🍫' },
+        { r: /miel/i, e: '🍯' },
+        { r: /sucre/i, e: '🍬' },
+        { r: /vanille/i, e: '🍦' },
+        // Sec / épices / huile
+        { r: /\bsel\b|fleur de sel/i, e: '🧂' },
+        { r: /poivre/i, e: '⚫' },
+        { r: /huile/i, e: '🫒' },
+        { r: /olive/i, e: '🫒' },
+        { r: /amande|noisette|noix\b|pistache|pignon|cajou/i, e: '🌰' },
+        { r: /basilic|thym|romarin|persil|coriandre|menthe|estragon|laurier|herbe|sauge/i, e: '🌿' },
+        // Boissons
+        { r: /\bvin\b/i, e: '🍷' },
+        { r: /bière|biere/i, e: '🍺' },
+        { r: /café|cafe\b|expresso|espresso/i, e: '☕' },
+        { r: /\bthé\b|\bthe\b/i, e: '🍵' },
+        { r: /eau\b/i, e: '💧' },
+    ];
+    // ── Smart portion steps ───────────────────────────────────────────────
+    function buildPortionSteps(base) {
+        const pool = [1, 2, 3, 4, 6, 8, 10, 12, 16, 20, 24];
+        const set  = new Set([...pool, base]);
+        return [...set].filter(n => n > 0).sort((a, b) => a - b);
+    }
+    function stepDown(steps, cur) { return [...steps].reverse().find(s => s < cur) ?? steps[0]; }
+    function stepUp(steps, cur)   { return steps.find(s => s > cur) ?? steps[steps.length - 1]; }
+
+    // ── Smart quantity formatting (fractions instead of decimals) ─────────
+    const FRAC_CHARS = [
+        [1/8,'⅛'],[1/4,'¼'],[1/3,'⅓'],[3/8,'⅜'],
+        [1/2,'½'],[5/8,'⅝'],[2/3,'⅔'],[3/4,'¾'],[7/8,'⅞']
+    ];
+    function fmtQty(n) {
+        if (n <= 0) return '0';
+        const whole = Math.floor(n);
+        const frac  = +(n - whole).toFixed(4);
+        if (frac < 0.04) return String(whole);
+        if (frac > 0.96) return String(whole + 1);
+        let bestSym = null, bestDiff = Infinity;
+        for (const [v, sym] of FRAC_CHARS) {
+            const d = Math.abs(frac - v);
+            if (d < bestDiff) { bestDiff = d; bestSym = sym; }
+        }
+        if (bestDiff > 0.07) {
+            // No clean fraction — 1 decimal for small numbers, round for large
+            return n < 10 ? n.toFixed(1).replace(/\.0$/, '') : String(Math.round(n));
+        }
+        return whole > 0 ? `${whole}${bestSym}` : bestSym;
+    }
+
+    function ingredientMeta(name) {
+        for (const e of INGREDIENT_DB) {
+            if (e.r.test(name)) return { emoji: e.e, countable: !!e.c };
+        }
+        return { emoji: '🍴', countable: false };
+    }
+
+    function renderIngredients() {
+        const r = currentRecipe;
+        const list = document.getElementById('ingredientsList');
+        const ings = r.ingredients || [];
+        if (ings.length === 0) { list.innerHTML = '<li class="text-gray-400 text-sm py-2">Aucun ingrédient renseigné.</li>'; return; }
+        const factor = currentPortions / (basePortions || 1);
+        list.innerHTML = ings.map((ing, i) => {
+            const name = ing.name || '';
+            const unit = (ing.unit || '').trim();
+            const meta = ingredientMeta(name);
+            // An ingredient is "discrete" if it's countable per name OR has no unit (and amount is a small int)
+            const noUnit = !unit;
+            const amountStr = String(ing.amount || '');
+            const numMatch = amountStr.match(/^(\d+(?:[.,]\d+)?)/);
+            let amount = amountStr;
+            if (numMatch) {
+                const base = parseFloat(numMatch[1].replace(',', '.'));
+                let scaled = base * factor;
+                const isDiscrete = meta.countable || (noUnit && Number.isInteger(base) && base <= 30);
+                let formatted;
+                if (isDiscrete) {
+                    // Whole items (eggs, onions…): round to nearest integer, minimum 1
+                    formatted = String(Math.max(1, Math.round(scaled)));
+                } else {
+                    // Measurable quantities: show fractions instead of decimals
+                    formatted = fmtQty(scaled);
+                }
+                amount = formatted + amountStr.slice(numMatch[1].length);
+            }
+            const display = [amount, unit, name].filter(Boolean).join(' ');
+            return `
+            <li class="ingredient-item" data-i="${i}">
+                <div class="checkbox"></div>
+                <span class="ing-emoji text-xl flex-shrink-0 leading-none" aria-hidden="true">${meta.emoji}</span>
+                <span class="ing-text">${escape(display)}</span>
+            </li>`;
+        }).join('');
+        list.querySelectorAll('.ingredient-item').forEach(it => {
+            it.addEventListener('click', () => it.classList.toggle('checked'));
+        });
+    }
+
+    function updateFavBtn(favorited) {
+        const btn = document.getElementById('favBtn');
+        const lbl = document.getElementById('favLabel');
+        if (favorited) {
+            btn.classList.add('is-fav');
+            lbl.textContent = 'Retirer des favoris';
+        } else {
+            btn.classList.remove('is-fav');
+            lbl.textContent = 'Ajouter aux favoris';
+        }
+    }
+
+    document.getElementById('favBtn').addEventListener('click', async () => {
+        if (!window.SP.user) { window.location.href = 'connexion.html'; return; }
+        const r = currentRecipe; if (!r) return;
+        try {
+            const res = await fetch(window.SP.apiPath('favorites.php?action=toggle'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ recipe_id: r.id })
+            });
+            const data = await res.json();
+            if (data.success) { r.is_favorited = data.favorited; updateFavBtn(data.favorited); }
+        } catch {}
+    });
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+
+    // ── Ajouter aux courses ────────────────────────────────────────────────
+    document.getElementById('cartBtn').addEventListener('click', async () => {
+        const r = currentRecipe; if (!r) return;
+        const btn   = document.getElementById('cartBtn');
+        const label = document.getElementById('cartBtnLabel');
+        btn.disabled = true;
+        label.textContent = 'Ajout en cours…';
+        try {
+            const res = await fetch(window.SP.apiPath('shopping.php?action=add_from_recipe'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ recipe_id: r.id, servings: currentPortions, base_servings: basePortions })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || 'Erreur');
+            // Success feedback
+            btn.classList.add('bg-green-500', 'border-green-500', 'text-white');
+            btn.classList.remove('bg-green-50', 'border-green-200', 'text-green-700');
+            label.textContent = `Ajouté ✓ (${data.added} ingr.)`;
+            setTimeout(() => {
+                btn.classList.remove('bg-green-500', 'border-green-500', 'text-white');
+                btn.classList.add('bg-green-50', 'border-green-200', 'text-green-700');
+                label.textContent = 'Ajouter aux courses';
+                btn.disabled = false;
+            }, 2500);
+        } catch (e) {
+            label.textContent = 'Ajouter aux courses';
+            btn.disabled = false;
+            alert('Impossible d\'ajouter aux courses : ' + e.message);
+        }
+    });
+
+    // ── Signalement ────────────────────────────────────────────────────────
+    function openReportModal()  { document.getElementById('reportModal').classList.remove('hidden'); if(window.lucide) lucide.createIcons(); }
+    function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); document.getElementById('reportError').classList.add('hidden'); document.getElementById('reportNote').value = ''; }
+
+    document.getElementById('reportBtn').addEventListener('click', openReportModal);
+    document.getElementById('reportModalClose').addEventListener('click', closeReportModal);
+    document.getElementById('reportCancel').addEventListener('click', closeReportModal);
+    document.getElementById('reportModalBackdrop').addEventListener('click', closeReportModal);
+
+    document.getElementById('reportSubmit').addEventListener('click', async () => {
+        const r = currentRecipe; if (!r) return;
+        const btn    = document.getElementById('reportSubmit');
+        const errBox = document.getElementById('reportError');
+        const reason = document.getElementById('reportReason').value;
+        const note   = document.getElementById('reportNote').value.trim();
+        errBox.classList.add('hidden');
+        btn.disabled = true;
+        try {
+            const res = await fetch(window.SP.apiPath('reports.php?action=create'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ type: 'recipe', target_id: r.id, reason, note: note || undefined })
+            });
+            const data = await res.json();
+            if (!res.ok && !data.already) throw new Error(data.error || 'Erreur');
+            closeReportModal();
+            // Brief toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-encre text-white text-sm font-semibold px-5 py-3 rounded-full shadow-xl pointer-events-none';
+            toast.textContent = 'Signalement envoyé, merci.';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        } catch (e) {
+            errBox.textContent = e.message;
+            errBox.classList.remove('hidden');
+            btn.disabled = false;
+        }
+    });
+
+    // ── Share dropdown ────────────────────────────────────────────────────
+    const shareBtn      = document.getElementById('shareBtn');
+    const shareDropdown = document.getElementById('shareDropdown');
+
+    shareBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const url   = window.location.href;
+        const title = currentRecipe ? currentRecipe.title : document.title;
+        const img   = currentRecipe ? absImg(currentRecipe.image_url) : '';
+        const enc   = encodeURIComponent;
+
+        // Populate links
+        document.getElementById('shareWhatsapp').href  = `https://wa.me/?text=${enc(title + ' — ' + url)}`;
+        document.getElementById('sharePinterest').href = `https://pinterest.com/pin/create/button/?url=${enc(url)}&media=${enc(img)}&description=${enc(title + ' — Recette sur Sel & Poivre')}`;
+        document.getElementById('shareTwitter').href   = `https://twitter.com/intent/tweet?text=${enc(title)}&url=${enc(url)}&via=SelPoivreCom`;
+
+        // Toggle dropdown (mobile: use native share if available)
+        if (navigator.share && window.innerWidth < 640) {
+            navigator.share({ title, url }).catch(() => {});
+        } else {
+            shareDropdown.classList.toggle('hidden');
+        }
+    });
+
+    document.getElementById('shareCopy').addEventListener('click', async () => {
+        const url = window.location.href;
+        try {
+            await navigator.clipboard.writeText(url);
+            const btn = document.getElementById('shareCopy');
+            btn.innerHTML = '<svg class="w-4 h-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Lien copié !';
+            setTimeout(() => { btn.innerHTML = '<i data-lucide="link" class="w-4 h-4 text-gray-500"></i> Copier le lien'; lucide.createIcons(); }, 2000);
+        } catch { alert(url); }
+        shareDropdown.classList.add('hidden');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => shareDropdown.classList.add('hidden'));
+
+    // Portions
+    document.getElementById('portionsMinus').addEventListener('click', () => {
+        const prev = stepDown(portionSteps, currentPortions);
+        if (prev !== currentPortions) {
+            currentPortions = prev;
+            document.getElementById('portionsCount').textContent = currentPortions;
+            renderIngredients();
+        }
+    });
+    document.getElementById('portionsPlus').addEventListener('click', () => {
+        const next = stepUp(portionSteps, currentPortions);
+        if (next !== currentPortions) {
+            currentPortions = next;
+            document.getElementById('portionsCount').textContent = currentPortions;
+            renderIngredients();
+        }
+    });
+
+    // Mobile menu
+    const mb = document.getElementById('mobileMenuBtn');
+    const mm = document.getElementById('mobileMenu');
+    if (mb && mm) mb.addEventListener('click', () => { const o = mm.classList.toggle('hidden') === false; mb.setAttribute('aria-expanded', String(o)); });
+
+    // ── Comments ────────────────────────────────────────────────
+    let pickedRating = 0;
+
+    function renderRatingInput() {
+        const box = document.getElementById('ratingInput');
+        let html = '<div class="flex items-center gap-2"><span class="text-sm text-gray-600 mr-1">Votre note :</span>';
+        for (let i = 1; i <= 5; i++) {
+            html += `<button type="button" data-r="${i}" class="star-input w-7 h-7 text-gray-300 hover:text-amber-400" aria-label="${i} étoile${i>1?'s':''}">
+                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>`;
+        }
+        html += '<span id="ratingPicked" class="text-sm text-gray-400 ml-2">Cliquez pour noter</span></div>';
+        box.innerHTML = html;
+        box.querySelectorAll('.star-input').forEach(b => {
+            b.addEventListener('click', () => {
+                pickedRating = +b.dataset.r;
+                box.querySelectorAll('.star-input').forEach((s, i) => {
+                    s.classList.toggle('text-amber-400', i < pickedRating);
+                    s.classList.toggle('text-gray-300', i >= pickedRating);
+                });
+                document.getElementById('ratingPicked').textContent = pickedRating + ' / 5';
+            });
+        });
+    }
+
+    function commentItem(c) {
+        const name = c.username || 'Utilisateur';
+        const u = window.SP && window.SP.user;
+        const canDelete = u && (c.user_id == u.id || u.role === 'admin');
+        const ratingHTML = c.rating ? `<div class="flex gap-0.5">${starsHTML(c.rating)}</div>` : '';
+        const userLink = `utilisateur.html?username=${encodeURIComponent(name)}`;
+        return `
+        <div class="bg-ivoire rounded-2xl p-5 border border-gray-100" data-id="${c.id}">
+            <div class="flex items-start gap-3">
+                <a href="${userLink}" class="flex-shrink-0">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs hover:opacity-80 transition-opacity" style="background:${colorFor(name)}">${initials(name)}</div>
+                </a>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <div class="flex items-center gap-3">
+                            <a href="${userLink}" class="font-semibold text-sm hover:underline">${escape(name)}</a>
+                            ${ratingHTML}
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <p class="text-xs text-gray-400">${fmtDate(c.created_at)}</p>
+                            ${canDelete ? `<button class="js-del-comment text-xs text-red-500 hover:underline">Supprimer</button>` : ''}
+                        </div>
+                    </div>
+                    <p class="mt-2 text-gray-700 text-sm leading-relaxed whitespace-pre-line">${escape(c.content)}</p>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    async function loadComments(recipeId) {
+        const box = document.getElementById('commentsList');
+        try {
+            const res = await fetch(window.SP.apiPath('comments.php?action=list&recipe_id=') + recipeId, { credentials: 'include' });
+            const data = await res.json();
+            const list = data.comments || [];
+            document.getElementById('commentsCount').textContent = list.length ? '· ' + list.length : '';
+            if (list.length === 0) {
+                box.innerHTML = '<p class="text-gray-400 text-center py-8">Aucun avis pour le moment. Soyez le premier !</p>';
+            } else {
+                box.innerHTML = list.map(commentItem).join('');
+                box.querySelectorAll('.js-del-comment').forEach(b => {
+                    b.addEventListener('click', async () => {
+                        const id = b.closest('[data-id]').dataset.id;
+                        if (!confirm('Supprimer ce commentaire ?')) return;
+                        try {
+                            await fetch(window.SP.apiPath('comments.php?action=delete&id=') + id, { method: 'DELETE', credentials: 'include' });
+                            loadComments(recipeId);
+                            // refresh recipe rating
+                            refreshRating();
+                        } catch {}
+                    });
+                });
+            }
+        } catch {
+            box.innerHTML = '<p class="text-red-500 text-center py-8">Impossible de charger les avis.</p>';
+        }
+    }
+
+    async function refreshRating() {
+        if (!currentRecipe) return;
+        try {
+            const res = await fetch(window.SP.apiPath('recipes.php?action=single&slug=') + encodeURIComponent(currentRecipe.slug), { credentials: 'include' });
+            const data = await res.json();
+            if (data && !data.error) {
+                currentRecipe.rating = data.rating;
+                currentRecipe.rating_count = data.rating_count;
+                const ratingVal = parseFloat(data.rating || 0);
+                const ratingCnt = realisticCount(data.rating_count);
+                document.getElementById('statRating').innerHTML = ratingVal > 0 ? `${ratingVal.toFixed(1)} <span class="text-xs text-gray-400">(${ratingCnt})</span>` : '<span class="text-xs text-gray-400">Aucun avis</span>';
+            }
+        } catch {}
+    }
+
+    document.getElementById('submitComment').addEventListener('click', async () => {
+        const r = currentRecipe; if (!r) return;
+        const content = document.getElementById('commentText').value.trim();
+        const errBox  = document.getElementById('commentError');
+        errBox.classList.add('hidden');
+        if (!content) { errBox.textContent = 'Le commentaire ne peut pas être vide.'; errBox.classList.remove('hidden'); return; }
+
+        try {
+            const res = await fetch(window.SP.apiPath('comments.php?action=add'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ recipe_id: r.id, content, rating: pickedRating || null })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || 'Erreur');
+            document.getElementById('commentText').value = '';
+            pickedRating = 0;
+            renderRatingInput();
+            await loadComments(r.id);
+            await refreshRating();
+        } catch (e) {
+            errBox.textContent = e.message;
+            errBox.classList.remove('hidden');
+        }
+    });
+
+    function setupCommentBox() {
+        const u = window.SP && window.SP.user;
+        document.getElementById('commentFormBox').classList.toggle('hidden', !u);
+        document.getElementById('commentLoginCTA').classList.toggle('hidden', !!u);
+        if (u) renderRatingInput();
+    }
+
+    // ── Recettes similaires ──────────────────────────────────────
+    function similarCard(r) {
+        const img = r.image_url || '/assets/recipes/_default.jpg';
+        return `
+        <a href="recette-detail.html?slug=${r.slug}" class="group block">
+            <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+                <div class="aspect-[4/3] overflow-hidden">
+                    <img src="${img}" alt="${escape(r.title)}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                </div>
+                <div class="p-3">
+                    <h3 class="font-display font-bold text-sm leading-snug group-hover:text-sp-600 transition-colors line-clamp-2">${escape(r.title)}</h3>
+                    <p class="text-xs text-gray-400 mt-1 capitalize">${r.category || ''} · ${r.difficulty || 'Facile'}</p>
+                </div>
+            </div>
+        </a>`;
+    }
+    async function loadSimilar(recipe) {
+        try {
+            const params = new URLSearchParams({ action: 'list', limit: 4, status: 'published' });
+            if (recipe.category) params.set('category', recipe.category);
+            const res  = await fetch(window.SP.apiPath('recipes.php?' + params.toString()), { credentials: 'include' });
+            const data = await res.json();
+            const others = (data.recipes || []).filter(r => r.slug !== recipe.slug).slice(0, 4);
+            if (others.length === 0) return;
+            document.getElementById('similarGrid').innerHTML = others.map(similarCard).join('');
+            document.getElementById('similarSection').classList.remove('hidden');
+        } catch(e) { /* noop */ }
+    }
+
+    // ── Init ────────────────────────────────────────────────────
+    async function init() {
+        const slug = new URLSearchParams(window.location.search).get('slug');
+        if (!slug) { showError('Aucune recette demandée.'); return; }
+
+        try {
+            const res = await fetch(window.SP.apiPath('recipes.php?action=single&slug=') + encodeURIComponent(slug), { credentials: 'include' });
+            const data = await res.json();
+            if (!res.ok || data.error) throw new Error(data.error || 'Recette introuvable');
+            renderRecipe(data);
+            setupCommentBox();
+            await loadComments(data.id);
+            loadSimilar(data);          // async, non-bloquant
+        } catch (e) {
+            showError(e.message);
+        }
+    }
+    init();
+
+    // ── Cooking Timer ─────────────────────────────────────────────
+    const RING_R = 72, RING_CIRC = +(2 * Math.PI * RING_R).toFixed(2);
+    document.body.insertAdjacentHTML('beforeend', `
+        <button id="timerFab" aria-label="Ouvrir la minuterie">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9.5 3h5M12 3v2"/>
+            </svg>
+            Minuterie
+            <span class="fab-dot" id="fabDot" style="display:none"></span>
+        </button>
+        <div id="cookingTimer" class="hidden" role="dialog" aria-label="Minuterie">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <span style="font-size:.8125rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.45)">Minuterie</span>
+                <button id="timerClose" style="background:rgba(255,255,255,.10);border:none;color:rgba(255,255,255,.7);cursor:pointer;width:28px;height:28px;border-radius:50%;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background .15s" aria-label="Fermer">×</button>
+            </div>
+
+            <div style="display:flex;justify-content:center;margin-bottom:18px;position:relative">
+                <svg width="180" height="180" viewBox="0 0 180 180" style="transform:rotate(-90deg)">
+                    <circle id="timerRingTrack" cx="90" cy="90" r="${RING_R}" fill="none" stroke-width="6"/>
+                    <circle id="timerRingProg"  cx="90" cy="90" r="${RING_R}" fill="none" stroke-width="6"
+                            stroke-dasharray="${RING_CIRC}" stroke-dashoffset="${RING_CIRC}"/>
+                </svg>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+                    <div id="timerDisplay" style="font-size:2.6rem;font-weight:700;letter-spacing:.04em;font-variant-numeric:tabular-nums;line-height:1">00:00</div>
+                    <p id="timerLabel" style="font-size:.7rem;color:rgba(255,255,255,.4);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center"></p>
+                </div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                    <label style="font-size:.65rem;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase">min</label>
+                    <input id="timerInputMin" class="timer-time-input" type="number" min="0" max="99" value="05" inputmode="numeric">
+                </div>
+                <span style="font-size:1.75rem;font-weight:300;color:rgba(255,255,255,.3);padding-bottom:14px">:</span>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                    <label style="font-size:.65rem;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.08em;text-transform:uppercase">sec</label>
+                    <input id="timerInputSec" class="timer-time-input" type="number" min="0" max="59" value="00" inputmode="numeric">
+                </div>
+            </div>
+
+            <div style="display:flex;gap:8px">
+                <button id="timerToggle">Démarrer</button>
+                <button id="timerReset" title="Réinitialiser">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                </button>
+            </div>
+        </div>`);
+
+    function parseTimerMins(raw) {
+        const hm = raw.match(/(\d+)\s*h(?:eure?s?)?\s*(\d+)/i);
+        if (hm) return parseInt(hm[1]) * 60 + parseInt(hm[2]);
+        const h = raw.match(/(\d+)\s*h(?:eure?s?)?/i);
+        const m = raw.match(/(\d+)\s*min(?:ute?s?)?/i);
+        let t = 0;
+        if (h) t += parseInt(h[1]) * 60;
+        if (m) t += parseInt(m[1]);
+        if (!h && !m) { const n = raw.match(/(\d+)/); if (n) t = parseInt(n[1]); }
+        return t;
+    }
+    function linkTimers(text) {
+        const re = /\b\d+\s*(?:h(?:eure?s?)?(?:\s*\d+\s*(?:min(?:ute?s?)?)?)?|min(?:ute?s?)?|heures?)\b/gi;
+        return text.replace(re, raw => {
+            const mins = parseTimerMins(raw);
+            if (mins < 1 || mins > 720) return raw;
+            return `<button class="timer-chip" data-mins="${mins}" data-label="${raw.replace(/"/g,'&quot;')}">⏱ ${raw}</button>`;
+        });
+    }
+
+    let timerSecs = 0, timerOrigSecs = 0, timerRunning = false, timerIv = null;
+
+    function playDoneSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            // Carillon 3 notes : Do-Mi-Sol (accord parfait majeur)
+            [[0, 523.25], [0.18, 659.25], [0.36, 783.99], [0.54, 1046.5]].forEach(([t, freq]) => {
+                const osc  = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + t);
+                gain.gain.setValueAtTime(0, ctx.currentTime + t);
+                gain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + t + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.9);
+                osc.start(ctx.currentTime + t);
+                osc.stop(ctx.currentTime + t + 0.95);
+            });
+        } catch(e) {}
+    }
+
+    function pad2(n) { return String(n).padStart(2,'0'); }
+
+    function setRing(pct) {
+        document.getElementById('timerRingProg').style.strokeDashoffset = RING_CIRC * (1 - Math.max(0, Math.min(1, pct)));
+    }
+    function updateTimerDisplay() {
+        const m = Math.floor(timerSecs / 60), s = timerSecs % 60;
+        document.getElementById('timerDisplay').textContent = `${pad2(m)}:${pad2(s)}`;
+        setRing(timerOrigSecs > 0 ? timerSecs / timerOrigSecs : 0);
+    }
+    function syncInputsFromSecs(secs) {
+        document.getElementById('timerInputMin').value = pad2(Math.floor(secs / 60));
+        document.getElementById('timerInputSec').value = pad2(secs % 60);
+    }
+    function secsFromInputs() {
+        return Math.min(99,Math.max(0,+document.getElementById('timerInputMin').value||0)) * 60
+             + Math.min(59,Math.max(0,+document.getElementById('timerInputSec').value||0));
+    }
+
+    function openTimer(secs, label) {
+        timerSecs = timerOrigSecs = secs;
+        document.getElementById('timerLabel').textContent = label || '';
+        syncInputsFromSecs(secs);
+        updateTimerDisplay();
+        document.getElementById('timerRingProg').style.stroke = '#C4311B';
+        document.getElementById('cookingTimer').classList.remove('hidden');
+        document.getElementById('fabDot').style.display = 'inline-block';
+    }
+    function stopTimer() {
+        clearInterval(timerIv); timerRunning = false;
+        document.getElementById('timerToggle').textContent = 'Démarrer';
+        document.getElementById('timerToggle').style.background = '#C4311B';
+    }
+
+    // FAB
+    document.getElementById('timerFab').addEventListener('click', () => {
+        const t = document.getElementById('cookingTimer');
+        if (t.classList.contains('hidden')) {
+            if (timerOrigSecs === 0) openTimer(secsFromInputs(), '');
+            else t.classList.remove('hidden');
+        } else {
+            t.classList.add('hidden');
+        }
+    });
+
+    // Inputs: update secs when not running
+    ['timerInputMin','timerInputSec'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => {
+            if (timerRunning) return;
+            timerSecs = timerOrigSecs = secsFromInputs();
+            updateTimerDisplay();
+        });
+        document.getElementById(id).addEventListener('focus', function(){ this.select(); });
+    });
+
+    document.getElementById('timerToggle').addEventListener('click', () => {
+        if (!timerRunning && timerSecs === 0) {
+            timerSecs = timerOrigSecs = secsFromInputs();
+            if (!timerSecs) return;
+        }
+        timerRunning = !timerRunning;
+        const tb = document.getElementById('timerToggle');
+        if (timerRunning) {
+            tb.textContent = 'Pause';
+            tb.style.background = 'rgba(255,255,255,.12)';
+            timerIv = setInterval(() => {
+                timerSecs--;
+                updateTimerDisplay();
+                if (timerSecs <= 0) {
+                    clearInterval(timerIv); timerRunning = false;
+                    document.getElementById('timerDisplay').textContent = '🎉 Fini !';
+                    document.getElementById('timerRingProg').style.stroke = '#C4892A';
+                    tb.textContent = 'Recommencer'; tb.style.background = '#C4311B';
+                    playDoneSound();
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 400]);
+                }
+            }, 1000);
+        } else {
+            clearInterval(timerIv);
+            tb.textContent = 'Reprendre';
+            tb.style.background = '#C4311B';
+        }
+    });
+
+    document.getElementById('timerReset').addEventListener('click', () => {
+        stopTimer();
+        timerSecs = timerOrigSecs;
+        document.getElementById('timerRingProg').style.stroke = '#C4311B';
+        updateTimerDisplay();
+    });
+
+    document.getElementById('timerClose').addEventListener('click', () => {
+        document.getElementById('cookingTimer').classList.add('hidden');
+    });
+
+    document.getElementById('stepsList').addEventListener('click', e => {
+        const chip = e.target.closest('.timer-chip');
+        if (!chip) return;
+        stopTimer();
+        openTimer(+chip.dataset.mins * 60, chip.dataset.label);
+    });
+})();
+</script>
+
+
+<script>
+(function(){
+    const form = document.getElementById('newsletterForm');
+    const msg  = document.getElementById('newsletterMsg');
+    if (!form) return;
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('newsletterEmail').value.trim();
+        if (!email) return;
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) { btn.disabled = true; btn.textContent = '…'; }
+        try {
+            const src = window.location.pathname.replace(/.*\//,'').replace('.html','') || 'page';
+            const res = await fetch('api/newsletter.php', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ email, source: src })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                form.reset();
+                msg.textContent = '🎉 Merci ! Vous recevrez notre prochaine sélection.';
+                msg.className   = 'mt-4 text-center text-sm text-green-600 font-medium';
+            } else {
+                msg.textContent = data.error || 'Une erreur est survenue.';
+                msg.className   = 'mt-4 text-center text-sm text-red-500';
+                if (btn) { btn.disabled = false; btn.textContent = "S'abonner"; }
+            }
+        } catch { if (btn) { btn.disabled = false; btn.textContent = "S'abonner"; } }
+    });
+})();
+</script><script src="js/consent.js"></script>
+</body>
+</html>
